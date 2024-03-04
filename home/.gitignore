@@ -1,0 +1,23 @@
+.DS_Store
+.idea/httpRequests
+.idea
+*/.idea/
+*/*/.idea/
+*.iml
+*/target/
+*/*/target/
+*.log
+hs_err_pid*
+.idea_modules
+node_modules/
+target
+lib
+
+# VS Code
+.project
+.settings/
+.vscode/
+*/.classpath
+*/*/.classpath
+*/.factorypath
+*/*/.factorypath
