@@ -1,18 +1,21 @@
 package workspace.vigiang;
 
-import workspace.vigiang.model.CredentialsOracle;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.model.TablePrinter;
+import workspace.vigiang.model.VigiaNgDAO;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CheckFeatures {
+
+    static final VigiaNgDAO VIGIA_NG_DAO = new VigiaNgDAO();
 
     public static void main(String[] args) {
         var vigiangPathStr = "C:\\Users\\jjunior\\OneDrive - COGNYTE\\Documents\\COGNYTE\\VIGIANG";
@@ -27,28 +30,8 @@ public class CheckFeatures {
             System.out.println(env);
 
             try {
-                String[] headers = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
-                List<String[]> data = listFeatures(env);
-
-                var finalLines = new ArrayList<String>();
-                int[] columnWidths = TablePrinter.calculateColumnWidths(headers, data);
-
-                finalLines.add(TablePrinter.printRow(headers, columnWidths));
-                finalLines.add(TablePrinter.printHorizontalLine(columnWidths));
-
-                for (String[] row : data) {
-                    finalLines.add(TablePrinter.printRow(row, columnWidths));
-                }
-
-                var finalContent = String.join(System.lineSeparator(), finalLines);
-
-//                TablePrinter.printTable(headers, data);
-
-                Path finalFilePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\database\\CFG_NG_FEATURE.md");
-                System.out.println("updating file: " + finalFilePath);
-                Files.writeString(finalFilePath, finalContent, StandardCharsets.UTF_8);
-                System.out.println("file updated");
-
+                updateLocalFeaturesFile(vigiangPath, env);
+                updateLocalConfigurationFile(vigiangPath, env);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -58,29 +41,48 @@ public class CheckFeatures {
         }
     }
 
-    private static List<String[]> listFeatures(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
+    private static void updateLocalFeaturesFile(Path vigiangPath, Environment env) throws SQLException, IOException {
+        String[] headers = new String[] { "ID_FEATURE", "ID_STATUS" }; // , "ID_DESCRICAO"
+        List<String[]> data = VIGIA_NG_DAO.listFeatures(env);
 
-        String sql =
-            "select ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
-            "from CFG_NG_FEATURE\n" +
-            "order by ID_FEATURE";
+        var finalLines = new ArrayList<String>();
+        int[] columnWidths = TablePrinter.calculateColumnWidths(headers, data);
 
-        List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while(rs.next()) {
-                var descricao = (rs.getString("ID_DESCRICAO") == null) ? "NULL" : rs.getString("ID_DESCRICAO");
-                String[] row = new String[] {
-                        rs.getString("ID_FEATURE"),
-                        rs.getString("ID_STATUS"),
-                        descricao
-                };
-                data.add(row);
-            }
+        finalLines.add(TablePrinter.printRow(headers, columnWidths));
+        finalLines.add(TablePrinter.printHorizontalLine(columnWidths));
+
+        for (String[] row : data) {
+            finalLines.add(TablePrinter.printRow(row, columnWidths));
         }
-        return data;
+
+        var finalContent = String.join(System.lineSeparator(), finalLines);
+
+        Path finalFilePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\database\\CFG_NG_FEATURE.md");
+        System.out.println("updating file: " + finalFilePath);
+        Files.writeString(finalFilePath, finalContent, StandardCharsets.UTF_8);
+        System.out.println("file updated");
+    }
+
+    private static void updateLocalConfigurationFile(Path vigiangPath, Environment env) throws SQLException, IOException {
+        String[] headers = new String[] { "ID_PARAMETRO" };
+        List<String[]> data = VIGIA_NG_DAO.listConfigurationValues(env);
+
+        var finalLines = new ArrayList<String>();
+        int[] columnWidths = TablePrinter.calculateColumnWidths(headers, data);
+
+        finalLines.add(TablePrinter.printRow(headers, columnWidths));
+        finalLines.add(TablePrinter.printHorizontalLine(columnWidths));
+
+        for (String[] row : data) {
+            finalLines.add(TablePrinter.printRow(row, columnWidths));
+        }
+
+        var finalContent = String.join(System.lineSeparator(), finalLines);
+
+        Path finalFilePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\database\\CFG_NG_SITE.md");
+        System.out.println("updating file: " + finalFilePath);
+        Files.writeString(finalFilePath, finalContent, StandardCharsets.UTF_8);
+        System.out.println("file updated");
     }
 
 }

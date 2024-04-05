@@ -39,9 +39,9 @@ public class CheckProjectsVersions {
             Page page = context.newPage();
             page.navigate("https://flngit01.cognyte.local/dev");
 
-            page.locator("#username").pressSequentially("jjunior");
-            page.locator("#password").pressSequentially("Floripa2024#");
-            page.locator("#new_ldap_user > div.submit-container.move-submit-down.gl-px-5.gl-pb-5 > input").click();
+            page.locator("#ldapmain_username").pressSequentially("jjunior");
+            page.locator("#ldapmain_password").pressSequentially("Floripa2024#");
+            page.locator("#ldapmain > form > button").click();
             await();
 
             {
@@ -96,9 +96,11 @@ public class CheckProjectsVersions {
         for (String url : urls) {
             page.navigate(url + "/-/tags");
 
-            var project = page.locator("div > ul > li.context-header.has-tooltip > a > span.sidebar-context-title").textContent();
-            var content = page.locator("div.tags > ul > li:nth-child(1) > div.row-main-content > a").textContent();
-            data.add(new String[] { project.trim(), content.trim() });
+            String projectSelector = "#super-sidebar > div.contextual-nav.gl-display-flex.gl-flex-direction-column.gl-flex-grow-1.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-flex-grow-1.bottom-scrim-visible.gl-border-b > div.gl-p-2.gl-relative > ul.gl-list-style-none.gl-p-0.gl-m-0 > li > a > div.gl-flex-grow-1.gl-text-gray-900.gl-truncate-end";
+            var project = page.locator(projectSelector).textContent();
+            String firstVersionSelector = "#content-body > div.flex-list > div.tags > ul > li:nth-child(1) > div.row-main-content > a";
+            var version = page.locator(firstVersionSelector).textContent();
+            data.add(new String[] { project.trim(), version.trim() });
 
             await();
         }
