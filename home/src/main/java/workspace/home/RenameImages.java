@@ -26,9 +26,10 @@ public class RenameImages {
                 throw new IOException("The folder does not exist or it is not a directory");
 
             var filesToRename = listFilesToRename(folder);
-            Collections.sort(filesToRename,
-                    (image1, image2) -> image2.getCreationTime().compareTo(image1.getCreationTime()));
+            sortByLastModifiedTime(filesToRename);
             Collections.reverse(filesToRename);
+
+            // no log esta creation time, tem de trocar para last modified time...
 
             // experimental: execute this routine in a folder, in a different day
 //            renameFilesDateStart(filesToRename, false);
@@ -42,6 +43,23 @@ public class RenameImages {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void sortByLastModifiedTime(List<FileToRename> filesToRename) {
+        Collections.sort(filesToRename, (image1, image2) -> {
+            try {
+                BasicFileAttributes attr1 = Files.readAttributes(image1.getPath(), BasicFileAttributes.class);
+                BasicFileAttributes attr2 = Files.readAttributes(image2.getPath(), BasicFileAttributes.class);
+                return attr2.lastModifiedTime().compareTo(attr1.lastModifiedTime());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private static void sortByCreationTime(List<FileToRename> filesToRename) {
+        Collections.sort(filesToRename,
+            (image1, image2) -> image2.getCreationTime().compareTo(image1.getCreationTime()));
     }
 
     private static void renameFilesDateStart(List<FileToRename> filesToRename) throws IOException {
@@ -80,11 +98,15 @@ public class RenameImages {
 
             count = count + 5;
 
-            try {
-                TimeUnit.SECONDS.sleep(2);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-            }
+            await();
+        }
+    }
+
+    private static void await() {
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -127,7 +149,7 @@ public class RenameImages {
     }
 
     public static List<FileToRename> listFilesToRename(String dir) throws IOException {
-        var imageExtensions = List.of("jpg", "png", "webp");
+        var imageExtensions = List.of("jpg", "jpeg", "png", "webp");
         return listFilesUsingFileWalk(dir, 1).stream()
                 .filter((path) -> {
                     var extension = getExtension(path.toString());
