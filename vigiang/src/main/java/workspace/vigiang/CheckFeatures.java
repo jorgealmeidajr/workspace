@@ -35,9 +35,11 @@ public class CheckFeatures {
                 updateLocalPrivilegeFiles(vigiangPath, env);
                 updateLocalProfileFiles(vigiangPath, env);
                 updateLocalFilterQueryFiles(vigiangPath, env);
+                updateLocalZoneInterceptionFiles(vigiangPath, env);
+                updateLocalValidationRuleFiles(vigiangPath, env);
+                updateLocalQdsValidationRuleFiles(vigiangPath, env);
             } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+                System.err.println(e.getMessage());
             }
 
             System.out.println("######\n");
@@ -83,6 +85,27 @@ public class CheckFeatures {
         var fileName = "CFG_NG_FILTERQUERY";
         String[] columns = new String[] { "MODULE", "LABEL", "VALUE" };
         List<String[]> data = VIGIA_NG_DAO.listFilterQueries(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalZoneInterceptionFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
+        var fileName = "CFG_TP_ZONA_TP_VL_ITC";
+        String[] columns = new String[] { "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO", "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS" };
+        List<String[]> data = VIGIA_NG_DAO.listZoneInterceptions(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalValidationRuleFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
+        var fileName = "CFG_NG_VALIDATRULES";
+        String[] columns = new String[] { "MODULO", "VALID_RULES" };
+        List<String[]> data = VIGIA_NG_DAO.listValidationRules(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalQdsValidationRuleFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
+        var fileName = "CFG_TIPO_NUMERO_QDS";
+        String[] columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
+        List<String[]> data = VIGIA_NG_DAO.listQdsValidationRules(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 

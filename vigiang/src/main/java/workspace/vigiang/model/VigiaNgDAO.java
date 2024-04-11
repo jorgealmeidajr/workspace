@@ -159,4 +159,81 @@ public class VigiaNgDAO {
         return data;
     }
 
+    public List<String[]> listZoneInterceptions(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO, t1.SN_VISIVEL_CAD_ITC, t1.SN_VISIVEL_LOTE, t1.NM_REGRAS\n" +
+            "from CFG_TP_ZONA_TP_VL_ITC t1\n" +
+            "join CFG_TIPO_VALOR_INTERCEPTADO t2 on (t1.CD_TIPO_VALOR_INTERCEPTADO = t2.CD_TIPO_VALOR_INTERCEPTADO)\n" +
+            "join CFG_ZONA_MONIT t3 on (t1.CD_TIPO_CENTRAL = t3.CD_TIPO_CENTRAL)\n" +
+            "order by t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("NM_ZONA_MONIT"),
+                    rs.getString("NM_TIPO_VALOR_INTERCEPTADO"),
+                    rs.getString("SN_VISIVEL_CAD_ITC"),
+                    rs.getString("SN_VISIVEL_LOTE"),
+                    rs.getString("NM_REGRAS"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    public List<String[]> listValidationRules(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select MODULO, VALID_RULES\n" +
+            "from CFG_NG_VALIDATRULES\n" +
+            "order by MODULO";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("MODULO"),
+                    rs.getString("VALID_RULES"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    public List<String[]> listQdsValidationRules(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select ID_TIPO_NUMERO_QDS, NM_CHAVE, TP_CONSULTA, SN_VOUCHER_DATE, VALID_RULES\n" +
+            "from CFG_TIPO_NUMERO_QDS\n" +
+            "order by ID_TIPO_NUMERO_QDS";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("ID_TIPO_NUMERO_QDS"),
+                    rs.getString("NM_CHAVE"),
+                    rs.getString("TP_CONSULTA"),
+                    rs.getString("SN_VOUCHER_DATE"),
+                    rs.getString("VALID_RULES"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
 }
