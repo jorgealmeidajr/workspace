@@ -4,18 +4,15 @@ import com.microsoft.playwright.*;
 import workspace.vigiang.model.TablePrinter;
 
 import java.awt.*;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static workspace.vigiang.model.TablePrinter.calculateColumnWidths;
 
 public class CheckProjectsVersions {
 
@@ -96,7 +93,7 @@ public class CheckProjectsVersions {
         for (String url : urls) {
             page.navigate(url + "/-/tags");
 
-            String projectSelector = "#super-sidebar > div.contextual-nav.gl-display-flex.gl-flex-direction-column.gl-flex-grow-1.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-flex-grow-1.bottom-scrim-visible.gl-border-b > div.gl-p-2.gl-relative > ul.gl-list-style-none.gl-p-0.gl-m-0 > li > a > div.gl-flex-grow-1.gl-text-gray-900.gl-truncate-end";
+            String projectSelector = "#super-sidebar > div.contextual-nav.gl-display-flex.gl-flex-direction-column.gl-flex-grow-1.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-flex-grow-1.bottom-scrim-visible.gl-border-b > div.gl-p-2.gl-relative > ul.gl-list-none.gl-p-0.gl-m-0 > li > a > div.gl-flex-grow-1.gl-text-gray-900";
             var project = page.locator(projectSelector).textContent();
             String firstVersionSelector = "#content-body > div.flex-list > div.tags > ul > li:nth-child(1) > div.row-main-content > a";
             var version = page.locator(firstVersionSelector).textContent();
@@ -105,8 +102,14 @@ public class CheckProjectsVersions {
             await();
         }
 
+        Collections.sort(data, (data1, data2) -> data1[0].compareTo(data2[0]));
+        return getTableStr(data);
+    }
+
+    private static String getTableStr(ArrayList<String[]> data) {
         var lines = new ArrayList<String>();
         int[] columnWidths = TablePrinter.calculateColumnWidths(data);
+        columnWidths = new int[] { 35, 35 };
         for (String[] row : data) {
             lines.add(TablePrinter.printRow(row, columnWidths));
         }

@@ -60,6 +60,20 @@ public class CheckContainers {
     }
 
     public static String listContainers(String username, String password, String host, int port) throws Exception {
+        List<String[]> data = listDockerContainers(username, password, host, port);
+
+        var finalLines = new ArrayList<String>();
+        int[] columnWidths = TablePrinter.calculateColumnWidths(data);
+        columnWidths = new int[] { 35, 35 };
+        for (String[] row : data) {
+            finalLines.add(TablePrinter.printRow(row, columnWidths));
+        }
+
+        finalLines.sort(Comparator.naturalOrder());
+        return String.join(System.lineSeparator(), finalLines);
+    }
+
+    private static List<String[]> listDockerContainers(String username, String password, String host, int port) throws Exception {
         var command = "docker ps -a --format 'table {{.Names}}\\t{{.Image}}'";
         String sshResponse = SshExecutor.execute(username, password, host, port, command);
         List<String> initialLines = new ArrayList<>(Arrays.asList(sshResponse.split("\\R")));
@@ -85,14 +99,7 @@ public class CheckContainers {
             data.add(row);
         }
 
-        var finalLines = new ArrayList<String>();
-        int[] columnWidths = TablePrinter.calculateColumnWidths(data);
-        for (String[] row : data) {
-            finalLines.add(TablePrinter.printRow(row, columnWidths));
-        }
-
-        finalLines.sort(Comparator.naturalOrder());
-        return String.join(System.lineSeparator(), finalLines);
+        return data;
     }
 
     public static String getDockerCompose(String username, String password, String host, int port) throws Exception {
