@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CheckFeatures {
+public class CheckDatabases {
 
     static final VigiaNgDAO VIGIA_NG_DAO = new VigiaNgDAO();
 
@@ -25,7 +25,7 @@ public class CheckFeatures {
         }
 
         System.out.println("#".repeat(3 * 2));
-        System.out.println("## START checking all features\n");
+        System.out.println("## START checking all environment databases\n");
 
         for (Environment env : Environment.values()) {
             if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
@@ -50,7 +50,7 @@ public class CheckFeatures {
             System.out.println("#".repeat(3 * 1) + "\n");
         }
 
-        System.out.println("## END checking all features.");
+        System.out.println("## END checking all environment databases.");
         System.out.println("#".repeat(3 * 2));
     }
 
