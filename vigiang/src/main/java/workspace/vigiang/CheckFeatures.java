@@ -24,10 +24,13 @@ public class CheckFeatures {
             throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
         }
 
-        for (Environment env : Environment.values()) {
-            if (env.equals(Environment.SURF)) continue;
+        System.out.println("#".repeat(3 * 2));
+        System.out.println("## START checking all features\n");
 
-            System.out.println("######");
+        for (Environment env : Environment.values()) {
+            if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
+
+            System.out.println("#".repeat(3 * 1));
             System.out.println(env);
 
             try {
@@ -44,8 +47,11 @@ public class CheckFeatures {
                 System.err.println(e.getMessage());
             }
 
-            System.out.println("######\n");
+            System.out.println("#".repeat(3 * 1) + "\n");
         }
+
+        System.out.println("## END checking all features.");
+        System.out.println("#".repeat(3 * 2));
     }
 
     private static void updateLocalFeatureFiles(Path vigiangPath, Environment env) throws SQLException, IOException {
@@ -124,16 +130,23 @@ public class CheckFeatures {
             finalLines.add(line);
         }
 
-        var finalContent =
+        var newFileContent =
             "# " + env + " | " + fileName + "\n" +
             "```\n" +
             String.join(System.lineSeparator(), finalLines) +
             "```\n";
 
         Path finalFilePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\database\\" + fileName + ".md");
-        System.out.println("updating file: " + finalFilePath);
-        Files.writeString(finalFilePath, finalContent, StandardCharsets.UTF_8);
-        System.out.println("file updated");
+
+        var initialFileContent = "";
+        if (Files.exists(finalFilePath)) {
+            initialFileContent = new String(Files.readAllBytes(finalFilePath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + finalFilePath);
+            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
+        }
     }
 
     private static int calculateColumnWidth(String[] headers) {
