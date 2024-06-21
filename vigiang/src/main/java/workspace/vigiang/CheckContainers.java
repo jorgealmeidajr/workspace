@@ -9,10 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CheckContainers {
@@ -21,6 +19,7 @@ public class CheckContainers {
         var vigiangPathStr = "C:\\Users\\jjunior\\OneDrive - COGNYTE\\Documents\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
+        System.out.println("## START checking all containers\n");
         try {
             if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
                 throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
@@ -33,23 +32,8 @@ public class CheckContainers {
                 var credentials = CredentialsSSH.getCredentials(env);
                 var port = Integer.parseInt(credentials.get("port"));
 
-                {
-                    var containersPathStr = vigiangPath + "\\envs\\" + env + "\\DEV\\containers.txt";
-                    Path containersPath = Paths.get(containersPathStr);
-                    System.out.println("updating file: " + containersPath);
-
-                    var response = listContainers(credentials.get("username"), credentials.get("password"), credentials.get("host"), port);
-                    Files.writeString(containersPath, response, StandardCharsets.UTF_8);
-                    System.out.println("file updated");
-                }
-
-                {
-                    Path dockerComposePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\docker-compose.yml");
-                    System.out.println("updating file: " + dockerComposePath);
-                    var response = getDockerCompose(credentials.get("username"), credentials.get("password"), credentials.get("host"), port);
-                    Files.writeString(dockerComposePath, response, StandardCharsets.UTF_8);
-                    System.out.println("file updated");
-                }
+                updateContainersFile(vigiangPath, env, credentials, port);
+                updateDockerComposeFile(vigiangPath, env, credentials, port);
 
                 System.out.println("######\n");
             }
@@ -57,14 +41,46 @@ public class CheckContainers {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        System.out.println("## END checking all containers.");
     }
 
-    public static String listContainers(String username, String password, String host, int port) throws Exception {
+    private static void updateDockerComposeFile(Path vigiangPath, Environment env, Map<String, String> credentials, int port) throws Exception {
+        Path dockerComposePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\docker-compose.yml");
+
+        var initialFileContent = "";
+        if (Files.exists(dockerComposePath)) {
+            initialFileContent = new String(Files.readAllBytes(dockerComposePath));
+        }
+
+        var newFileContent = getDockerCompose(credentials.get("username"), credentials.get("password"), credentials.get("host"), port);
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + dockerComposePath);
+            Files.writeString(dockerComposePath, newFileContent, StandardCharsets.UTF_8);
+        }
+    }
+
+    private static void updateContainersFile(Path vigiangPath, Environment env, Map<String, String> credentials, int port) throws Exception {
+        Path containersPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\containers.txt");
+
+        var initialFileContent = "";
+        if (Files.exists(containersPath)) {
+            initialFileContent = new String(Files.readAllBytes(containersPath));
+        }
+
+        var newFileContent = listContainers(credentials.get("username"), credentials.get("password"), credentials.get("host"), port);
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + containersPath);
+            Files.writeString(containersPath, newFileContent, StandardCharsets.UTF_8);
+        }
+    }
+
+    private static String listContainers(String username, String password, String host, int port) throws Exception {
         List<String[]> data = listDockerContainers(username, password, host, port);
 
         var finalLines = new ArrayList<String>();
-        int[] columnWidths = TablePrinter.calculateColumnWidths(data);
-        columnWidths = new int[] { 35, 35 };
+        int[] columnWidths = new int[] { 35, 35 };
         for (String[] row : data) {
             finalLines.add(TablePrinter.printRow(row, columnWidths));
         }
@@ -80,10 +96,10 @@ public class CheckContainers {
         initialLines.remove(0);
         initialLines.sort(Comparator.naturalOrder());
 
-        var patternsToIgnore = Arrays.asList("kafka", "mock-smtp", "zookeeper", "vigiang_claro_block", "integration-service");
+        Predicate<String> linesToIgnore = (line) -> !(line.startsWith("kafka") || line.startsWith("mock-smtp")
+                || line.startsWith("zookeeper") || line.startsWith("vigiang_claro_block") || line.startsWith("integration-service"));
         initialLines = initialLines.stream()
-                .filter((line) -> !(line.startsWith("kafka") || line.startsWith("mock-smtp") || line.startsWith("zookeeper")
-                    || line.startsWith("vigiang_claro_block") || line.startsWith("integration-service")))
+                .filter(linesToIgnore)
                 .collect(Collectors.toList());
 
         List<String[]> data = new ArrayList<>();
@@ -102,7 +118,7 @@ public class CheckContainers {
         return data;
     }
 
-    public static String getDockerCompose(String username, String password, String host, int port) throws Exception {
+    private static String getDockerCompose(String username, String password, String host, int port) throws Exception {
         var command = "cat /opt/vigiang/scripts/docker-compose.yml";
         return SshExecutor.execute(username, password, host, port, command);
     }
