@@ -12,6 +12,7 @@ public class CredentialsSSH {
             case LIGGA: return getLiggaCredentials();
             case OI: return getOiCredentials();
             case SKY: return getSkyCredentials();
+            case SURF: return getSurfCredentials();
             case TIM: return getTimCredentials();
             case VIVO: return getVivoCredentials();
             case VTAL: return getVtalCredentials();
@@ -54,6 +55,12 @@ public class CredentialsSSH {
     private static Map<String, String> getSkyCredentials() {
         Map<String, String> credentials = getDefaultCredentials();
         credentials.put("host", "10.50.153.226");
+        return credentials;
+    }
+
+    private static Map<String, String> getSurfCredentials() {
+        Map<String, String> credentials = getDefaultCredentials();
+        credentials.put("host", "10.50.150.78");
         return credentials;
     }
 

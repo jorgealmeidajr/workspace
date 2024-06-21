@@ -25,6 +25,8 @@ public class CheckFeatures {
         }
 
         for (Environment env : Environment.values()) {
+            if (env.equals(Environment.SURF)) continue;
+
             System.out.println("######");
             System.out.println(env);
 
