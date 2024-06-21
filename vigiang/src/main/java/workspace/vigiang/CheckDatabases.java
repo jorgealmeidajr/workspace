@@ -43,6 +43,8 @@ public class CheckDatabases {
                 updateLocalZoneInterceptionFiles(vigiangPath, env);
                 updateLocalValidationRuleFiles(vigiangPath, env);
                 updateLocalQdsValidationRuleFiles(vigiangPath, env);
+                // TODO: update email templates
+                // TOD0: update report + config
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }

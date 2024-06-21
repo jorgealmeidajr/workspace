@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import workspace.vigiang.model.TablePrinter;
 
 import java.awt.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,9 @@ public class CheckProjectsVersions {
         int width = (int) screenSize.getWidth();
         int height = (int) screenSize.getHeight();
 
+        System.out.println("#".repeat(3 * 2));
+        System.out.println("## START checking all projects versions\n");
+
         try (Playwright playwright = Playwright.create()) {
             var launchOptions = new BrowserType.LaunchOptions()
                     .setChannel("chrome") // "chrome", "msedge", "chrome-beta", "msedge-beta" or "msedge-dev"
@@ -41,21 +45,31 @@ public class CheckProjectsVersions {
             page.locator("#ldapmain > form > button").click();
             await();
 
-            {
-                var containersPathStr = vigiangPath + "\\containers.txt";
-                Path containersPath = Paths.get(containersPathStr);
-                System.out.println("updating file: " + containersPath);
-
-                var response = checkBackEndTags(page);
-                Files.writeString(containersPath, response, StandardCharsets.UTF_8);
-                System.out.println("file updated");
-            }
-
+            updateContainersFile(vigiangPath, page);
 //            checkFrontEndTags(page);
 
             browser.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        System.out.println("## END checking all projects versions.");
+        System.out.println("#".repeat(3 * 2));
+    }
+
+    private static void updateContainersFile(Path vigiangPath, Page page) throws IOException {
+        Path containersPath = Paths.get(vigiangPath + "\\containers.txt");
+
+        var initialFileContent = "";
+        if (Files.exists(containersPath)) {
+            initialFileContent = new String(Files.readAllBytes(containersPath));
+        }
+
+        var newFileContent = checkBackEndTags(page);
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + containersPath);
+            Files.writeString(containersPath, newFileContent, StandardCharsets.UTF_8);
         }
     }
 
