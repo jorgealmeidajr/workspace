@@ -7,7 +7,6 @@ public class Main {
         System.out.println("# START execution of all checkers\n");
 
         CheckContainers.main(new String[] { });
-        // TODO: tratar excecao em casos de falha por arquivo
         CheckDatabases.main(new String[] { });
         CheckProjectsVersions.main(new String[] { });
 

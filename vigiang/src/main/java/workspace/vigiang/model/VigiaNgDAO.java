@@ -236,4 +236,58 @@ public class VigiaNgDAO {
         return data;
     }
 
+    public List<String[]> listEmailTemplates(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO\n" +
+            "from CFG_EMAIL_SERVICOS\n" +
+            "order by CD_OPERADORA, ID_TIPO_SERVICO";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
+                    rs.getString("ID_TIPO_SERVICO"),
+                    rs.getString("DE_ASSUNTO"),
+                    rs.getString("DE_NOME"),
+                    rs.getString("DE_NOME_ARQUIVO"),
+                    rs.getString("DE_REMETENTE"),
+                    rs.getString("DE_DESTINATARIO"),
+                    rs.getString("DE_TEXTO"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    public List<String[]> listReports(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, CD_OPERADORA\n" +
+            "from CFG_RELATORIO\n" +
+            "order by CD_OPERADORA, ID_RELATORIO";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("CD_RELATORIO"),
+                    rs.getString("ID_RELATORIO"),
+                    rs.getString("TP_RELATORIO"),
+                    rs.getString("CD_OPERADORA"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
 }
