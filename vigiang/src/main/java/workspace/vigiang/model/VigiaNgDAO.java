@@ -290,4 +290,34 @@ public class VigiaNgDAO {
         return data;
     }
 
+    public List<String[]> listConfigurationReports(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select cfg.ID_PARAMETRO, cfg.DE_PARAMETRO, cfg.VL_PARAMETRO, rel.CD_RELATORIO, rel.ID_RELATORIO\n" +
+            "from CFG_NG_SITE cfg\n" +
+            "left join CFG_RELATORIO rel on (cfg.VL_PARAMETRO = rel.CD_RELATORIO)\n" +
+            "where cfg.CD_OPERADORA = 1\n" +
+            "  and cfg.VL_PARAMETRO is not null\n" +
+            "  and (cfg.ID_PARAMETRO like '%report%' and cfg.ID_PARAMETRO like '%id%')\n" +
+            "order by cfg.ID_PARAMETRO";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("ID_PARAMETRO"),
+                    rs.getString("DE_PARAMETRO"),
+                    rs.getString("VL_PARAMETRO"),
+                    rs.getString("CD_RELATORIO"),
+                    rs.getString("ID_RELATORIO"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
 }

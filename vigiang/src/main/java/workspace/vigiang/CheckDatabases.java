@@ -45,7 +45,7 @@ public class CheckDatabases {
                 updateLocalQdsValidationRuleFiles(vigiangPath, env);
                 updateLocalEmailTemplatesFiles(vigiangPath, env); // TODO: email text template should be written in a file, it is large
                 updateLocalReportFiles(vigiangPath, env); // TODO: report template should be written in a local file
-                // TOD0: update report + config
+                updateLocalConfigReportFiles(vigiangPath, env);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -145,6 +145,13 @@ public class CheckDatabases {
         var fileName = "CFG_RELATORIO";
         String[] columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA" };
         List<String[]> data = VIGIA_NG_DAO.listReports(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
+        var fileName = "CFG_SITE_RELATORIO";
+        String[] columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
+        List<String[]> data = VIGIA_NG_DAO.listConfigurationReports(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
