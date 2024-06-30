@@ -19,6 +19,7 @@ public class RenameImages {
 
     public static void main(String[] args) {
         var folder = "FOLDER_PATH...";
+        var forceRename = false;
 
         try {
             var folderPath = Paths.get(folder);
@@ -38,7 +39,7 @@ public class RenameImages {
 //            renameFilesDateStart(filesToRename);
 
             // * rename all files by counter
-            renameFilesByCounter(filesToRename);
+            renameFilesByCounter(filesToRename, forceRename);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,7 +73,7 @@ public class RenameImages {
             var extension = imageFile.getExtension();
             String newName = getNewName(count, extension, nowDate);
 
-            System.out.println("current file [" + fileName + "] creation time [" + formatDateTime(imageFile.getCreationTime()) + "]");
+            System.out.println("current file [" + fileName + "] creation time [" + formatDateTime(imageFile.getLastModifiedTime()) + "]");
             var newNamePath = imageFile.getPath().resolveSibling(newName);
             Files.move(imageFile.getPath(), newNamePath);
             System.out.println("renamed to [" + newName + "]");
@@ -82,7 +83,7 @@ public class RenameImages {
         }
     }
 
-    private static void renameFilesByCounter(List<FileToRename> filesToRename) throws IOException {
+    private static void renameFilesByCounter(List<FileToRename> filesToRename, boolean forceRename) throws IOException {
         var initial = "I";
         var count = 5;
 
@@ -90,7 +91,7 @@ public class RenameImages {
             var fileName = imageFile.getPath().getFileName().toString();
             var extension = imageFile.getExtension();
             String newName = String.format("%s%03d.%s", initial, count, extension);
-            System.out.println("original file name [" + fileName + "] creation time [" + formatDateTime(imageFile.getCreationTime()) + "]");
+            System.out.println("original file name [" + fileName + "] creation time [" + formatDateTime(imageFile.getLastModifiedTime()) + "]");
 
             var newNamePath = imageFile.getPath().resolveSibling(newName);
             Files.move(imageFile.getPath(), newNamePath);
@@ -179,36 +180,6 @@ public class RenameImages {
                 .toLocalDateTime();
 
         return localDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-    }
-
-}
-
-class FileToRename {
-
-    private final Path path;
-
-    FileToRename(Path path) {
-        this.path = path;
-    }
-
-    public Path getPath() {
-        return path;
-    }
-
-    public FileTime getCreationTime() {
-        FileTime creationTime;
-        try {
-            BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-            creationTime = attr.creationTime();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return creationTime;
-    }
-
-    public String getExtension() {
-        String filename = this.path.toString();
-        return filename.substring(filename.lastIndexOf(".") + 1);
     }
 
 }
