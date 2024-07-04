@@ -1,16 +1,19 @@
-package workspace.home;
+package workspace.home.model;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
-public class FileToRename {
+public class LocalFile {
 
     private final Path path;
 
-    FileToRename(Path path) {
+    public LocalFile(Path path) {
         this.path = path;
     }
 
@@ -43,6 +46,15 @@ public class FileToRename {
     public String getExtension() {
         String filename = this.path.toString();
         return filename.substring(filename.lastIndexOf(".") + 1);
+    }
+
+    public String formatDateTime(FileTime fileTime) {
+        LocalDateTime localDateTime = fileTime
+                .toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        return localDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
     }
 
 }

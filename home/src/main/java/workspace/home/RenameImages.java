@@ -1,5 +1,7 @@
 package workspace.home;
 
+import workspace.home.model.LocalFile;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +48,7 @@ public class RenameImages {
         }
     }
 
-    private static void sortByLastModifiedTime(List<FileToRename> filesToRename) {
+    private static void sortByLastModifiedTime(List<LocalFile> filesToRename) {
         Collections.sort(filesToRename, (image1, image2) -> {
             try {
                 BasicFileAttributes attr1 = Files.readAttributes(image1.getPath(), BasicFileAttributes.class);
@@ -58,12 +60,12 @@ public class RenameImages {
         });
     }
 
-    private static void sortByCreationTime(List<FileToRename> filesToRename) {
+    private static void sortByCreationTime(List<LocalFile> filesToRename) {
         Collections.sort(filesToRename,
             (image1, image2) -> image2.getCreationTime().compareTo(image1.getCreationTime()));
     }
 
-    private static void renameFilesDateStart(List<FileToRename> filesToRename) throws IOException {
+    private static void renameFilesDateStart(List<LocalFile> filesToRename) throws IOException {
         var maxCount = 995;
         var count = 0;
         var nowDate = LocalDateTime.now();
@@ -83,7 +85,7 @@ public class RenameImages {
         }
     }
 
-    private static void renameFilesByCounter(List<FileToRename> filesToRename, boolean forceRename) throws IOException {
+    private static void renameFilesByCounter(List<LocalFile> filesToRename, boolean forceRename) throws IOException {
         var initial = "I";
         var count = 5;
 
@@ -111,7 +113,7 @@ public class RenameImages {
         }
     }
 
-    private static void renameFilesDateStart(List<FileToRename> filesToRename, boolean forceRename) throws IOException {
+    private static void renameFilesDateStart(List<LocalFile> filesToRename, boolean forceRename) throws IOException {
         var count = 0;
         for (var imageFile : filesToRename) {
             var fileName = imageFile.getPath().getFileName().toString();
@@ -149,14 +151,14 @@ public class RenameImages {
         }
     }
 
-    public static List<FileToRename> listFilesToRename(String dir) throws IOException {
+    public static List<LocalFile> listFilesToRename(String dir) throws IOException {
         var imageExtensions = List.of("jpg", "jpeg", "png", "webp");
         return listFilesUsingFileWalk(dir, 1).stream()
                 .filter((path) -> {
                     var extension = getExtension(path.toString());
                     return imageExtensions.contains(extension.toLowerCase());
                 })
-                .map(FileToRename::new)
+                .map(LocalFile::new)
                 .collect(Collectors.toList());
     }
 
