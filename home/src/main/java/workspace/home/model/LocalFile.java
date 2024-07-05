@@ -24,7 +24,7 @@ public class LocalFile {
     public FileTime getCreationTime() {
         FileTime creationTime;
         try {
-            BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+            BasicFileAttributes attr = Files.readAttributes(this.path, BasicFileAttributes.class);
             creationTime = attr.creationTime();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -35,7 +35,7 @@ public class LocalFile {
     public FileTime getLastModifiedTime() {
         FileTime lastModifiedTime;
         try {
-            BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+            BasicFileAttributes attr = Files.readAttributes(this.path, BasicFileAttributes.class);
             lastModifiedTime = attr.lastModifiedTime();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -55,6 +55,10 @@ public class LocalFile {
                 .toLocalDateTime();
 
         return localDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+    }
+
+    public String getFileName() {
+        return this.path.getFileName().toString();
     }
 
 }

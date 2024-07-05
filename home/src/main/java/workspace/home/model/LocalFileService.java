@@ -46,4 +46,36 @@ public class LocalFileService {
         }
     }
 
+    public static String generateNewName(LocalFile localFile, String initial, int count) {
+        var extension = localFile.getExtension();
+        String newName = String.format("%s%03d.%s", initial, count, extension);
+        return newName;
+    }
+
+    public static String removeFileExtension(String filename, boolean removeAllExtensions) {
+        if (filename == null || filename.isEmpty()) {
+            return filename;
+        }
+
+        String extPattern = "(?<!^)[.]" + (removeAllExtensions ? ".*" : "[^.]*$");
+        return filename.replaceAll(extPattern, "");
+    }
+
+    public static int getAvailableCount(int startCount, String initial, List<LocalFile> localFilesToRename) {
+        int count = startCount;
+
+        for (var localFile : localFilesToRename) {
+            var fileNameNoExtension = LocalFileService.removeFileExtension(localFile.getFileName(), true);
+
+            if (fileNameNoExtension.matches(initial + "\\d{3}")) {
+                int currentCount = Integer.parseInt(fileNameNoExtension.substring(1));
+                if (currentCount >= count) {
+                    count = currentCount + 5;
+                }
+            }
+        }
+
+        return count;
+    }
+
 }

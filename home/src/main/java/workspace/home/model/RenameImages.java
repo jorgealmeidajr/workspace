@@ -27,28 +27,40 @@ public class RenameImages {
 
     public void execute() throws IOException {
         var imageExtensions = List.of("jpg", "jpeg", "png", "webp", "jfif");
-        var filesToRename = LocalFileService.listFilesFilterByExtensions(folder, imageExtensions);
-        LocalFileService.sortByLastModifiedTime(filesToRename);
-        Collections.reverse(filesToRename);
-        renameFilesByCounter(filesToRename);
+
+        var localFilesToRename = LocalFileService.listFilesFilterByExtensions(this.folder, imageExtensions);
+        LocalFileService.sortByLastModifiedTime(localFilesToRename);
+        Collections.reverse(localFilesToRename);
+
+        var initial = "I";
+        renameFilesByCounter(localFilesToRename, initial);
     }
 
-    private void renameFilesByCounter(List<LocalFile> filesToRename) throws IOException {
-        var initial = "I";
+    private void renameFilesByCounter(List<LocalFile> localFilesToRename, String initial) throws IOException {
+        var maxCount = 995;
         var count = 5;
 
-        for (var imageFile : filesToRename) {
-            var fileName = imageFile.getPath().getFileName().toString();
-            var extension = imageFile.getExtension();
-            String newName = String.format("%s%03d.%s", initial, count, extension);
-            System.out.println("original file name [" + fileName + "] creation time [" + imageFile.formatDateTime(imageFile.getLastModifiedTime()) + "]");
+        if (!this.forceRename) {
+            count = LocalFileService.getAvailableCount(count, initial, localFilesToRename);
+        }
 
-            var newNamePath = imageFile.getPath().resolveSibling(newName);
-            Files.move(imageFile.getPath(), newNamePath);
+        for (var localFile : localFilesToRename) {
+            var fileNameNoExtension = LocalFileService.removeFileExtension(localFile.getFileName(), true);
+
+            // ignore previous renamed files
+            if (!this.forceRename && fileNameNoExtension.matches(initial + "\\d{3}")) {
+                continue;
+            }
+
+            String newName = LocalFileService.generateNewName(localFile, initial, count);
+            System.out.println("original file name [" + localFile.getFileName() + "] creation time [" + localFile.formatDateTime(localFile.getLastModifiedTime()) + "]");
+
+            var newNamePath = localFile.getPath().resolveSibling(newName);
+            Files.move(localFile.getPath(), newNamePath);
             System.out.println("file renamed to [" + newName + "]");
 
             count = count + 5;
-
+            if (count >= maxCount) throw new IOException("The count value cant be larger than " + maxCount);
             await();
         }
     }
