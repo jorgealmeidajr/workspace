@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class CheckContainers {
 
     public static void main(String[] args) {
-        var vigiangPathStr = "C:\\Users\\jjunior\\OneDrive - COGNYTE\\Documents\\COGNYTE\\VIGIANG";
+        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
         System.out.println("## START checking all containers\n");

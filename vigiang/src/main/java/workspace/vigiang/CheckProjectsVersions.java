@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class CheckProjectsVersions {
 
     public static void main(String[] args) {
-        var vigiangPathStr = "C:\\Users\\jjunior\\OneDrive - COGNYTE\\Documents\\COGNYTE\\VIGIANG";
+        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

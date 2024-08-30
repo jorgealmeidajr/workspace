@@ -17,7 +17,7 @@ public class CheckDatabases {
     static final VigiaNgDAO VIGIA_NG_DAO = new VigiaNgDAO();
 
     public static void main(String[] args) {
-        var vigiangPathStr = "C:\\Users\\jjunior\\OneDrive - COGNYTE\\Documents\\COGNYTE\\VIGIANG";
+        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
         if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
