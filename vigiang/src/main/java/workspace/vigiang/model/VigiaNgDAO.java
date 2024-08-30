@@ -320,4 +320,33 @@ public class VigiaNgDAO {
         return data;
     }
 
+    public List<Object[]> listReportTemplates(Environment env) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select * from CFG_RELATORIO\n" +
+            "where CD_OPERADORA = 1\n" +
+            "  and TP_RELATORIO in ('xls', 'pdf')\n" +
+            "order by CD_RELATORIO";
+
+        List<Object[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var blob = rs.getBlob("DC_RELATORIO");
+                var bytes = blob.getBytes(1l, (int)blob.length());
+
+                Object[] row = new Object[] {
+                    rs.getString("CD_RELATORIO"),
+                    rs.getString("ID_RELATORIO"),
+                    rs.getString("TP_RELATORIO"),
+                    bytes,
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
 }
