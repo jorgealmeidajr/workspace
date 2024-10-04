@@ -335,17 +335,68 @@ public class VigiaNgDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var blob = rs.getBlob("DC_RELATORIO");
-                var bytes = blob.getBytes(1l, (int)blob.length());
 
-                Object[] row = new Object[] {
-                    rs.getString("CD_RELATORIO"),
-                    rs.getString("ID_RELATORIO"),
-                    rs.getString("TP_RELATORIO"),
-                    bytes,
-                };
-                data.add(row);
+                if (blob != null) {
+                    var bytes = blob.getBytes(1l, (int)blob.length());
+
+                    Object[] row = new Object[] {
+                        rs.getString("CD_RELATORIO"),
+                        rs.getString("ID_RELATORIO"),
+                        rs.getString("TP_RELATORIO"),
+                        bytes,
+                    };
+                    data.add(row);
+                }
             }
         }
+        return data;
+    }
+
+    public List<String> listObjects(Environment env, String objectType) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        String sql =
+            "select ao.owner, ao.object_type, ao.object_name, ao.status\n" +
+            "from all_objects ao\n" +
+            "where ao.owner like 'VIGIANG_" + env + "'\n" +
+            "  and ao.object_type = '" + objectType + "'\n" +
+            "order by ao.owner, ao.object_type, ao.object_name";
+
+        List<String> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                data.add(rs.getString("OBJECT_NAME"));
+            }
+        }
+        return data;
+    }
+
+    public List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException {
+        var credentials = CredentialsOracle.getCredentials(env);
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"))) {
+            int count = 0;
+            for (String objectName : objectNames) {
+                String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";
+
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(sql)) {
+                    while(rs.next()) {
+                        String[] row = new String[] {
+                            objectName,
+                            rs.getString("DDL")
+                        };
+                        data.add(row);
+                    }
+                }
+                count++;
+                if (count > 10) break; // todo: this routine takes time, in a large database
+            }
+        }
+
         return data;
     }
 
