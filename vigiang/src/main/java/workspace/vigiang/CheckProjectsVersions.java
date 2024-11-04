@@ -75,41 +75,48 @@ public class CheckProjectsVersions {
 
     private static String checkBackEndTags(Page page) {
         var data = new ArrayList<String[]>();
+
+        String cloudControlInitialUrl = "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-control/";
+        String cloudVigiangInitialUrl = "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/";
+
         var urls = Arrays.asList(
             // cloud-control
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-control/admin-server",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-control/config-server",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-control/eureka-server",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-control/zuul-server",
+            cloudControlInitialUrl + "admin-server",
+            cloudControlInitialUrl + "config-server",
+            cloudControlInitialUrl + "eureka-server",
+            cloudControlInitialUrl + "zuul-server",
             // cloud-vigiang
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/auth-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/block-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/carrier-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/dashboard-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/data-retention-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/event-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/interception-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/log-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/message-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/operation-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/portability-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/process-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/report-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/scheduler-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/sittel-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/system-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/tracking-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/user-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/voucher-service",
-            "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/warrant-service"
+            cloudVigiangInitialUrl + "auth-service",
+            cloudVigiangInitialUrl + "block-service",
+            cloudVigiangInitialUrl + "carrier-service",
+            cloudVigiangInitialUrl + "dashboard-service",
+            cloudVigiangInitialUrl + "data-retention-service",
+            cloudVigiangInitialUrl + "event-service",
+            cloudVigiangInitialUrl + "interception-service",
+            cloudVigiangInitialUrl + "log-service",
+            cloudVigiangInitialUrl + "message-service",
+            cloudVigiangInitialUrl + "operation-service",
+            cloudVigiangInitialUrl + "portability-service",
+            cloudVigiangInitialUrl + "process-service",
+            cloudVigiangInitialUrl + "report-service",
+            cloudVigiangInitialUrl + "scheduler-service",
+            cloudVigiangInitialUrl + "sittel-service",
+            cloudVigiangInitialUrl + "system-service",
+            cloudVigiangInitialUrl + "tracking-service",
+            cloudVigiangInitialUrl + "user-service",
+            cloudVigiangInitialUrl + "voucher-service",
+            cloudVigiangInitialUrl + "warrant-service"
         );
 
         for (String url : urls) {
             page.navigate(url + "/-/tags");
 
-            String projectSelector = "#super-sidebar > div.contextual-nav.gl-display-flex.gl-flex-direction-column.gl-flex-grow-1.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-flex-grow-1.bottom-scrim-visible.gl-border-b > div.gl-p-2.gl-relative > ul.gl-list-none.gl-p-0.gl-m-0 > li > a > div.gl-flex-grow-1.gl-text-gray-900";
+            // copy selector from page
+            String projectSelector = "#super-sidebar > div.contextual-nav.gl-flex.gl-grow.gl-flex-col.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-grow.bottom-scrim-visible.gl-border-b > div.gl-relative.gl-p-2 > ul.gl-m-0.gl-list-none.gl-p-0 > li > a > div.gl-grow.gl-text-gray-900";
             var project = page.locator(projectSelector).textContent();
-            String firstVersionSelector = "#content-body > div.flex-list > div.tags > ul > li:nth-child(1) > div.row-main-content > a";
+
+            // copy selector from page
+            String firstVersionSelector = "#content-body > ul > li:nth-child(1) > div.row-main-content > a";
             var version = page.locator(firstVersionSelector).textContent();
             data.add(new String[] { project.trim(), version.trim() });
 
