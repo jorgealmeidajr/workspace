@@ -15,6 +15,7 @@ public class CredentialsOracle {
             case TIM: return getTimCredentials();
             case VIVO: return getVivoCredentials();
             case VTAL: return getVtalCredentials();
+            case WOM: return getWomCredentials();
         }
         return new HashMap<>();
     }
@@ -79,6 +80,14 @@ public class CredentialsOracle {
         Map<String, String> credentials = new HashMap<>();
         credentials.put("username", "VIGIANG_VTAL");
         credentials.put("password", "VIGIANG_VTAL-sun");
+        credentials.put("url", "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV");
+        return credentials;
+    }
+
+    private static Map<String, String> getWomCredentials() {
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("username", "VIGIANG_WOM");
+        credentials.put("password", "VIGIANG_WOM-sun");
         credentials.put("url", "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV");
         return credentials;
     }
