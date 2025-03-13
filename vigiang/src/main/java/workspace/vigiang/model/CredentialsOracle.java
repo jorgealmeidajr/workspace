@@ -12,12 +12,30 @@ public class CredentialsOracle {
             case LIGGA: return getLiggaCredentials();
             case OI: return getOiCredentials();
             case SKY: return getSkyCredentials();
+            case SURF: return getSurfCredentials();
             case TIM: return getTimCredentials();
             case VIVO: return getVivoCredentials();
             case VTAL: return getVtalCredentials();
             case WOM: return getWomCredentials();
+            case WOM2: return getWomCredentials2();
         }
         return new HashMap<>();
+    }
+
+    private static Map<String, String> getSurfCredentials() {
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("username", "vigiang");
+        credentials.put("password", "vigiang-sun");
+        credentials.put("url", "jdbc:postgresql://10.50.153.19:5432/vigiang_surf");
+        return credentials;
+    }
+
+    private static Map<String, String> getWomCredentials2() {
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("username", "vigiang");
+        credentials.put("password", "vigiang-sun");
+        credentials.put("url", "jdbc:postgresql://10.50.153.19:5432/vigiang_wom");
+        return credentials;
     }
 
     private static Map<String, String> getAlgarCredentials() {

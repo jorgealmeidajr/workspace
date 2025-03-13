@@ -1,6 +1,7 @@
 package workspace.vigiang;
 
 import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.OracleVigiaNgDAO;
 import workspace.vigiang.model.VigiaNgDAO;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class CheckDatabases {
 
-    static final VigiaNgDAO VIGIA_NG_DAO = new VigiaNgDAO();
+    static final VigiaNgDAO VIGIA_NG_DAO = new OracleVigiaNgDAO();
 
     public static void main(String[] args) {
         var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
@@ -28,25 +29,23 @@ public class CheckDatabases {
         System.out.println("## START checking all environment databases\n");
 
         for (Environment env : Environment.values()) {
-            if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
-            if (env.equals(Environment.WOM2)) continue;
-
             System.out.println("#".repeat(3 * 1));
             System.out.println(env);
 
             try {
-                updateLocalFeatureFiles(vigiangPath, env);
-                updateLocalConfigurationFiles(vigiangPath, env);
-                updateLocalModuleFiles(vigiangPath, env);
-                updateLocalPrivilegeFiles(vigiangPath, env);
-                updateLocalProfileFiles(vigiangPath, env);
-                updateLocalFilterQueryFiles(vigiangPath, env);
-                updateLocalZoneInterceptionFiles(vigiangPath, env);
-                updateLocalValidationRuleFiles(vigiangPath, env);
-                updateLocalQdsValidationRuleFiles(vigiangPath, env);
-                updateLocalEmailTemplatesFiles(vigiangPath, env); // TODO: email text template should be written in a file, it is large
-                updateLocalReportFiles(vigiangPath, env); // TODO: report template should be written in a local file
-                updateLocalConfigReportFiles(vigiangPath, env);
+                VigiaNgDAO dao = env.getVigiaNgDAO();
+                updateLocalFeatureFiles(vigiangPath, env, dao);
+//                updateLocalConfigurationFiles(vigiangPath, env);
+//                updateLocalModuleFiles(vigiangPath, env);
+//                updateLocalPrivilegeFiles(vigiangPath, env);
+//                updateLocalProfileFiles(vigiangPath, env);
+//                updateLocalFilterQueryFiles(vigiangPath, env);
+//                updateLocalZoneInterceptionFiles(vigiangPath, env);
+//                updateLocalValidationRuleFiles(vigiangPath, env);
+//                updateLocalQdsValidationRuleFiles(vigiangPath, env);
+//                updateLocalEmailTemplatesFiles(vigiangPath, env); // TODO: email text template should be written in a file, it is large
+//                updateLocalReportFiles(vigiangPath, env); // TODO: report template should be written in a local file
+//                updateLocalConfigReportFiles(vigiangPath, env);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -58,11 +57,19 @@ public class CheckDatabases {
         System.out.println("#".repeat(3 * 2));
     }
 
-    private static void updateLocalFeatureFiles(Path vigiangPath, Environment env) throws SQLException, IOException {
-        var fileName = "CFG_NG_FEATURE";
-        String[] columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
-        List<String[]> data = VIGIA_NG_DAO.listFeatures(env, columns);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    private static void updateLocalFeatureFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            var fileName = "CFG_NG_FEATURE";
+            String[] columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
+            List<String[]> data = dao.listFeatures(env, columns);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            var fileName = "conf.feature";
+            String[] columns = new String[] { "feature", "status", "description" };
+            List<String[]> data = dao.listFeatures(env, columns);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        }
     }
 
     private static void updateLocalConfigurationFiles(Path vigiangPath, Environment env) throws SQLException, IOException {

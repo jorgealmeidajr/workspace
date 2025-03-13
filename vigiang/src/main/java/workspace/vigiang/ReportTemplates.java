@@ -1,6 +1,7 @@
 package workspace.vigiang;
 
 import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.OracleVigiaNgDAO;
 import workspace.vigiang.model.VigiaNgDAO;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ReportTemplates {
 
-    static final VigiaNgDAO VIGIA_NG_DAO = new VigiaNgDAO();
+    static final VigiaNgDAO VIGIA_NG_DAO = new OracleVigiaNgDAO();
 
     public static void main(String[] args) {
         try {
