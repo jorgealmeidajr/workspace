@@ -96,8 +96,7 @@ public class CheckContainers {
         initialLines.remove(0);
         initialLines.sort(Comparator.naturalOrder());
 
-        Predicate<String> linesToIgnore = (line) -> !(line.startsWith("kafka") || line.startsWith("mock-smtp")
-                || line.startsWith("zookeeper") || line.startsWith("vigiang_claro_block") || line.startsWith("integration-service"));
+        Predicate<String> linesToIgnore = (line) -> !(line.startsWith("kafka") || line.startsWith("mock-smtp") || line.startsWith("zookeeper"));
         initialLines = initialLines.stream()
                 .filter(linesToIgnore)
                 .collect(Collectors.toList());

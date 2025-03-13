@@ -17,6 +17,7 @@ public class CredentialsSSH {
             case VIVO: return getVivoCredentials();
             case VTAL: return getVtalCredentials();
             case WOM: return getWomCredentials();
+            case WOM2: return getWomCredentials2();
         }
         return new HashMap<>();
     }
@@ -86,6 +87,12 @@ public class CredentialsSSH {
     private static Map<String, String> getWomCredentials() {
         Map<String, String> credentials = getDefaultCredentials();
         credentials.put("host", "10.50.150.57");
+        return credentials;
+    }
+
+    private static Map<String, String> getWomCredentials2() {
+        Map<String, String> credentials = getDefaultCredentials();
+        credentials.put("host", "10.50.153.139");
         return credentials;
     }
 

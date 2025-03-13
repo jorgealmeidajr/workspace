@@ -41,7 +41,7 @@ public class CheckProjectsVersions {
             page.navigate("https://flngit01.cognyte.local/dev");
 
             page.locator("#ldapmain_username").pressSequentially("jjunior");
-            page.locator("#ldapmain_password").pressSequentially("Floripa2024#");
+            page.locator("#ldapmain_password").pressSequentially("Floripa2025#");
             page.locator("#ldapmain > form > button").click();
             await();
 

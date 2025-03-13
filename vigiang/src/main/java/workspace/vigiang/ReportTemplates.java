@@ -33,6 +33,7 @@ public class ReportTemplates {
     private static void downloadReportTemplates(Path path) throws IOException, SQLException {
         for (Environment env : Environment.values()) {
             if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
+            if (env.equals(Environment.WOM2)) continue;
 
             System.out.println("#########");
             System.out.println(env);

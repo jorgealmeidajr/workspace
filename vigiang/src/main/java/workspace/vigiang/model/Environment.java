@@ -1,5 +1,15 @@
 package workspace.vigiang.model;
 
 public enum Environment {
-    ALGAR, CLARO, LIGGA, OI, SKY, SURF, TIM, VIVO, VTAL, WOM;
+    ALGAR,
+    CLARO,
+    LIGGA,
+    OI,
+    SKY,
+    SURF,
+    TIM,
+    VIVO,
+    VTAL,
+    WOM,
+    WOM2
 }

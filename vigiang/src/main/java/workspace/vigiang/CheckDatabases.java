@@ -29,6 +29,7 @@ public class CheckDatabases {
 
         for (Environment env : Environment.values()) {
             if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
+            if (env.equals(Environment.WOM2)) continue;
 
             System.out.println("#".repeat(3 * 1));
             System.out.println(env);
