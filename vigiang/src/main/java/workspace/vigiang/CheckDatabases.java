@@ -29,8 +29,7 @@ public class CheckDatabases {
         System.out.println("## START checking all environment databases\n");
 
         for (Environment env : Environment.values()) {
-            System.out.println("#".repeat(3 * 1));
-            System.out.println(env);
+            System.out.println(env + ":");
 
             try {
                 VigiaNgDAO dao = env.getVigiaNgDAO();
@@ -39,18 +38,18 @@ public class CheckDatabases {
                 updateLocalModuleFiles(vigiangPath, env, dao);
                 updateLocalPrivilegeFiles(vigiangPath, env, dao);
 //                updateLocalProfileFiles(vigiangPath, env);
-//                updateLocalFilterQueryFiles(vigiangPath, env);
+                updateLocalFilterQueryFiles(vigiangPath, env, dao);
 //                updateLocalZoneInterceptionFiles(vigiangPath, env);
-//                updateLocalValidationRuleFiles(vigiangPath, env);
+                updateLocalValidationRuleFiles(vigiangPath, env, dao);
 //                updateLocalQdsValidationRuleFiles(vigiangPath, env);
-//                updateLocalEmailTemplatesFiles(vigiangPath, env); // TODO: email text template should be written in a file, it is large
-//                updateLocalReportFiles(vigiangPath, env); // TODO: report template should be written in a local file
+                updateLocalEmailTemplatesFiles(vigiangPath, env, dao); // TODO: email text template should be written in a file, it is large
+                updateLocalReportFiles(vigiangPath, env, dao); // TODO: report template should be written in a local file
 //                updateLocalConfigReportFiles(vigiangPath, env);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
 
-            System.out.println("#".repeat(3 * 1) + "\n");
+            System.out.println();
         }
 
         System.out.println("## END checking all environment databases.");
@@ -58,66 +57,61 @@ public class CheckDatabases {
     }
 
     private static void updateLocalFeatureFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+        String fileName = null;
+        String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            var fileName = "CFG_NG_FEATURE";
-            String[] columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
-            List<String[]> data = dao.listFeatures(env, columns);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
-
+            fileName = "CFG_NG_FEATURE";
+            columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            var fileName = "conf.feature";
-            String[] columns = new String[] { "feature", "status", "description" };
-            List<String[]> data = dao.listFeatures(env, columns);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            fileName = "conf.feature";
+            columns = new String[] { "feature", "status", "description" };
         }
+
+        List<String[]> data = dao.listFeatures(env, columns);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalConfigurationFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+        String fileName = null;
+        String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            var fileName = "CFG_NG_SITE";
-            String[] columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
-            List<String[]> data = dao.listConfigurationValues(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
-
+            fileName = "CFG_NG_SITE";
+            columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            var fileName = "conf.site";
-            String[] columns = new String[] { "parameter_id", "parameter_description", "value" };
-            List<String[]> data = dao.listConfigurationValues(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            fileName = "conf.site";
+            columns = new String[] { "parameter_id", "parameter_description", "value" };
         }
+
+        List<String[]> data = dao.listConfigurationValues(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalModuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            var fileName = "CFG_MODULO";
-            String[] columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
+            fileName = "CFG_MODULO";
+            columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
             List<String[]> data = dao.listModules(env);
             updateLocalFiles(vigiangPath, env, fileName, columns, data);
-
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
 
         }
     }
 
     private static void updateLocalPrivilegeFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            var fileName = "SEG_PRIVILEGIO";
-            String[] columns = new String[] { "NM_MODULO", "STATUS_MODULO", "NM_PRIVILEGIO" };
-            List<String[]> data = dao.listPrivileges(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
-
+            fileName = "SEG_PRIVILEGIO";
+            columns = new String[] { "NM_MODULO", "STATUS_MODULO", "NM_PRIVILEGIO" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            var fileName = "sec.privilege";
-            String[] columns = new String[] { "module_id", "name" };
-            List<String[]> data = dao.listPrivileges(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            fileName = "sec.privilege";
+            columns = new String[] { "module_id", "name" };
         }
 
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-
-        }
+        List<String[]> data = dao.listPrivileges(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalProfileFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
@@ -127,10 +121,18 @@ public class CheckDatabases {
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
-    private static void updateLocalFilterQueryFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "CFG_NG_FILTERQUERY";
-        String[] columns = new String[] { "MODULE", "LABEL", "VALUE" };
-        List<String[]> data = VIGIA_NG_DAO.listFilterQueries(env);
+    private static void updateLocalFilterQueryFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_NG_FILTERQUERY";
+            columns = new String[] { "MODULE", "LABEL", "VALUE" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.filterquery";
+            columns = new String[] { "module", "label", "value" };
+        }
+
+        List<String[]> data = dao.listFilterQueries(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
@@ -145,11 +147,19 @@ public class CheckDatabases {
         }
     }
 
-    private static void updateLocalValidationRuleFiles(Path vigiangPath, Environment env) {
-        var fileName = "CFG_NG_VALIDATRULES";
-        String[] columns = new String[] { "MODULO", "VALID_RULES" };
+    private static void updateLocalValidationRuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_NG_VALIDATRULES";
+            columns = new String[] { "MODULO", "VALID_RULES" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.validatrules";
+            columns = new String[] { "module", "valid_rules" };
+        }
+
         try {
-            List<String[]> data = VIGIA_NG_DAO.listValidationRules(env);
+            List<String[]> data = dao.listValidationRules(env);
             updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -167,19 +177,33 @@ public class CheckDatabases {
         }
     }
 
-    private static void updateLocalEmailTemplatesFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "CFG_EMAIL_SERVICOS";
-        String[] columns = new String[] {
-            "CD_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO", "DE_TEXTO"
-        };
-        List<String[]> data = VIGIA_NG_DAO.listEmailTemplates(env);
+    private static void updateLocalEmailTemplatesFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_EMAIL_SERVICOS";
+            columns = new String[] { "CD_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO", "DE_TEXTO" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.service_email";
+            columns = new String[] { "carrier_id", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to", "email_body" };
+        }
+
+        List<String[]> data = dao.listEmailTemplates(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
-    private static void updateLocalReportFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "CFG_RELATORIO";
-        String[] columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA" };
-        List<String[]> data = VIGIA_NG_DAO.listReports(env);
+    private static void updateLocalReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_RELATORIO";
+            columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.report";
+            columns = new String[] { "id", "report_id", "report_type", "carrier_id" };
+        }
+
+        List<String[]> data = dao.listReports(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 

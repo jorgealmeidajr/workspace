@@ -90,7 +90,25 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listFilterQueries(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select module, label, value\n" +
+            "from conf.filterquery\n" +
+            "order by module, label";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("module"),
+                    rs.getString("label"),
+                    rs.getString("value")
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override
@@ -100,7 +118,24 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listValidationRules(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select module, valid_rules\n" +
+            "from conf.validatrules\n" +
+            "order by module";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("module"),
+                    rs.getString("valid_rules"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override
@@ -110,12 +145,54 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listEmailTemplates(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select carrier_id, service_type, email_subject, service_name, attach_name, email_from, email_to, email_body\n" +
+            "from conf.service_email\n" +
+            "order by carrier_id, service_type";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("carrier_id"),
+                    rs.getString("service_type"),
+                    rs.getString("email_subject"),
+                    rs.getString("service_name"),
+                    rs.getString("attach_name"),
+                    rs.getString("email_from"),
+                    rs.getString("email_to"),
+                    rs.getString("email_body"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override
     public List<String[]> listReports(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select id, report_id, report_type, carrier_id\n" +
+            "from conf.report\n" +
+            "order by carrier_id, report_id";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("id"),
+                    rs.getString("report_id"),
+                    rs.getString("report_type"),
+                    rs.getString("carrier_id"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override

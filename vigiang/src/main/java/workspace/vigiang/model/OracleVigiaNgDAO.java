@@ -136,14 +136,12 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listFilterQueries(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select * from CFG_NG_FILTERQUERY\n" +
             "order by MODULE, LABEL";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -189,15 +187,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listValidationRules(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select MODULO, VALID_RULES\n" +
             "from CFG_NG_VALIDATRULES\n" +
             "order by MODULO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -240,15 +236,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listEmailTemplates(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO\n" +
             "from CFG_EMAIL_SERVICOS\n" +
             "order by CD_OPERADORA, ID_TIPO_SERVICO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -270,15 +264,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listReports(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, CD_OPERADORA\n" +
             "from CFG_RELATORIO\n" +
             "order by CD_OPERADORA, ID_RELATORIO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
