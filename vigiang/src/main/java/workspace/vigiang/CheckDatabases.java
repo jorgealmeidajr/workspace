@@ -35,9 +35,9 @@ public class CheckDatabases {
             try {
                 VigiaNgDAO dao = env.getVigiaNgDAO();
                 updateLocalFeatureFiles(vigiangPath, env, dao);
-//                updateLocalConfigurationFiles(vigiangPath, env);
-//                updateLocalModuleFiles(vigiangPath, env);
-//                updateLocalPrivilegeFiles(vigiangPath, env);
+                updateLocalConfigurationFiles(vigiangPath, env, dao);
+                updateLocalModuleFiles(vigiangPath, env, dao);
+                updateLocalPrivilegeFiles(vigiangPath, env, dao);
 //                updateLocalProfileFiles(vigiangPath, env);
 //                updateLocalFilterQueryFiles(vigiangPath, env);
 //                updateLocalZoneInterceptionFiles(vigiangPath, env);
@@ -72,25 +72,52 @@ public class CheckDatabases {
         }
     }
 
-    private static void updateLocalConfigurationFiles(Path vigiangPath, Environment env) throws SQLException, IOException {
-        var fileName = "CFG_NG_SITE";
-        String[] columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
-        List<String[]> data = VIGIA_NG_DAO.listConfigurationValues(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    private static void updateLocalConfigurationFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            var fileName = "CFG_NG_SITE";
+            String[] columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
+            List<String[]> data = dao.listConfigurationValues(env);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            var fileName = "conf.site";
+            String[] columns = new String[] { "parameter_id", "parameter_description", "value" };
+            List<String[]> data = dao.listConfigurationValues(env);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        }
     }
 
-    private static void updateLocalModuleFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "CFG_MODULO";
-        String[] columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
-        List<String[]> data = VIGIA_NG_DAO.listModules(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    private static void updateLocalModuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            var fileName = "CFG_MODULO";
+            String[] columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
+            List<String[]> data = dao.listModules(env);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+
+        }
     }
 
-    private static void updateLocalPrivilegeFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "SEG_PRIVILEGIO";
-        String[] columns = new String[] { "NM_MODULO", "STATUS_MODULO", "NM_PRIVILEGIO" };
-        List<String[]> data = VIGIA_NG_DAO.listPrivileges(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    private static void updateLocalPrivilegeFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            var fileName = "SEG_PRIVILEGIO";
+            String[] columns = new String[] { "NM_MODULO", "STATUS_MODULO", "NM_PRIVILEGIO" };
+            List<String[]> data = dao.listPrivileges(env);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            var fileName = "sec.privilege";
+            String[] columns = new String[] { "module_id", "name" };
+            List<String[]> data = dao.listPrivileges(env);
+            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        }
+
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+
+        }
     }
 
     private static void updateLocalProfileFiles(Path vigiangPath, Environment env) throws IOException, SQLException {

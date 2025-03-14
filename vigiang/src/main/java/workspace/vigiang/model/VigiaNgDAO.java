@@ -1,5 +1,7 @@
 package workspace.vigiang.model;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -34,5 +36,10 @@ public interface VigiaNgDAO {
     List<String> listObjects(Environment env, String objectType) throws SQLException;
 
     List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException;
+
+    default Connection getConnection(Environment environment) throws SQLException {
+        var credentials = environment.getDatabaseCredentials();
+        return DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+    }
 
 }

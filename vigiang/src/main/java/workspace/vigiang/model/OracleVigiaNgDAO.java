@@ -8,7 +8,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listFeatures(Environment env, String[] columns) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
         var selectColumns = String.join(", ", columns);
 
         String sql =
@@ -17,7 +16,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by ID_FEATURE";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -35,23 +34,21 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listConfigurationValues(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
             "order by ID_PARAMETRO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                var valor = (rs.getString("VL_PARAMETRO") == null) ? "NULL" : rs.getString("VL_PARAMETRO");
+                var value = (rs.getString("VL_PARAMETRO") == null) ? "NULL" : rs.getString("VL_PARAMETRO");
                 String[] row = new String[] {
                     rs.getString("ID_PARAMETRO"),
                     rs.getString("DE_PARAMETRO"),
-                    valor,
+                    value,
                 };
                 data.add(row);
             }
@@ -61,15 +58,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listModules(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select ID_CHAVE, ID_STATUS, ID_TIPO\n" +
             "from CFG_MODULO\n" +
             "order by ID_CHAVE";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -86,8 +81,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listPrivileges(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select \n" +
             "  ID_CHAVE as NM_MODULO, ID_STATUS as STATUS_MODULO, NM_PRIVILEGIO\n" +
@@ -96,14 +89,14 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by NM_MODULO, NM_PRIVILEGIO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 String[] row = new String[] {
-                        (rs.getString("NM_MODULO") == null) ? "NULL" : rs.getString("NM_MODULO"),
-                        (rs.getString("STATUS_MODULO") == null) ? "NULL" : rs.getString("STATUS_MODULO"),
-                        rs.getString("NM_PRIVILEGIO"),
+                    (rs.getString("NM_MODULO") == null) ? "NULL" : rs.getString("NM_MODULO"),
+                    (rs.getString("STATUS_MODULO") == null) ? "NULL" : rs.getString("STATUS_MODULO"),
+                    rs.getString("NM_PRIVILEGIO"),
                 };
                 data.add(row);
             }

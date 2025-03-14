@@ -3,6 +3,7 @@ package workspace.vigiang.model;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class CredentialsOracle {
 
     public static Map<String, String> getCredentials(Environment environment) {

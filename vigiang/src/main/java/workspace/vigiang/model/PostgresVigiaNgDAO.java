@@ -8,7 +8,6 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listFeatures(Environment env, String[] columns) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
         var selectColumns = String.join(", ", columns);
 
         String sql =
@@ -17,7 +16,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by feature";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -35,7 +34,26 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listConfigurationValues(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select parameter_id, parameter_description, value\n" +
+            "from conf.site\n" +
+            "order by parameter_id";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var value = (rs.getString("value") == null) ? "NULL" : rs.getString("value");
+                String[] row = new String[] {
+                    rs.getString("parameter_id"),
+                    rs.getString("parameter_description"),
+                    value,
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override
@@ -45,7 +63,24 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listPrivileges(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select module_id, \"name\"\n" +
+            "from sec.privilege\n" +
+            "order by name";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    (rs.getString("module_id") == null) ? "NULL" : rs.getString("module_id"),
+                    rs.getString("name"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override
