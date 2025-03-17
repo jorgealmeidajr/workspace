@@ -106,8 +106,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listProfiles(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select t3.NM_PERFIL, t2.NM_PRIVILEGIO, t4.ID_CHAVE as NM_MODULO\n" +
             "from SEG_PERFIL_PRIVILEGIO t1\n" +
@@ -115,11 +113,11 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "join SEG_PERFIL t3 on (t1.CD_PERFIL = t3.CD_PERFIL)\n" +
             "left join CFG_MODULO t4 on (t2.CD_MODULO = t4.CD_MODULO)\n" +
             "where CD_OPERADORA = 1\n" +
-            "  and t3.NM_PERFIL in ('Administrador', 'Admin', 'ADMIN')\n" +
+            "  and t3.NM_PERFIL in ('Administrador', 'Admin', 'ADMIN')\n" + // Autoridades...
             "order by t3.NM_PERFIL, t2.NM_PRIVILEGIO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -158,8 +156,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listZoneInterceptions(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO, t1.SN_VISIVEL_CAD_ITC, t1.SN_VISIVEL_LOTE, t1.NM_REGRAS\n" +
             "from CFG_TP_ZONA_TP_VL_ITC t1\n" +
@@ -168,7 +164,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -209,15 +205,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listQdsValidationRules(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select ID_TIPO_NUMERO_QDS, NM_CHAVE, TP_CONSULTA, SN_VOUCHER_DATE, VALID_RULES\n" +
             "from CFG_TIPO_NUMERO_QDS\n" +
             "order by ID_TIPO_NUMERO_QDS";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -288,23 +282,20 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listConfigurationReports(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
-            "select cfg.ID_PARAMETRO, cfg.DE_PARAMETRO, cfg.VL_PARAMETRO, rel.CD_RELATORIO, rel.ID_RELATORIO\n" +
+            "select cfg.CD_OPERADORA, cfg.ID_PARAMETRO, cfg.DE_PARAMETRO, cfg.VL_PARAMETRO, rel.CD_RELATORIO, rel.ID_RELATORIO\n" +
             "from CFG_NG_SITE cfg\n" +
             "left join CFG_RELATORIO rel on (cfg.VL_PARAMETRO = rel.CD_RELATORIO)\n" +
-            "where cfg.CD_OPERADORA = 1\n" +
-            "  and cfg.VL_PARAMETRO is not null\n" +
-            "  and (cfg.ID_PARAMETRO like '%report%' and cfg.ID_PARAMETRO like '%id%')\n" +
-            "order by cfg.ID_PARAMETRO";
+            "where cfg.ID_PARAMETRO like '%report.id'\n" +
+            "order by cfg.CD_OPERADORA, cfg.ID_PARAMETRO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
                     rs.getString("ID_PARAMETRO"),
                     rs.getString("DE_PARAMETRO"),
                     rs.getString("VL_PARAMETRO"),
@@ -319,8 +310,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<Object[]> listReportTemplates(Environment env) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select * from CFG_RELATORIO\n" +
             "where CD_OPERADORA = 1\n" +
@@ -328,7 +317,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_RELATORIO";
 
         List<Object[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -352,8 +341,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String> listObjects(Environment env, String objectType) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         String sql =
             "select ao.owner, ao.object_type, ao.object_name, ao.status\n" +
             "from all_objects ao\n" +
@@ -362,7 +349,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by ao.owner, ao.object_type, ao.object_name";
 
         List<String> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -374,10 +361,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException {
-        var credentials = CredentialsOracle.getCredentials(env);
-
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"))) {
+        try (Connection conn = getConnection(env)) {
             int count = 0;
             for (String objectName : objectNames) {
                 String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";

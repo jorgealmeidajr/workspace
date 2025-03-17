@@ -197,7 +197,30 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listConfigurationReports(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select cfg.carrier_id, cfg.parameter_id, cfg.parameter_description, cfg.value, rel.id as id, rel.report_id\n" +
+            "from conf.site cfg\n" +
+            "left join conf.report rel on (CAST(nullif(cfg.value, '') AS integer) = rel.id)\n" +
+            "where cfg.parameter_id like '%report.id'\n" +
+            "order by cfg.carrier_id, cfg.parameter_id";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("carrier_id"),
+                    rs.getString("parameter_id"),
+                    rs.getString("parameter_description"),
+                    rs.getString("value"),
+                    rs.getString("id"),
+                    rs.getString("report_id"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override

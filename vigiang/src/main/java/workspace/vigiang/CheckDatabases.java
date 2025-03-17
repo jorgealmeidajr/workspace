@@ -44,7 +44,7 @@ public class CheckDatabases {
 //                updateLocalQdsValidationRuleFiles(vigiangPath, env);
                 updateLocalEmailTemplatesFiles(vigiangPath, env, dao); // TODO: email text template should be written in a file, it is large
                 updateLocalReportFiles(vigiangPath, env, dao); // TODO: report template should be written in a local file
-//                updateLocalConfigReportFiles(vigiangPath, env);
+                updateLocalConfigReportFiles(vigiangPath, env, dao);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -92,11 +92,12 @@ public class CheckDatabases {
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "CFG_MODULO";
             columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
-            List<String[]> data = dao.listModules(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-
+            return;
         }
+
+        List<String[]> data = dao.listModules(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalPrivilegeFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
@@ -207,10 +208,18 @@ public class CheckDatabases {
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
-    private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "CFG_SITE_RELATORIO";
-        String[] columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
-        List<String[]> data = VIGIA_NG_DAO.listConfigurationReports(env);
+    private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_SITE_RELATORIO";
+            columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.site_report";
+            columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id" };
+        }
+
+        List<String[]> data = dao.listConfigurationReports(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
@@ -248,8 +257,8 @@ public class CheckDatabases {
 
     private static int calculateColumnWidth(String[] headers) {
         int maxValue = headers[0].length();
-        for (int i = 0; i < headers.length; i++) {
-            int headerLength = headers[i].length();
+        for (String header : headers) {
+            int headerLength = header.length();
             if (headerLength > maxValue) {
                 maxValue = headerLength;
             }
