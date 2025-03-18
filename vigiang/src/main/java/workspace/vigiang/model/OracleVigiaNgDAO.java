@@ -8,10 +8,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listFeatures(Environment env, String[] columns) throws SQLException {
-        var selectColumns = String.join(", ", columns);
-
         String sql =
-            "select " + selectColumns + "\n" +
+            "select ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +
             "order by ID_FEATURE";
 
@@ -35,9 +33,9 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listConfigurationValues(Environment env) throws SQLException {
         String sql =
-            "select ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
+            "select CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
-            "order by ID_PARAMETRO";
+            "order by CD_OPERADORA, ID_PARAMETRO";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
@@ -46,6 +44,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             while(rs.next()) {
                 var value = (rs.getString("VL_PARAMETRO") == null) ? "NULL" : rs.getString("VL_PARAMETRO");
                 String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
                     rs.getString("ID_PARAMETRO"),
                     rs.getString("DE_PARAMETRO"),
                     value,
@@ -82,11 +81,10 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listPrivileges(Environment env) throws SQLException {
         String sql =
-            "select \n" +
-            "  ID_CHAVE as NM_MODULO, ID_STATUS as STATUS_MODULO, NM_PRIVILEGIO\n" +
+            "select ID_CHAVE as NM_MODULO, ID_STATUS as STATUS_MODULO, t1.NM_PRIVILEGIO\n" +
             "from SEG_PRIVILEGIO t1\n" +
             "left join CFG_MODULO t2 on (t1.CD_MODULO = t2.CD_MODULO)\n" +
-            "order by NM_MODULO, NM_PRIVILEGIO";
+            "order by NM_MODULO, t1.NM_PRIVILEGIO";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);

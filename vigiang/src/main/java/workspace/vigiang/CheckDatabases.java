@@ -76,10 +76,10 @@ public class CheckDatabases {
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "CFG_NG_SITE";
-            columns = new String[] { "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
+            columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
             fileName = "conf.site";
-            columns = new String[] { "parameter_id", "parameter_description", "value" };
+            columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value" };
         }
 
         List<String[]> data = dao.listConfigurationValues(env);

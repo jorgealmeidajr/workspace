@@ -8,10 +8,8 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listFeatures(Environment env, String[] columns) throws SQLException {
-        var selectColumns = String.join(", ", columns);
-
         String sql =
-            "select " + selectColumns + "\n" +
+            "select feature, status, description\n" +
             "from conf.feature\n" +
             "order by feature";
 
@@ -35,9 +33,9 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listConfigurationValues(Environment env) throws SQLException {
         String sql =
-            "select parameter_id, parameter_description, value\n" +
+            "select carrier_id, parameter_id, parameter_description, value\n" +
             "from conf.site\n" +
-            "order by parameter_id";
+            "order by carrier_id, parameter_id";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
@@ -46,6 +44,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             while(rs.next()) {
                 var value = (rs.getString("value") == null) ? "NULL" : rs.getString("value");
                 String[] row = new String[] {
+                    rs.getString("carrier_id"),
                     rs.getString("parameter_id"),
                     rs.getString("parameter_description"),
                     value,
