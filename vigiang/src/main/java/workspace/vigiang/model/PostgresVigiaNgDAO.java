@@ -84,7 +84,29 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listProfiles(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select t3.carrier_id, t3.\"name\" as \"profile_name\", t2.\"name\" as \"privilege_name\", t2.module_id\n" +
+            "from sec.profile_privilege t1\n" +
+            "join sec.privilege t2 on (t1.privilege_id = t2.id)\n" +
+            "join sec.profile t3 on (t1.profile_id = t3.id)\n" +
+            "where LOWER(t3.\"name\") in ('administrador', 'admin', 'autoridades')\n" +
+            "order by t3.carrier_id, t3.\"name\", t2.\"name\"";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("carrier_id"),
+                    rs.getString("profile_name"),
+                    rs.getString("privilege_name"),
+                    (rs.getString("module_id") == null) ? "NULL" : rs.getString("module_id")
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override
@@ -118,9 +140,10 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listValidationRules(Environment env) throws SQLException {
         String sql =
-            "select module, valid_rules\n" +
-            "from conf.validatrules\n" +
-            "order by module";
+            "select t1.carrier_id, t2.\"name\" as \"carrier_name\", t1.\"module\", t1.valid_rules\n" +
+            "from conf.validatrules t1\n" +
+            "left join conf.carrier t2 on (t1.carrier_id = t2.id)\n" +
+            "order by t1.carrier_id, t1.\"module\"";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
@@ -128,6 +151,8 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 String[] row = new String[] {
+                    rs.getString("carrier_id"),
+                    rs.getString("carrier_name"),
                     rs.getString("module"),
                     rs.getString("valid_rules"),
                 };

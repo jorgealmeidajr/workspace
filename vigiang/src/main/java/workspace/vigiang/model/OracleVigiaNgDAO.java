@@ -105,14 +105,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listProfiles(Environment env) throws SQLException {
         String sql =
-            "select t3.NM_PERFIL, t2.NM_PRIVILEGIO, t4.ID_CHAVE as NM_MODULO\n" +
+            "select t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO, t2.CD_MODULO, t4.ID_CHAVE as NM_MODULO\n" +
             "from SEG_PERFIL_PRIVILEGIO t1\n" +
             "join SEG_PRIVILEGIO t2 on (t1.CD_PRIVILEGIO = t2.CD_PRIVILEGIO)\n" +
             "join SEG_PERFIL t3 on (t1.CD_PERFIL = t3.CD_PERFIL)\n" +
             "left join CFG_MODULO t4 on (t2.CD_MODULO = t4.CD_MODULO)\n" +
-            "where CD_OPERADORA = 1\n" +
-            "  and t3.NM_PERFIL in ('Administrador', 'Admin', 'ADMIN')\n" + // Autoridades...
-            "order by t3.NM_PERFIL, t2.NM_PRIVILEGIO";
+            "where LOWER(t3.NM_PERFIL) in ('administrador', 'admin', 'autoridades')\n" +
+            "order by t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
@@ -120,9 +119,11 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 String[] row = new String[] {
-                        rs.getString("NM_PERFIL"),
-                        rs.getString("NM_PRIVILEGIO"),
-                        (rs.getString("NM_MODULO") == null) ? "NULL" : rs.getString("NM_MODULO"),
+                    rs.getString("CD_OPERADORA"),
+                    rs.getString("NM_PERFIL"),
+                    rs.getString("NM_PRIVILEGIO"),
+                    (rs.getString("CD_MODULO") == null) ? "NULL" : rs.getString("CD_MODULO"),
+                    (rs.getString("NM_MODULO") == null) ? "NULL" : rs.getString("NM_MODULO"),
                 };
                 data.add(row);
             }
@@ -182,9 +183,10 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listValidationRules(Environment env) throws SQLException {
         String sql =
-            "select MODULO, VALID_RULES\n" +
-            "from CFG_NG_VALIDATRULES\n" +
-            "order by MODULO";
+            "select t1.CD_OPERADORA, t2.NM_OPERADORA, t1.MODULO, t1.VALID_RULES\n" +
+            "from CFG_NG_VALIDATRULES t1\n" +
+            "left join CFG_OPERADORA t2 on (t1.CD_OPERADORA = t2.CD_OPERADORA)\n" +
+            "order by t1.CD_OPERADORA, t1.MODULO";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
@@ -192,6 +194,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
+                    rs.getString("NM_OPERADORA"),
                     rs.getString("MODULO"),
                     rs.getString("VALID_RULES"),
                 };

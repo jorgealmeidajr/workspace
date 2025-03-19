@@ -37,7 +37,7 @@ public class CheckDatabases {
                 updateLocalConfigurationFiles(vigiangPath, env, dao);
                 updateLocalModuleFiles(vigiangPath, env, dao);
                 updateLocalPrivilegeFiles(vigiangPath, env, dao);
-//                updateLocalProfileFiles(vigiangPath, env);
+                updateLocalProfileFiles(vigiangPath, env, dao);
                 updateLocalFilterQueryFiles(vigiangPath, env, dao);
 //                updateLocalZoneInterceptionFiles(vigiangPath, env);
                 updateLocalValidationRuleFiles(vigiangPath, env, dao);
@@ -115,10 +115,18 @@ public class CheckDatabases {
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
-    private static void updateLocalProfileFiles(Path vigiangPath, Environment env) throws IOException, SQLException {
-        var fileName = "SEG_PERFIL_PRIVILEGIO";
-        String[] columns = new String[] { "NM_PERFIL", "NM_PRIVILEGIO", "NM_MODULO" };
-        List<String[]> data = VIGIA_NG_DAO.listProfiles(env);
+    private static void updateLocalProfileFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "SEG_PERFIL_PRIVILEGIO";
+            columns = new String[] { "CD_OPERADORA", "NM_PERFIL", "NM_PRIVILEGIO", "CD_MODULO", "NM_MODULO" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "sec.profile_privilege";
+            columns = new String[] { "carrier_id", "profile_name", "privilege_name", "module_id" };
+        }
+
+        List<String[]> data = dao.listProfiles(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
@@ -153,10 +161,10 @@ public class CheckDatabases {
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "CFG_NG_VALIDATRULES";
-            columns = new String[] { "MODULO", "VALID_RULES" };
+            columns = new String[] { "CD_OPERADORA", "NM_OPERADORA", "MODULO", "VALID_RULES" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
             fileName = "conf.validatrules";
-            columns = new String[] { "module", "valid_rules" };
+            columns = new String[] { "carrier_id", "carrier_name", "module", "valid_rules" };
         }
 
         try {
