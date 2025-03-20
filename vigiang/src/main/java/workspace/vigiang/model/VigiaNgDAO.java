@@ -37,6 +37,8 @@ public interface VigiaNgDAO {
 
     List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException;
 
+    List<String[]> listCarriers(Environment env) throws SQLException;
+
     default Connection getConnection(Environment environment) throws SQLException {
         var credentials = environment.getDatabaseCredentials();
         return DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));

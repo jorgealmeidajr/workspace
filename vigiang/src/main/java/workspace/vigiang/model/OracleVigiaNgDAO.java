@@ -1,5 +1,9 @@
 package workspace.vigiang.model;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -385,6 +389,73 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         }
 
         return data;
+    }
+
+    @Override
+    public List<String[]> listCarriers(Environment env) throws SQLException {
+        String sql =
+            "select\n" +
+            "  CD_OPERADORA, NM_OPERADORA,\n" +
+            "  ID_SMTP_HOST, ID_SMTP_USER, ID_SMPT_PASSWORD, ID_SMPT_ACCOUNT, ID_SMTP_PORT,\n" +
+            "  DE_COMENTARIO, SN_MULTIOPERADORA, ID_REGEX, DS_LOCAL_IMAGENS, DS_REGEX, ID_API_KEY_MAPS, SN_TOKEN,\n" +
+            "  IM_LOGO, IM_LOGO_FOOTER\n" +
+            "from CFG_OPERADORA\n" +
+            "where (lower(NM_OPERADORA) not like '%test%' and lower(NM_OPERADORA) not like '%robot%')\n" +
+            "order by CD_OPERADORA";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
+                    rs.getString("NM_OPERADORA"),
+                    rs.getString("ID_SMTP_HOST"),
+                    rs.getString("ID_SMTP_USER"),
+                    rs.getString("ID_SMPT_PASSWORD"),
+                    rs.getString("ID_SMPT_ACCOUNT"),
+                    rs.getString("ID_SMTP_PORT"),
+                    rs.getString("DE_COMENTARIO"),
+                    rs.getString("SN_MULTIOPERADORA"),
+                    rs.getString("ID_REGEX"),
+                    rs.getString("DS_LOCAL_IMAGENS"),
+                    rs.getString("DS_REGEX"),
+                    rs.getString("ID_API_KEY_MAPS"),
+                    rs.getString("SN_TOKEN"),
+                    getBlobAsString(rs.getBlob("IM_LOGO")),
+                    getBlobAsString(rs.getBlob("IM_LOGO_FOOTER"))
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    private String getBlobAsString(Blob blob) {
+        StringBuffer result = new StringBuffer();
+
+        if (blob != null) {
+            int read = 0;
+            Reader reader = null;
+            char[] buffer = new char[1024];
+
+            try {
+                reader = new InputStreamReader(blob.getBinaryStream(), StandardCharsets.UTF_8);
+
+                while ((read = reader.read(buffer)) != -1) {
+                    result.append(buffer, 0, read);
+                }
+            } catch (SQLException | IOException ex) {
+                throw new RuntimeException("Unable to read blob data.", ex);
+            } finally {
+                try {
+                    if (reader != null) reader.close();
+                } catch (Exception ex) { }
+            }
+        }
+
+        return result.toString();
     }
 
 }

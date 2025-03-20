@@ -262,4 +262,46 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
         return List.of();
     }
 
+    @Override
+    public List<String[]> listCarriers(Environment env) throws SQLException {
+        String sql =
+            "select\n" +
+            "  id, \"name\",\n" +
+            "  smtp_host, smtp_user, smpt_password, smpt_account, smtp_port,\n" +
+            "  \"comments\", muti_carrier, regex, local_images, ds_regex, api_key_maps, \"token\",\n" +
+            "  im_logo, im_logo_footer\n" +
+            "from conf.carrier\n" +
+            "where (lower(\"name\") not like '%test%' and lower(\"name\") not like '%robot%')\n" +
+            "order by id";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("id"),
+                    rs.getString("name"),
+                    rs.getString("smtp_host"),
+                    rs.getString("smtp_user"),
+                    rs.getString("smpt_password"),
+                    rs.getString("smpt_account"),
+                    rs.getString("smtp_port"),
+                    rs.getString("comments"),
+                    rs.getString("muti_carrier"),
+                    rs.getString("regex"),
+                    rs.getString("local_images"),
+                    rs.getString("ds_regex"),
+                    rs.getString("api_key_maps"),
+                    rs.getString("token"),
+                    "", "" // TODO: convert bytea to string
+//                    rs.getBinaryStream("im_logo"),
+//                    rs.getBinaryStream("im_logo_footer")
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
 }

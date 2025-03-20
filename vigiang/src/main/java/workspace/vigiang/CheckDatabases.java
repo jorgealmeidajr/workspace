@@ -45,6 +45,7 @@ public class CheckDatabases {
                 updateLocalEmailTemplatesFiles(vigiangPath, env, dao); // TODO: email text template should be written in a file, it is large
                 updateLocalReportFiles(vigiangPath, env, dao); // TODO: report template should be written in a local file
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
+                updateLocalCarriersFiles(vigiangPath, env, dao);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -228,6 +229,31 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listConfigurationReports(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalCarriersFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_OPERADORA";
+            columns = new String[] {
+                "CD_OPERADORA", "NM_OPERADORA",
+                "ID_SMTP_HOST", "ID_SMTP_USER", "ID_SMPT_PASSWORD", "ID_SMPT_ACCOUNT", "ID_SMTP_PORT",
+                "DE_COMENTARIO", "SN_MULTIOPERADORA", "ID_REGEX", "DS_LOCAL_IMAGENS",  "DS_REGEX", "ID_API_KEY_MAPS", "SN_TOKEN",
+                "IM_LOGO", "IM_LOGO_FOOTER"
+            };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.carrier";
+            columns = new String[] {
+                "id", "name",
+                "smtp_host", "smtp_user", "smpt_password", "smpt_account", "smtp_port",
+                "comments", "muti_carrier", "regex", "local_images", "ds_regex", "api_key_maps", "token",
+                "im_logo", "im_logo_footer"
+            };
+        }
+
+        List<String[]> data = dao.listCarriers(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
