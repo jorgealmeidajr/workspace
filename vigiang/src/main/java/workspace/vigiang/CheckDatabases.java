@@ -1,7 +1,6 @@
 package workspace.vigiang;
 
 import workspace.vigiang.model.Environment;
-import workspace.vigiang.model.OracleVigiaNgDAO;
 import workspace.vigiang.model.VigiaNgDAO;
 
 import java.io.IOException;
@@ -14,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CheckDatabases {
-
-    static final VigiaNgDAO VIGIA_NG_DAO = new OracleVigiaNgDAO();
 
     public static void main(String[] args) {
         var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
@@ -39,9 +36,9 @@ public class CheckDatabases {
                 updateLocalPrivilegeFiles(vigiangPath, env, dao);
                 updateLocalProfileFiles(vigiangPath, env, dao);
                 updateLocalFilterQueryFiles(vigiangPath, env, dao);
-//                updateLocalZoneInterceptionFiles(vigiangPath, env);
+                updateLocalZoneInterceptionFiles(vigiangPath, env, dao);
                 updateLocalValidationRuleFiles(vigiangPath, env, dao);
-//                updateLocalQdsValidationRuleFiles(vigiangPath, env);
+                updateLocalQdsValidationRuleFiles(vigiangPath, env, dao);
                 updateLocalEmailTemplatesFiles(vigiangPath, env, dao); // TODO: email text template should be written in a file, it is large
                 updateLocalReportFiles(vigiangPath, env, dao); // TODO: report template should be written in a local file
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
@@ -146,11 +143,27 @@ public class CheckDatabases {
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
-    private static void updateLocalZoneInterceptionFiles(Path vigiangPath, Environment env) {
-        var fileName = "CFG_TP_ZONA_TP_VL_ITC";
-        String[] columns = new String[] { "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO", "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS" };
+    private static void updateLocalZoneInterceptionFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_TP_ZONA_TP_VL_ITC";
+            columns = new String[] {
+                "CD_OPERADORA", "NM_OPERADORA",
+                "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO",
+                "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS"
+            };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.tp_zone_tp_vl_itc";
+            columns = new String[] {
+                "carrier_id", "carrier_name",
+                "network_element_type_name", "target_type_name",
+                "itc_form_visible", "visible", "rules"
+            };
+        }
+
         try {
-            List<String[]> data = VIGIA_NG_DAO.listZoneInterceptions(env);
+            List<String[]> data = dao.listZoneInterceptions(env);
             updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -176,11 +189,12 @@ public class CheckDatabases {
         }
     }
 
-    private static void updateLocalQdsValidationRuleFiles(Path vigiangPath, Environment env) {
+    private static void updateLocalQdsValidationRuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
         var fileName = "CFG_TIPO_NUMERO_QDS";
         String[] columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
+
         try {
-            List<String[]> data = VIGIA_NG_DAO.listQdsValidationRules(env);
+            List<String[]> data = dao.listQdsValidationRules(env);
             updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());

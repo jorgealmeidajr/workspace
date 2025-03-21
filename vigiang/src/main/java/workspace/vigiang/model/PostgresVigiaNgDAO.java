@@ -134,7 +134,35 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listZoneInterceptions(Environment env) throws SQLException {
-        return List.of();
+        String sql =
+            "select\n" +
+            "  t4.id as \"carrier_id\", t4.\"name\" as \"carrier_name\",\n" +
+            "  t3.\"name\" as \"network_element_type_name\", t2.\"name\" as \"target_type_name\",\n" +
+            "  t1.itc_form_visible, t1.visible, t1.rules\n" +
+            "from conf.tp_zone_tp_vl_itc t1\n" +
+            "join conf.target_type t2 on (t1.targettype_id = t2.id)\n" +
+            "join conf.network_element_type t3 on (t1.networkelementtype_id  = t3.id)\n" +
+            "left join conf.carrier t4 on (t1.carrier_id = t4.id)\n" +
+            "order by t4.id, t3.\"name\", t2.\"name\"";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("carrier_id"),
+                    rs.getString("carrier_name"),
+                    rs.getString("network_element_type_name"),
+                    rs.getString("target_type_name"),
+                    rs.getString("itc_form_visible"),
+                    rs.getString("visible"),
+                    rs.getString("rules")
+                };
+                data.add(row);
+            }
+        }
+        return data;
     }
 
     @Override

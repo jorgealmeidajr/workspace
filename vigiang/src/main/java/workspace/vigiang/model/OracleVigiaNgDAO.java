@@ -160,11 +160,15 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listZoneInterceptions(Environment env) throws SQLException {
         String sql =
-            "select t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO, t1.SN_VISIVEL_CAD_ITC, t1.SN_VISIVEL_LOTE, t1.NM_REGRAS\n" +
+            "select\n" +
+            "  t4.CD_OPERADORA, t4.NM_OPERADORA,\n" +
+            "  t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO,\n" +
+            "  t1.SN_VISIVEL_CAD_ITC, t1.SN_VISIVEL_LOTE, t1.NM_REGRAS\n" +
             "from CFG_TP_ZONA_TP_VL_ITC t1\n" +
             "join CFG_TIPO_VALOR_INTERCEPTADO t2 on (t1.CD_TIPO_VALOR_INTERCEPTADO = t2.CD_TIPO_VALOR_INTERCEPTADO)\n" +
             "join CFG_ZONA_MONIT t3 on (t1.CD_TIPO_CENTRAL = t3.CD_TIPO_CENTRAL)\n" +
-            "order by t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO";
+            "left join CFG_OPERADORA t4 on (t1.CD_OPERADORA = t4.CD_OPERADORA)\n" +
+            "order by t4.CD_OPERADORA, t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
@@ -172,6 +176,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
+                    rs.getString("NM_OPERADORA"),
                     rs.getString("NM_ZONA_MONIT"),
                     rs.getString("NM_TIPO_VALOR_INTERCEPTADO"),
                     rs.getString("SN_VISIVEL_CAD_ITC"),
