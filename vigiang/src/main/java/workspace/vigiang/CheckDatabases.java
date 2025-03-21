@@ -39,10 +39,13 @@ public class CheckDatabases {
                 updateLocalZoneInterceptionFiles(vigiangPath, env, dao);
                 updateLocalValidationRuleFiles(vigiangPath, env, dao);
                 updateLocalQdsValidationRuleFiles(vigiangPath, env, dao);
-                updateLocalEmailTemplatesFiles(vigiangPath, env, dao); // TODO: email text template should be written in a file, it is large
-                updateLocalReportFiles(vigiangPath, env, dao); // TODO: report template should be written in a local file
+                updateLocalEmailTemplatesFiles(vigiangPath, env, dao);
+                // TODO: email text template should be written in a file
+                updateLocalReportFiles(vigiangPath, env, dao);
+                // TODO: report template should be written in a local file
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
                 updateLocalCarriersFiles(vigiangPath, env, dao);
+                updateLocalZonesFiles(vigiangPath, env, dao);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -65,7 +68,7 @@ public class CheckDatabases {
             columns = new String[] { "feature", "status", "description" };
         }
 
-        List<String[]> data = dao.listFeatures(env, columns);
+        List<String[]> data = dao.listFeatures(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
@@ -190,8 +193,14 @@ public class CheckDatabases {
     }
 
     private static void updateLocalQdsValidationRuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
-        var fileName = "CFG_TIPO_NUMERO_QDS";
-        String[] columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_TIPO_NUMERO_QDS";
+            columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            return;
+        }
 
         try {
             List<String[]> data = dao.listQdsValidationRules(env);
@@ -268,6 +277,27 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listCarriers(env);
+        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalZonesFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+        String fileName = null;
+        String[] columns = null;
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            fileName = "CFG_ZONA_MONIT";
+            columns = new String[] {
+                "CD_OPERADORA", "NM_OPERADORA",
+                "CD_ZONA_MONIT", "NM_ZONA_MONIT", "DE_COMENTARIOS", "IN_ATIVO"
+            };
+        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            fileName = "conf.zone_monit";
+            columns = new String[] {
+                "carrier_id", "carrier_name",
+                "zone_monit_id", "zone_monit_name", "comments", "active"
+            };
+        }
+
+        List<String[]> data = dao.listZones(env);
         updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 

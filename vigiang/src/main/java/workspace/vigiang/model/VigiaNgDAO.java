@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface VigiaNgDAO {
 
-    List<String[]> listFeatures(Environment env, String[] columns) throws SQLException;
+    List<String[]> listFeatures(Environment env) throws SQLException;
 
     List<String[]> listConfigurationValues(Environment env) throws SQLException;
 
@@ -38,6 +38,8 @@ public interface VigiaNgDAO {
     List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException;
 
     List<String[]> listCarriers(Environment env) throws SQLException;
+
+    List<String[]> listZones(Environment env) throws SQLException;
 
     default Connection getConnection(Environment environment) throws SQLException {
         var credentials = environment.getDatabaseCredentials();

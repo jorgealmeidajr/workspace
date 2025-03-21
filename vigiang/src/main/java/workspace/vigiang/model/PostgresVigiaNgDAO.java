@@ -7,7 +7,7 @@ import java.util.List;
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<String[]> listFeatures(Environment env, String[] columns) throws SQLException {
+    public List<String[]> listFeatures(Environment env) throws SQLException {
         String sql =
             "select feature, status, description\n" +
             "from conf.feature\n" +
@@ -325,6 +325,36 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
                     "", "" // TODO: convert bytea to string
 //                    rs.getBinaryStream("im_logo"),
 //                    rs.getBinaryStream("im_logo_footer")
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    @Override
+    public List<String[]> listZones(Environment env) throws SQLException {
+        String sql =
+            "select\n" +
+            "  t2.id as \"carrier_id\", t2.\"name\" as \"carrier_name\",\n" +
+            "  t1.id as \"zone_monit_id\", t1.\"name\" as \"zone_monit_name\", t1.\"comments\", t1.active\n" +
+            "from conf.zone_monit t1\n" +
+            "left join conf.carrier t2 on (t1.carrier_id = t2.id)\n" +
+            "where lower(t1.\"name\") not like '%test%'\n" +
+            "order by t1.carrier_id, t1.id";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("carrier_id"),
+                    rs.getString("carrier_name"),
+                    rs.getString("zone_monit_id"),
+                    rs.getString("zone_monit_name"),
+                    rs.getString("comments"),
+                    rs.getString("active")
                 };
                 data.add(row);
             }

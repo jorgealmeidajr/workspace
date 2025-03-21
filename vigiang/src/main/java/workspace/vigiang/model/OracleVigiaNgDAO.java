@@ -11,7 +11,7 @@ import java.util.List;
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<String[]> listFeatures(Environment env, String[] columns) throws SQLException {
+    public List<String[]> listFeatures(Environment env) throws SQLException {
         String sql =
             "select ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +
@@ -431,6 +431,36 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("SN_TOKEN"),
                     getBlobAsString(rs.getBlob("IM_LOGO")),
                     getBlobAsString(rs.getBlob("IM_LOGO_FOOTER"))
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    @Override
+    public List<String[]> listZones(Environment env) throws SQLException {
+        String sql =
+            "select\n" +
+            "  t2.CD_OPERADORA, t2.NM_OPERADORA,\n" +
+            "  t1.CD_ZONA_MONIT, t1.NM_ZONA_MONIT, t1.DE_COMENTARIOS, t1.IN_ATIVO\n" +
+            "from CFG_ZONA_MONIT t1\n" +
+            "left join CFG_OPERADORA t2 on (t1.CD_OPERADORA = t2.CD_OPERADORA)\n" +
+            "where lower(t1.NM_ZONA_MONIT) not like '%test%'\n" +
+            "order by t1.CD_OPERADORA, t1.CD_ZONA_MONIT";
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(env);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                String[] row = new String[] {
+                    rs.getString("CD_OPERADORA"),
+                    rs.getString("NM_OPERADORA"),
+                    rs.getString("CD_ZONA_MONIT"),
+                    rs.getString("NM_ZONA_MONIT"),
+                    rs.getString("DE_COMENTARIOS"),
+                    rs.getString("IN_ATIVO")
                 };
                 data.add(row);
             }
