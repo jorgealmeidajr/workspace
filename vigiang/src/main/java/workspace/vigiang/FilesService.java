@@ -12,7 +12,7 @@ import java.util.List;
 
 public class FilesService {
 
-    static void updateLocalFiles(Path vigiangPath, Environment env, String fileName, String[] columns, List<String[]> data) throws IOException {
+    public static void updateLocalFiles(Path vigiangPath, Environment env, String fileName, String[] columns, List<String[]> data) throws IOException {
         var finalLines = new ArrayList<String>();
         int columnWidth = calculateColumnWidth(columns);
 

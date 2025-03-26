@@ -4,12 +4,10 @@ import workspace.vigiang.model.Environment;
 import workspace.vigiang.model.VigiaNgDAO;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CheckDatabases {
@@ -44,6 +42,7 @@ public class CheckDatabases {
                 updateLocalCarriersFiles(vigiangPath, env, dao);
                 updateLocalZonesFiles(vigiangPath, env, dao);
 
+                // TODO: add CheckReports
                 updateLocalReportFiles(vigiangPath, env, dao);
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
                 // TODO: report template should be written in a local file
@@ -70,7 +69,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listFeatures(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalConfigurationFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
@@ -85,7 +84,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listConfigurationValues(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalModuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
@@ -99,7 +98,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listModules(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalPrivilegeFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
@@ -114,7 +113,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listPrivileges(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalProfileFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
@@ -129,7 +128,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listProfiles(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalFilterQueryFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
@@ -144,7 +143,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listFilterQueries(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalZoneInterceptionFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
@@ -168,7 +167,7 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listZoneInterceptions(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -187,7 +186,7 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listValidationRules(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -205,7 +204,7 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listQdsValidationRules(env);
-            updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -223,7 +222,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listReports(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
@@ -238,7 +237,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listConfigurationReports(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalCarriersFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
@@ -263,7 +262,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listCarriers(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalZonesFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
@@ -284,68 +283,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listZones(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
-    }
-
-    private static void updateLocalFiles(Path vigiangPath, Environment env, String fileName, String[] columns, List<String[]> data) throws IOException {
-        var finalLines = new ArrayList<String>();
-        int columnWidth = calculateColumnWidth(columns);
-
-        for (String[] row : data) {
-            String line = "";
-            for (int i = 0; i < columns.length; i++) {
-                var column = rightPad(columns[i], columnWidth, " ");
-                line += column + ": " + row[i] + "\n";
-            }
-            finalLines.add(line);
-        }
-
-        var newFileContent =
-            "# " + env + " | " + fileName + "\n" +
-            "```\n" +
-            String.join(System.lineSeparator(), finalLines) +
-            "```\n";
-
-        Path finalFilePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\database\\" + fileName + ".md");
-
-        var initialFileContent = "";
-        if (Files.exists(finalFilePath)) {
-            initialFileContent = new String(Files.readAllBytes(finalFilePath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + finalFilePath);
-            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
-        }
-    }
-
-    private static int calculateColumnWidth(String[] headers) {
-        int maxValue = headers[0].length();
-        for (String header : headers) {
-            int headerLength = header.length();
-            if (headerLength > maxValue) {
-                maxValue = headerLength;
-            }
-        }
-        return maxValue;
-    }
-
-    public static String rightPad(String input, int length, String padStr) {
-        if(input == null || padStr == null){
-            return null;
-        }
-
-        if(input.length() >= length){
-            return input;
-        }
-
-        int padLength = length - input.length();
-
-        StringBuilder paddedString = new StringBuilder();
-        paddedString.append(input);
-        paddedString.append(padStr.repeat(padLength));
-
-        return paddedString.toString();
+        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
 }
