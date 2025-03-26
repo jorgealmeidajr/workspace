@@ -25,7 +25,7 @@ public interface VigiaNgDAO {
 
     List<String[]> listQdsValidationRules(Environment env) throws SQLException;
 
-    List<String[]> listEmailTemplates(Environment env) throws SQLException;
+    List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException;
 
     List<String[]> listReports(Environment env) throws SQLException;
 

@@ -44,9 +44,6 @@ public class CheckDatabases {
                 updateLocalCarriersFiles(vigiangPath, env, dao);
                 updateLocalZonesFiles(vigiangPath, env, dao);
 
-                updateLocalEmailTemplatesFiles(vigiangPath, env, dao);
-//                updateEmailTemplates(vigiangPath, env, dao);
-
                 updateLocalReportFiles(vigiangPath, env, dao);
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
                 // TODO: report template should be written in a local file
@@ -59,33 +56,6 @@ public class CheckDatabases {
 
         System.out.println("## END checking all environment databases.");
         System.out.println("#".repeat(3 * 2));
-    }
-
-    private static void updateEmailTemplates(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
-        List<String[]> data = dao.listEmailTemplates(env);
-
-        for (String[] row : data) {
-            var carrierId = row[0];
-            var nameId = row[1];
-            var newFileContent = row[row.length - 1];
-            var fileName = carrierId + "_" + nameId;
-
-            Path emailTemplatesPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\email_templates");
-            if (!Files.exists(emailTemplatesPath)) {
-                Files.createDirectories(emailTemplatesPath);
-            }
-
-            Path finalFilePath = Paths.get(emailTemplatesPath + "\\" + fileName + ".html");
-            var initialFileContent = "";
-            if (Files.exists(finalFilePath)) {
-                initialFileContent = new String(Files.readAllBytes(finalFilePath));
-            }
-
-            if (!initialFileContent.equals(newFileContent)) {
-                System.out.println("updating file: " + finalFilePath);
-                Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
-            }
-        }
     }
 
     private static void updateLocalFeatureFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
@@ -239,21 +209,6 @@ public class CheckDatabases {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-    }
-
-    private static void updateLocalEmailTemplatesFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            fileName = "CFG_EMAIL_SERVICOS";
-            columns = new String[] { "CD_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO", "DE_TEXTO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            fileName = "conf.service_email";
-            columns = new String[] { "carrier_id", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to", "email_body" };
-        }
-
-        List<String[]> data = dao.listEmailTemplates(env);
-        updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {

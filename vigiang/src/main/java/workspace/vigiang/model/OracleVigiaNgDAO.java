@@ -241,18 +241,18 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listEmailTemplates(Environment env) throws SQLException {
+    public List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException {
         String sql =
             "select CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO\n" +
             "from CFG_EMAIL_SERVICOS\n" +
             "order by CD_OPERADORA, ID_TIPO_SERVICO";
 
-        List<String[]> data = new ArrayList<>();
+        List<EmailTemplate> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                String[] row = new String[] {
+                EmailTemplate row = new EmailTemplate(
                     rs.getString("CD_OPERADORA"),
                     rs.getString("ID_TIPO_SERVICO"),
                     rs.getString("DE_ASSUNTO"),
@@ -260,8 +260,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("DE_NOME_ARQUIVO"),
                     rs.getString("DE_REMETENTE"),
                     rs.getString("DE_DESTINATARIO"),
-                    rs.getString("DE_TEXTO"),
-                };
+                    rs.getString("DE_TEXTO"));
                 data.add(row);
             }
         }

@@ -196,18 +196,18 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listEmailTemplates(Environment env) throws SQLException {
+    public List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException {
         String sql =
             "select carrier_id, service_type, email_subject, service_name, attach_name, email_from, email_to, email_body\n" +
             "from conf.service_email\n" +
             "order by carrier_id, service_type";
 
-        List<String[]> data = new ArrayList<>();
+        List<EmailTemplate> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                String[] row = new String[] {
+                EmailTemplate row = new EmailTemplate(
                     rs.getString("carrier_id"),
                     rs.getString("service_type"),
                     rs.getString("email_subject"),
@@ -215,8 +215,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("attach_name"),
                     rs.getString("email_from"),
                     rs.getString("email_to"),
-                    rs.getString("email_body"),
-                };
+                    rs.getString("email_body"));
                 data.add(row);
             }
         }
