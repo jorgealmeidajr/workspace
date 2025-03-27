@@ -198,8 +198,9 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException {
         String sql =
-            "select carrier_id, service_type, email_subject, service_name, attach_name, email_from, email_to, email_body\n" +
-            "from conf.service_email\n" +
+            "select carrier_id, service_type, email_subject, service_name, attach_name, email_to, email_from, email_body, t2.\"name\" as \"carrier_name\"\n" +
+            "from conf.service_email t1\n" +
+            "left join conf.carrier t2 on (t1.carrier_id = t2.id)\n" +
             "order by carrier_id, service_type";
 
         List<EmailTemplate> data = new ArrayList<>();
@@ -215,7 +216,8 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("attach_name"),
                     rs.getString("email_from"),
                     rs.getString("email_to"),
-                    rs.getString("email_body"));
+                    rs.getString("email_body"),
+                    rs.getString("carrier_name"));
                 data.add(row);
             }
         }

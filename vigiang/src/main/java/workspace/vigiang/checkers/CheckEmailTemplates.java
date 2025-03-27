@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,8 +31,9 @@ public class CheckEmailTemplates {
             System.out.println(env + ":");
 
             try {
-                updateLocalEmailTemplatesFiles(vigiangPath, env, dao);
-//                updateEmailTemplates(vigiangPath, env, dao);
+                List<EmailTemplate> emailTemplates = dao.listEmailTemplates(env);
+                updateLocalEmailTemplatesFiles(vigiangPath, env, emailTemplates);
+                updateEmailTemplates(vigiangPath, env, emailTemplates);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -45,22 +45,21 @@ public class CheckEmailTemplates {
         System.out.println("#".repeat(3 * 2));
     }
 
-    private static void updateLocalEmailTemplatesFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalEmailTemplatesFiles(Path vigiangPath, Environment env, List<EmailTemplate> emailTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "CFG_EMAIL_SERVICOS";
             columns = new String[] {
-                "CD_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO", "DE_TEXTO"
+                "CD_OPERADORA", "NM_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO"
             };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
             fileName = "conf.service_email";
             columns = new String[] {
-                "carrier_id", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to", "email_body"
+                "carrier_id", "carrier_name", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to"
             };
         }
 
-        List<EmailTemplate> emailTemplates = dao.listEmailTemplates(env);
         List<String[]> data = emailTemplates.stream()
                 .map(EmailTemplate::toArray)
                 .collect(Collectors.toList());
@@ -68,27 +67,30 @@ public class CheckEmailTemplates {
         FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
-    private static void updateEmailTemplates(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
-        List<EmailTemplate> emailTemplates = dao.listEmailTemplates(env);
-
+    private static void updateEmailTemplates(Path vigiangPath, Environment env, List<EmailTemplate> emailTemplates) {
         for (EmailTemplate emailTemplate : emailTemplates) {
             var newFileContent = emailTemplate.getBody();
             var fileName = emailTemplate.getCarrierId() + "_" + emailTemplate.getId();
 
-            Path emailTemplatesPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\email_templates");
-            if (!Files.exists(emailTemplatesPath)) {
-                Files.createDirectories(emailTemplatesPath);
-            }
+            try {
+                Path emailTemplatesPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\email_templates");
+                if (!Files.exists(emailTemplatesPath)) {
+                    Files.createDirectories(emailTemplatesPath);
+                }
 
-            Path finalFilePath = Paths.get(emailTemplatesPath + "\\" + fileName + ".html");
-            var initialFileContent = "";
-            if (Files.exists(finalFilePath)) {
-                initialFileContent = new String(Files.readAllBytes(finalFilePath));
-            }
+                Path finalFilePath = Paths.get(emailTemplatesPath + "\\" + fileName + ".html");
+                var initialFileContent = "";
+                if (Files.exists(finalFilePath)) {
+                    initialFileContent = new String(Files.readAllBytes(finalFilePath));
+                }
 
-            if (!initialFileContent.equals(newFileContent)) {
-                System.out.println("updating file: " + finalFilePath);
-                Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
+                if (!initialFileContent.equals(newFileContent)) {
+                    System.out.println("updating file: " + finalFilePath);
+                    Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
+                }
+            } catch (Exception e) {
+                System.err.println("fail on file: " + fileName);
+                e.printStackTrace();
             }
         }
     }

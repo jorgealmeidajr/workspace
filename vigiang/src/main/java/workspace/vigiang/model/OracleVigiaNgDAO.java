@@ -243,8 +243,9 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException {
         String sql =
-            "select CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO\n" +
-            "from CFG_EMAIL_SERVICOS\n" +
+            "select t1.CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO, t2.NM_OPERADORA\n" +
+            "from CFG_EMAIL_SERVICOS t1\n" +
+            "left join CFG_OPERADORA t2 on (t1.CD_OPERADORA = t2.CD_OPERADORA)\n" +
             "order by CD_OPERADORA, ID_TIPO_SERVICO";
 
         List<EmailTemplate> data = new ArrayList<>();
@@ -260,7 +261,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("DE_NOME_ARQUIVO"),
                     rs.getString("DE_REMETENTE"),
                     rs.getString("DE_DESTINATARIO"),
-                    rs.getString("DE_TEXTO"));
+                    rs.getString("DE_TEXTO"),
+                    rs.getString("NM_OPERADORA"));
                 data.add(row);
             }
         }

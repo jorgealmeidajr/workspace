@@ -10,20 +10,29 @@ public class EmailTemplate {
     private final String emailFrom;
     private final String emailTo;
     private final String body;
+    private final String carrierName;
 
-    public EmailTemplate(String carrierId, String id, String subject, String name, String fileName, String emailFrom, String emailTo, String body) {
-        this.carrierId = carrierId;
-        this.id = id;
+    public EmailTemplate(String carrierId, String id, String subject, String name, String fileName, String emailFrom, String emailTo, String body, String carrierName) {
+        this.carrierId = requireNonBlank(carrierId, "Carrier ID must not be blank");
+        this.id = requireNonBlank(id, "ID must not be blank");
         this.subject = subject;
         this.name = name;
         this.fileName = fileName;
         this.emailFrom = emailFrom;
         this.emailTo = emailTo;
-        this.body = body;
+        this.body = (body == null) ? " " : body;
+        this.carrierName = carrierName;
+    }
+
+    public static String requireNonBlank(String value, String message) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(message);
+        }
+        return value;
     }
 
     public String[] toArray() {
-        return new String[] { carrierId, id, subject, name, fileName, emailFrom, emailTo, body };
+        return new String[] { carrierId, carrierName, id, subject, name, fileName, emailFrom, emailTo };
     }
 
     public String getCarrierId() {
@@ -56,6 +65,10 @@ public class EmailTemplate {
 
     public String getBody() {
         return body;
+    }
+
+    public String getCarrierName() {
+        return carrierName;
     }
 
 }
