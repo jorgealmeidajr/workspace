@@ -1,4 +1,4 @@
-package workspace.vigiang;
+package workspace.vigiang.checkers;
 
 import com.microsoft.playwright.*;
 import workspace.vigiang.model.TablePrinter;

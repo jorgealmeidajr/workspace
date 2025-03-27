@@ -1,4 +1,4 @@
-package workspace.vigiang;
+package workspace.vigiang.checkers;
 
 import workspace.vigiang.model.CredentialsSSH;
 import workspace.vigiang.model.Environment;

@@ -1,6 +1,11 @@
 package workspace.vigiang;
 
-public class Main {
+import workspace.vigiang.checkers.CheckContainers;
+import workspace.vigiang.checkers.CheckDatabases;
+import workspace.vigiang.checkers.CheckEmailTemplates;
+import workspace.vigiang.checkers.CheckProjectsVersions;
+
+public class CheckersMain {
 
     public static void main(String[] args) {
         CheckContainers.main(new String[] { });
