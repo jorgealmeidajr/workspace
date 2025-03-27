@@ -1,9 +1,6 @@
 package workspace.vigiang;
 
-import workspace.vigiang.checkers.CheckContainers;
-import workspace.vigiang.checkers.CheckDatabases;
-import workspace.vigiang.checkers.CheckEmailTemplates;
-import workspace.vigiang.checkers.CheckProjectsVersions;
+import workspace.vigiang.checkers.*;
 
 public class CheckersMain {
 
@@ -11,6 +8,7 @@ public class CheckersMain {
         CheckContainers.main(new String[] { });
         CheckDatabases.main(new String[] { });
         CheckEmailTemplates.main(new String[] { });
+        CheckReportTemplates.main(new String[] { });
         CheckProjectsVersions.main(new String[] { });
     }
 

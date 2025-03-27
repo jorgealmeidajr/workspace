@@ -20,6 +20,10 @@ public class ReportTemplate {
         this.template = template;
     }
 
+    public String[] toArray() {
+        return new String[] { reportCode, reportId, reportType, carrierCode, carrierName };
+    }
+
     public String getReportCode() {
         return reportCode;
     }

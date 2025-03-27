@@ -44,10 +44,6 @@ public class CheckDatabases {
                 updateLocalCarriersFiles(vigiangPath, env, dao);
                 updateLocalZonesFiles(vigiangPath, env, dao);
 
-                // TODO: add CheckReports
-//                updateLocalReportFiles(vigiangPath, env, dao);
-                updateLocalConfigReportFiles(vigiangPath, env, dao);
-                // TODO: report template should be written in a local file
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -210,37 +206,6 @@ public class CheckDatabases {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-    }
-
-    private static void updateLocalReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            fileName = "CFG_RELATORIO";
-            columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA", "NM_OPERADORA" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            fileName = "conf.report";
-            columns = new String[] { "id", "report_id", "report_type", "carrier_id", "carrier_name" };
-        }
-
-        List<ReportTemplate> reportTemplates = dao.listReports(env);
-        List<String[]> data = null;
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
-    }
-
-    private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            fileName = "CFG_SITE_RELATORIO";
-            columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            fileName = "conf.site_report";
-            columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id" };
-        }
-
-        List<String[]> data = dao.listConfigurationReports(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
     private static void updateLocalCarriersFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
