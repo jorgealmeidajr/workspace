@@ -225,23 +225,26 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listReports(Environment env) throws SQLException {
+    public List<ReportTemplate> listReports(Environment env) throws SQLException {
         String sql =
-            "select id, report_id, report_type, carrier_id\n" +
-            "from conf.report\n" +
+            "select t1.id, report_id, report_type, carrier_id, t2.\"name\" as \"carrier_name\", file\n" +
+            "from conf.report t1\n" +
+            "left join conf.carrier t2 on (t1.carrier_id = t2.id)\n" +
             "order by carrier_id, report_id";
 
-        List<String[]> data = new ArrayList<>();
+        List<ReportTemplate> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                String[] row = new String[] {
+                ReportTemplate row = new ReportTemplate(
                     rs.getString("id"),
                     rs.getString("report_id"),
                     rs.getString("report_type"),
                     rs.getString("carrier_id"),
-                };
+                    rs.getString("carrier_name"),
+                    new byte[] {}
+                );
                 data.add(row);
             }
         }

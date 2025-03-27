@@ -13,8 +13,8 @@ public class EmailTemplate {
     private final String carrierName;
 
     public EmailTemplate(String carrierId, String id, String subject, String name, String fileName, String emailFrom, String emailTo, String body, String carrierName) {
-        this.carrierId = requireNonBlank(carrierId, "Carrier ID must not be blank");
-        this.id = requireNonBlank(id, "ID must not be blank");
+        this.carrierId = ObjectUtils.requireNonBlank(carrierId, "Carrier ID must not be blank");
+        this.id = ObjectUtils.requireNonBlank(id, "ID must not be blank");
         this.subject = subject;
         this.name = name;
         this.fileName = fileName;
@@ -22,13 +22,6 @@ public class EmailTemplate {
         this.emailTo = emailTo;
         this.body = (body == null) ? " " : body;
         this.carrierName = carrierName;
-    }
-
-    public static String requireNonBlank(String value, String message) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(message);
-        }
-        return value;
     }
 
     public String[] toArray() {

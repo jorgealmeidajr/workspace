@@ -270,23 +270,26 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listReports(Environment env) throws SQLException {
+    public List<ReportTemplate> listReports(Environment env) throws SQLException {
         String sql =
-            "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, CD_OPERADORA\n" +
-            "from CFG_RELATORIO\n" +
+            "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, t1.CD_OPERADORA, t2.NM_OPERADORA, DC_RELATORIO\n" +
+            "from CFG_RELATORIO t1\n" +
+            "left join CFG_OPERADORA t2 on (t1.CD_OPERADORA = t2.CD_OPERADORA)\n" +
             "order by CD_OPERADORA, ID_RELATORIO";
 
-        List<String[]> data = new ArrayList<>();
+        List<ReportTemplate> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                String[] row = new String[] {
+                ReportTemplate row = new ReportTemplate(
                     rs.getString("CD_RELATORIO"),
                     rs.getString("ID_RELATORIO"),
                     rs.getString("TP_RELATORIO"),
                     rs.getString("CD_OPERADORA"),
-                };
+                    rs.getString("NM_OPERADORA"),
+                    new byte[] {}
+                );
                 data.add(row);
             }
         }

@@ -2,6 +2,7 @@ package workspace.vigiang.checkers;
 
 import workspace.vigiang.FilesService;
 import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.ReportTemplate;
 import workspace.vigiang.model.VigiaNgDAO;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class CheckDatabases {
                 updateLocalZonesFiles(vigiangPath, env, dao);
 
                 // TODO: add CheckReports
-                updateLocalReportFiles(vigiangPath, env, dao);
+//                updateLocalReportFiles(vigiangPath, env, dao);
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
                 // TODO: report template should be written in a local file
             } catch (Exception e) {
@@ -216,13 +217,14 @@ public class CheckDatabases {
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "CFG_RELATORIO";
-            columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA" };
+            columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA", "NM_OPERADORA" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
             fileName = "conf.report";
-            columns = new String[] { "id", "report_id", "report_type", "carrier_id" };
+            columns = new String[] { "id", "report_id", "report_type", "carrier_id", "carrier_name" };
         }
 
-        List<String[]> data = dao.listReports(env);
+        List<ReportTemplate> reportTemplates = dao.listReports(env);
+        List<String[]> data = null;
         FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
     }
 
