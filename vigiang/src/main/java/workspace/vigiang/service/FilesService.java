@@ -1,4 +1,4 @@
-package workspace.vigiang;
+package workspace.vigiang.service;
 
 import workspace.vigiang.model.Environment;
 

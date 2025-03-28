@@ -1,6 +1,7 @@
 package workspace.vigiang.checkers;
 
 import com.microsoft.playwright.*;
+import workspace.vigiang.service.GitLabService;
 import workspace.vigiang.model.TablePrinter;
 
 import java.awt.*;
@@ -10,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
@@ -75,38 +75,7 @@ public class CheckProjectsVersions {
 
     private static String checkBackEndTags(Page page) {
         var data = new ArrayList<String[]>();
-
-        String cloudControlInitialUrl = "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-control/";
-        String cloudVigiangInitialUrl = "https://flngit01.cognyte.local/dev/vigiang/back-end/cloud-vigiang/";
-
-        var urls = Arrays.asList(
-            // cloud-control
-            cloudControlInitialUrl + "admin-server",
-            cloudControlInitialUrl + "config-server",
-            cloudControlInitialUrl + "eureka-server",
-            cloudControlInitialUrl + "zuul-server",
-            // cloud-vigiang
-            cloudVigiangInitialUrl + "auth-service",
-            cloudVigiangInitialUrl + "block-service",
-            cloudVigiangInitialUrl + "carrier-service",
-            cloudVigiangInitialUrl + "dashboard-service",
-            cloudVigiangInitialUrl + "data-retention-service",
-            cloudVigiangInitialUrl + "event-service",
-            cloudVigiangInitialUrl + "interception-service",
-            cloudVigiangInitialUrl + "log-service",
-            cloudVigiangInitialUrl + "message-service",
-            cloudVigiangInitialUrl + "operation-service",
-            cloudVigiangInitialUrl + "portability-service",
-            cloudVigiangInitialUrl + "process-service",
-            cloudVigiangInitialUrl + "report-service",
-            cloudVigiangInitialUrl + "scheduler-service",
-            cloudVigiangInitialUrl + "sittel-service",
-            cloudVigiangInitialUrl + "system-service",
-            cloudVigiangInitialUrl + "tracking-service",
-            cloudVigiangInitialUrl + "user-service",
-            cloudVigiangInitialUrl + "voucher-service",
-            cloudVigiangInitialUrl + "warrant-service"
-        );
+        var urls = GitLabService.VigiaNG.getBackendRepositoryUrls();
 
         for (String url : urls) {
             page.navigate(url + "/-/tags");

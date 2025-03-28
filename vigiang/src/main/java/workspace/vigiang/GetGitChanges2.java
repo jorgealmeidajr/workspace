@@ -1,7 +1,10 @@
 package workspace.vigiang;
 
 import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.models.*;
+import org.gitlab4j.api.models.Branch;
+import org.gitlab4j.api.models.Issue;
+import org.gitlab4j.api.models.MergeRequest;
+import org.gitlab4j.api.models.Project;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,11 +13,10 @@ public class GetGitChanges2 {
 
     public static void main(String[] args) {
         final var BRANCH_A = "version-1.3.4";
-        final var BRANCH_B = "version-1.5.0";
-        final var CARRIER_TARGET = "ALGAR";
+        final var BRANCH_B = "main";
+        final var CARRIER_TARGET = "SURF";
 
-        try {
-            GitLabApi gitLabApi = new GitLabApi("https://flngit01.cognyte.local/", "token...");
+        try(GitLabApi gitLabApi = new GitLabApi("https://flngit01.cognyte.local/", "...")) {
             gitLabApi.setIgnoreCertificateErrors(true);
 
             List<Project> projects = gitLabApi.getProjectApi().getProjects();
@@ -54,7 +56,11 @@ public class GetGitChanges2 {
                     .orElseThrow();
 
             List<Issue> issues = gitLabApi.getIssuesApi().getIssues(databaseProject.getId());
-            System.out.println(issues.size());
+            for (Issue issue : issues) {
+                System.out.println(issue.getTitle());
+                System.out.println(issue.getWebUrl());
+                System.out.println(issue.getDescription());
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

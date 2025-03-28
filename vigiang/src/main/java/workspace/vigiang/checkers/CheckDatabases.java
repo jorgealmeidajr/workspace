@@ -1,6 +1,6 @@
 package workspace.vigiang.checkers;
 
-import workspace.vigiang.FilesService;
+import workspace.vigiang.service.FilesService;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.dao.VigiaNgDAO;
 
