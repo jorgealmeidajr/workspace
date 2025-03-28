@@ -1,8 +1,8 @@
 package workspace.vigiang;
 
 import workspace.vigiang.model.Environment;
-import workspace.vigiang.model.OracleVigiaNgDAO;
-import workspace.vigiang.model.VigiaNgDAO;
+import workspace.vigiang.dao.OracleVigiaNgDAO;
+import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

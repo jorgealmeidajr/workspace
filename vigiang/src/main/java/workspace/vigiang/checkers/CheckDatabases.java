@@ -2,8 +2,7 @@ package workspace.vigiang.checkers;
 
 import workspace.vigiang.FilesService;
 import workspace.vigiang.model.Environment;
-import workspace.vigiang.model.ReportTemplate;
-import workspace.vigiang.model.VigiaNgDAO;
+import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
 import java.nio.file.Files;

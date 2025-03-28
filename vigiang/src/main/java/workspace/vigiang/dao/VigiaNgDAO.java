@@ -1,4 +1,8 @@
-package workspace.vigiang.model;
+package workspace.vigiang.dao;
+
+import workspace.vigiang.model.EmailTemplate;
+import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.ReportTemplate;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

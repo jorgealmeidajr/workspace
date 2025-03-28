@@ -1,5 +1,9 @@
 package workspace.vigiang.model;
 
+import workspace.vigiang.dao.OracleVigiaNgDAO;
+import workspace.vigiang.dao.PostgresVigiaNgDAO;
+import workspace.vigiang.dao.VigiaNgDAO;
+
 import java.util.HashMap;
 import java.util.Map;
 
