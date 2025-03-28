@@ -270,7 +270,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<ReportTemplate> listReports(Environment env) throws SQLException {
+    public List<ReportTemplate> listReportTemplates(Environment env) throws SQLException {
         String sql =
             "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, t1.CD_OPERADORA, t2.NM_OPERADORA, DC_RELATORIO\n" +
             "from CFG_RELATORIO t1\n" +
@@ -282,13 +282,19 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
+                var blob = rs.getBlob("DC_RELATORIO");
+                byte[] template = new byte[] {};
+                if (blob != null) {
+                    template = blob.getBytes(1l, (int) blob.length());
+                }
+
                 ReportTemplate row = new ReportTemplate(
                     rs.getString("CD_RELATORIO"),
                     rs.getString("ID_RELATORIO"),
                     rs.getString("TP_RELATORIO"),
                     rs.getString("CD_OPERADORA"),
                     rs.getString("NM_OPERADORA"),
-                    new byte[] {}
+                    template
                 );
                 data.add(row);
             }
@@ -319,37 +325,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("ID_RELATORIO"),
                 };
                 data.add(row);
-            }
-        }
-        return data;
-    }
-
-    @Override
-    public List<Object[]> listReportTemplates(Environment env) throws SQLException {
-        String sql =
-            "select * from CFG_RELATORIO\n" +
-            "where CD_OPERADORA = 1\n" +
-            "  and TP_RELATORIO in ('xls', 'pdf')\n" +
-            "order by CD_RELATORIO";
-
-        List<Object[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while(rs.next()) {
-                var blob = rs.getBlob("DC_RELATORIO");
-
-                if (blob != null) {
-                    var bytes = blob.getBytes(1l, (int)blob.length());
-
-                    Object[] row = new Object[] {
-                        rs.getString("CD_RELATORIO"),
-                        rs.getString("ID_RELATORIO"),
-                        rs.getString("TP_RELATORIO"),
-                        bytes,
-                    };
-                    data.add(row);
-                }
             }
         }
         return data;

@@ -2,6 +2,7 @@ package workspace.vigiang.model;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
@@ -225,7 +226,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<ReportTemplate> listReports(Environment env) throws SQLException {
+    public List<ReportTemplate> listReportTemplates(Environment env) throws SQLException {
         String sql =
             "select t1.id, report_id, report_type, carrier_id, t2.\"name\" as \"carrier_name\", file\n" +
             "from conf.report t1\n" +
@@ -237,13 +238,19 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
+                var blob = rs.getString("file");
+                byte[] template = new byte[] {};
+                if (blob != null) {
+                    template = Base64.getDecoder().decode(blob);
+                }
+
                 ReportTemplate row = new ReportTemplate(
                     rs.getString("id"),
                     rs.getString("report_id"),
                     rs.getString("report_type"),
                     rs.getString("carrier_id"),
                     rs.getString("carrier_name"),
-                    new byte[] {}
+                    template
                 );
                 data.add(row);
             }
@@ -277,11 +284,6 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             }
         }
         return data;
-    }
-
-    @Override
-    public List<Object[]> listReportTemplates(Environment env) throws SQLException {
-        return List.of();
     }
 
     @Override

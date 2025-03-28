@@ -27,11 +27,9 @@ public interface VigiaNgDAO {
 
     List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException;
 
-    List<ReportTemplate> listReports(Environment env) throws SQLException;
+    List<ReportTemplate> listReportTemplates(Environment env) throws SQLException;
 
     List<String[]> listConfigurationReports(Environment env) throws SQLException;
-
-    List<Object[]> listReportTemplates(Environment env) throws SQLException;
 
     List<String> listObjects(Environment env, String objectType) throws SQLException;
 

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,12 +27,22 @@ public class CheckReportTemplates {
         System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking all report templates\n");
 
+        execute(vigiangPath);
+
+        System.out.println("## END checking all report templates.");
+        System.out.println("#".repeat(3 * 2));
+    }
+
+    private static void execute(Path vigiangPath) {
         for (Environment env : Environment.values()) {
             VigiaNgDAO dao = env.getVigiaNgDAO();
             System.out.println(env + ":");
 
             try {
-                updateLocalReportFiles(vigiangPath, env, dao);
+                List<ReportTemplate> reportTemplates = dao.listReportTemplates(env);
+                updateLocalReportFiles(vigiangPath, env, reportTemplates);
+                updateLocalReportTemplates(vigiangPath, env, reportTemplates);
+
                 updateLocalConfigReportFiles(vigiangPath, env, dao);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
@@ -39,12 +50,9 @@ public class CheckReportTemplates {
 
             System.out.println();
         }
-
-        System.out.println("## END checking all report templates.");
-        System.out.println("#".repeat(3 * 2));
     }
 
-    private static void updateLocalReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalReportFiles(Path vigiangPath, Environment env, List<ReportTemplate> reportTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -55,12 +63,58 @@ public class CheckReportTemplates {
             columns = new String[] { "id", "report_id", "report_type", "carrier_id", "carrier_name" };
         }
 
-        List<ReportTemplate> reportTemplates = dao.listReports(env);
         List<String[]> data = reportTemplates.stream()
                 .map(ReportTemplate::toArray)
                 .collect(Collectors.toList());
 
         FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+    }
+
+    private static void updateLocalReportTemplates(Path vigiangPath, Environment env, List<ReportTemplate> reportTemplates) throws IOException {
+        Path reportPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\report_templates");
+        if (!Files.exists(reportPath)) {
+            Files.createDirectories(reportPath);
+        }
+
+        for (ReportTemplate reportTemplate : reportTemplates) {
+            try {
+                writeReportTemplate(reportPath, reportTemplate);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void writeReportTemplate(Path reportPath, ReportTemplate reportTemplate) throws IOException {
+        int code = Integer.parseInt(reportTemplate.getCarrierCode());
+        String carrierCode = String.format("%02d", code);
+
+        code = Integer.parseInt(reportTemplate.getReportCode());
+        String reportCode = String.format("%02d", code);
+        var id = reportTemplate.getReportId();
+
+        var extension = reportTemplate.getReportType();
+        var templateExtension = "";
+        if ("pdf".equals(extension)) {
+            templateExtension = "odt";
+        } else if ("xls".equals(extension)) {
+            templateExtension = "xlsx";
+        }
+
+        var bytes = reportTemplate.getTemplate();
+        var templateName = carrierCode + "_" + reportCode + "_" + id + "." + templateExtension;
+        Path templatePath = Paths.get(reportPath + "\\" + templateName);
+
+        if (Files.exists(templatePath)) {
+            byte[] fileContent = Files.readAllBytes(templatePath);
+            if (!Arrays.equals(fileContent, bytes)) {
+                System.out.println("updating file: " + templatePath);
+                Files.write(templatePath, bytes);
+            }
+        } else {
+            System.out.println("writing new file: " + templatePath);
+            Files.write(templatePath, bytes);
+        }
     }
 
     private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
