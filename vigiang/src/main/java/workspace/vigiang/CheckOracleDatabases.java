@@ -3,6 +3,7 @@ package workspace.vigiang;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.dao.OracleVigiaNgDAO;
 import workspace.vigiang.dao.VigiaNgDAO;
+import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +17,7 @@ public class CheckOracleDatabases {
 
     static final VigiaNgDAO VIGIA_NG_DAO = new OracleVigiaNgDAO();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
@@ -27,8 +28,8 @@ public class CheckOracleDatabases {
         System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking ORACLE databases\n");
 
-        for (Environment env : Environment.values()) {
-            if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
+        for (Environment env : EnvironmentService.getEnvironments()) {
+//            if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
 
             System.out.println("#".repeat(3 * 1));
             System.out.println(env);

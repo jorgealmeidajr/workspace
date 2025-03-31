@@ -1,5 +1,6 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FilesService;
 import workspace.vigiang.model.EmailTemplate;
 import workspace.vigiang.model.Environment;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class CheckEmailTemplates {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
@@ -26,8 +27,8 @@ public class CheckEmailTemplates {
         System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking all email templates\n");
 
-        for (Environment env : Environment.values()) {
-            VigiaNgDAO dao = env.getVigiaNgDAO();
+        for (Environment env : EnvironmentService.getEnvironments()) {
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
             System.out.println(env + ":");
 
             try {

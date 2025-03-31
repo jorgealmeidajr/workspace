@@ -1,5 +1,6 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FilesService;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.dao.VigiaNgDAO;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class CheckDatabases {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
@@ -24,8 +25,8 @@ public class CheckDatabases {
         System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking all environment databases\n");
 
-        for (Environment env : Environment.values()) {
-            VigiaNgDAO dao = env.getVigiaNgDAO();
+        for (Environment env : EnvironmentService.getEnvironments()) {
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
             System.out.println(env + ":");
 
             try {

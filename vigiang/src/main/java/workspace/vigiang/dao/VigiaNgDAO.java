@@ -44,8 +44,10 @@ public interface VigiaNgDAO {
     List<String[]> listZones(Environment env) throws SQLException;
 
     default Connection getConnection(Environment environment) throws SQLException {
-        var credentials = environment.getDatabaseCredentials();
-        return DriverManager.getConnection(credentials.get("url"), credentials.get("username"), credentials.get("password"));
+        return DriverManager.getConnection(
+                environment.getDatabaseUrl(),
+                environment.getDatabaseUsername(),
+                environment.getDatabasePassword());
     }
 
 }

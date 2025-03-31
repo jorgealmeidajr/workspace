@@ -11,8 +11,7 @@ import java.util.stream.Collectors;
 public class Gitlab4jTest {
 
     public static void main(String[] args) {
-        try {
-            GitLabApi gitLabApi = new GitLabApi("https://flngit01.cognyte.local/", "token...");
+        try (GitLabApi gitLabApi = new GitLabApi("https://flngit01.cognyte.local/", "...")) {
             gitLabApi.setIgnoreCertificateErrors(true);
 
             List<Project> projects = gitLabApi.getProjectApi().getProjects();
@@ -75,7 +74,7 @@ public class Gitlab4jTest {
             RepositoryFile file = gitLabApi.getRepositoryFileApi().getFile(frontendProject.getId(), "SRC/apps/workflow/.env", "dev");
             System.out.println(file.getDecodedContentAsString() + "\n");
 
-            file = gitLabApi.getRepositoryFileApi().getFile(frontendProject.getId(), "SRC/apps/workflow/.env", "master");
+            file = gitLabApi.getRepositoryFileApi().getFile(frontendProject.getId(), "SRC/apps/workflow/.env", "main");
             System.out.println(file.getDecodedContentAsString());
 
 

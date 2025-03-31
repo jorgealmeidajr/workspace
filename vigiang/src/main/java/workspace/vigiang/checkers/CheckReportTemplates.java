@@ -1,5 +1,6 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FilesService;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.model.ReportTemplate;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class CheckReportTemplates {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
         Path vigiangPath = Paths.get(vigiangPathStr);
 
@@ -33,9 +34,9 @@ public class CheckReportTemplates {
         System.out.println("#".repeat(3 * 2));
     }
 
-    private static void execute(Path vigiangPath) {
-        for (Environment env : Environment.values()) {
-            VigiaNgDAO dao = env.getVigiaNgDAO();
+    private static void execute(Path vigiangPath) throws IOException {
+        for (Environment env : EnvironmentService.getEnvironments()) {
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
             System.out.println(env + ":");
 
             try {

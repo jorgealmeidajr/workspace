@@ -1,15 +1,18 @@
 package workspace.vigiang.checkers;
 
-import workspace.vigiang.model.CredentialsSSH;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.model.SshExecutor;
 import workspace.vigiang.model.TablePrinter;
+import workspace.vigiang.service.EnvironmentService;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -25,17 +28,18 @@ public class CheckContainers {
                 throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
             }
 
-            for (Environment env : Environment.values()) {
-                System.out.println("######");
-                System.out.println(env);
+            for (Environment environment : EnvironmentService.getEnvironments()) {
+                System.out.println(environment.getName() + ":");
 
-                var credentials = CredentialsSSH.getCredentials(env);
-                var port = Integer.parseInt(credentials.get("port"));
+                Path environmentPath = Paths.get(vigiangPath + "\\environments\\" + environment.getName());
+                if (!Files.exists(environmentPath)) {
+                    Files.createDirectories(environmentPath);
+                }
 
-                updateContainersFile(vigiangPath, env, credentials, port);
-                updateDockerComposeFile(vigiangPath, env, credentials, port);
+                updateContainersFile(environmentPath, environment);
+                updateDockerComposeFile(environmentPath, environment);
 
-                System.out.println("######\n");
+                System.out.println();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,15 +48,15 @@ public class CheckContainers {
         System.out.println("## END checking all containers.");
     }
 
-    private static void updateDockerComposeFile(Path vigiangPath, Environment env, Map<String, String> credentials, int port) throws Exception {
-        Path dockerComposePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\docker-compose.yml");
+    private static void updateDockerComposeFile(Path environmentPath, Environment env) throws Exception {
+        Path dockerComposePath = Paths.get(environmentPath + "\\docker-compose.yml");
 
         var initialFileContent = "";
         if (Files.exists(dockerComposePath)) {
             initialFileContent = new String(Files.readAllBytes(dockerComposePath));
         }
 
-        var newFileContent = getDockerCompose(credentials.get("username"), credentials.get("password"), credentials.get("host"), port);
+        var newFileContent = getDockerCompose(env.getSshUsername(), env.getSshPassword(), env.getSshHost(), env.getSshPort());
 
         if (!initialFileContent.equals(newFileContent)) {
             System.out.println("updating file: " + dockerComposePath);
@@ -60,15 +64,15 @@ public class CheckContainers {
         }
     }
 
-    private static void updateContainersFile(Path vigiangPath, Environment env, Map<String, String> credentials, int port) throws Exception {
-        Path containersPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\containers.txt");
+    private static void updateContainersFile(Path environmentPath, Environment env) throws Exception {
+        Path containersPath = Paths.get(environmentPath + "\\containers.txt");
 
         var initialFileContent = "";
         if (Files.exists(containersPath)) {
             initialFileContent = new String(Files.readAllBytes(containersPath));
         }
 
-        var newFileContent = listContainers(credentials.get("username"), credentials.get("password"), credentials.get("host"), port);
+        var newFileContent = listContainers(env.getSshUsername(), env.getSshPassword(), env.getSshHost(), env.getSshPort());
 
         if (!initialFileContent.equals(newFileContent)) {
             System.out.println("updating file: " + containersPath);
