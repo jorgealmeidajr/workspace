@@ -18,20 +18,11 @@ import java.util.stream.Collectors;
 public class CheckReportTemplates {
 
     public static void main(String[] args) throws IOException {
-        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-        Path vigiangPath = Paths.get(vigiangPathStr);
+        Path vigiangPath = EnvironmentService.getVigiaNgPath();
 
-        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
-            throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
-        }
-
-        System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking all report templates\n");
-
         execute(vigiangPath);
-
         System.out.println("## END checking all report templates.");
-        System.out.println("#".repeat(3 * 2));
     }
 
     private static void execute(Path vigiangPath) throws IOException {
@@ -41,10 +32,10 @@ public class CheckReportTemplates {
 
             try {
                 List<ReportTemplate> reportTemplates = dao.listReportTemplates(env);
-                updateLocalReportFiles(vigiangPath, env, reportTemplates);
+                updateLocalReportFiles(env, reportTemplates);
                 updateLocalReportTemplates(vigiangPath, env, reportTemplates);
 
-                updateLocalConfigReportFiles(vigiangPath, env, dao);
+                updateLocalConfigReportFiles(env, dao);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
@@ -53,7 +44,7 @@ public class CheckReportTemplates {
         }
     }
 
-    private static void updateLocalReportFiles(Path vigiangPath, Environment env, List<ReportTemplate> reportTemplates) throws IOException {
+    private static void updateLocalReportFiles(Environment env, List<ReportTemplate> reportTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -118,7 +109,7 @@ public class CheckReportTemplates {
         }
     }
 
-    private static void updateLocalConfigReportFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalConfigReportFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {

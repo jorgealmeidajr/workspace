@@ -17,23 +17,16 @@ import java.util.stream.Collectors;
 public class CheckEmailTemplates {
 
     public static void main(String[] args) throws IOException {
-        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-        Path vigiangPath = Paths.get(vigiangPathStr);
+        Path vigiangPath = EnvironmentService.getVigiaNgPath();
 
-        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
-            throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
-        }
-
-        System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking all email templates\n");
-
         for (Environment env : EnvironmentService.getEnvironments()) {
             VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
             System.out.println(env + ":");
 
             try {
                 List<EmailTemplate> emailTemplates = dao.listEmailTemplates(env);
-                updateLocalEmailTemplatesFiles(vigiangPath, env, emailTemplates);
+                updateLocalEmailTemplatesFiles(env, emailTemplates);
                 updateEmailTemplates(vigiangPath, env, emailTemplates);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
@@ -41,12 +34,10 @@ public class CheckEmailTemplates {
 
             System.out.println();
         }
-
         System.out.println("## END checking all email templates.");
-        System.out.println("#".repeat(3 * 2));
     }
 
-    private static void updateLocalEmailTemplatesFiles(Path vigiangPath, Environment env, List<EmailTemplate> emailTemplates) throws IOException {
+    private static void updateLocalEmailTemplatesFiles(Environment env, List<EmailTemplate> emailTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {

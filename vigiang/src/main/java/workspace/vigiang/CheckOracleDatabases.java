@@ -18,21 +18,12 @@ public class CheckOracleDatabases {
     static final VigiaNgDAO VIGIA_NG_DAO = new OracleVigiaNgDAO();
 
     public static void main(String[] args) throws IOException {
-        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-        Path vigiangPath = Paths.get(vigiangPathStr);
+        Path vigiangPath = EnvironmentService.getVigiaNgPath();
 
-        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
-            throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
-        }
-
-        System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking ORACLE databases\n");
-
         for (Environment env : EnvironmentService.getEnvironments()) {
-//            if (env.equals(Environment.SURF)) continue; // TODO: this environment uses postgres
-
-            System.out.println("#".repeat(3 * 1));
-            System.out.println(env);
+            if (Environment.Database.POSTGRES.equals(env.getDatabase())) continue;
+            System.out.println(env.getName() + ":");
 
             try {
                 updateFunctions(vigiangPath, env);
@@ -40,21 +31,16 @@ public class CheckOracleDatabases {
                 updatePackages(vigiangPath, env);
                 updatePackageBodies(vigiangPath, env);
                 updateProcedures(vigiangPath, env);
-                updateSequences(vigiangPath, env);
                 updateTables(vigiangPath, env);
-                updateTriggers(vigiangPath, env);
                 updateViews(vigiangPath, env);
 
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                e.printStackTrace();
             }
 
-            System.out.println("#".repeat(3 * 1) + "\n");
-            break;
+            System.out.println();
         }
-
         System.out.println("## END checking all ORACLE databases.");
-        System.out.println("#".repeat(3 * 2));
     }
 
     private static void updateFunctions(Path vigiangPath, Environment env) {
@@ -83,16 +69,8 @@ public class CheckOracleDatabases {
         update(vigiangPath, env, "PROCEDURE", "PROCEDURES");
     }
 
-    private static void updateSequences(Path vigiangPath, Environment env) {
-        update(vigiangPath, env, "SEQUENCE", "SEQUENCES");
-    }
-
     private static void updateTables(Path vigiangPath, Environment env) {
         update(vigiangPath, env, "TABLE", "TABLES");
-    }
-
-    private static void updateTriggers(Path vigiangPath, Environment env) {
-        update(vigiangPath, env, "TRIGGER", "TRIGGERS");
     }
 
     private static void updateViews(Path vigiangPath, Environment env) {
