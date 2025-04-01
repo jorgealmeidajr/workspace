@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
 import workspace.vigiang.service.EnvironmentService;
-import workspace.vigiang.service.FilesService;
+import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.EmailTemplate;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.dao.VigiaNgDAO;
@@ -65,7 +65,7 @@ public class CheckEmailTemplates {
                 .map(EmailTemplate::toArray)
                 .collect(Collectors.toList());
 
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
     private static void updateEmailTemplates(Path vigiangPath, Environment env, List<EmailTemplate> emailTemplates) {

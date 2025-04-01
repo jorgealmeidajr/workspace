@@ -10,9 +10,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilesService {
+public class FileService {
 
-    public static void updateLocalFiles(Path vigiangPath, Environment env, String fileName, String[] columns, List<String[]> data) throws IOException {
+    public static void updateLocalFiles(Environment env, String fileName, String[] columns, List<String[]> data) throws IOException {
         var finalLines = new ArrayList<String>();
         int columnWidth = calculateColumnWidth(columns);
 
@@ -26,12 +26,13 @@ public class FilesService {
         }
 
         var newFileContent =
-            "# " + env + " | " + fileName + "\n" +
+            "# " + env.getName() + " | " + fileName + "\n" +
             "```\n" +
             String.join(System.lineSeparator(), finalLines) +
             "```\n";
 
-        Path finalFilePath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\database\\" + fileName + ".md");
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(env);
+        Path finalFilePath = Paths.get(databaseDataPath + "\\" + fileName + ".md");
 
         var initialFileContent = "";
         if (Files.exists(finalFilePath)) {

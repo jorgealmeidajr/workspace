@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
 import workspace.vigiang.service.EnvironmentService;
-import workspace.vigiang.service.FilesService;
+import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.model.ReportTemplate;
 import workspace.vigiang.dao.VigiaNgDAO;
@@ -68,7 +68,7 @@ public class CheckReportTemplates {
                 .map(ReportTemplate::toArray)
                 .collect(Collectors.toList());
 
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
     private static void updateLocalReportTemplates(Path vigiangPath, Environment env, List<ReportTemplate> reportTemplates) throws IOException {
@@ -130,7 +130,7 @@ public class CheckReportTemplates {
         }
 
         List<String[]> data = dao.listConfigurationReports(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
 }

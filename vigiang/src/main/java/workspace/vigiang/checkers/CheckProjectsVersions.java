@@ -1,6 +1,7 @@
 package workspace.vigiang.checkers;
 
 import com.microsoft.playwright.*;
+import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.GitLabService;
 import workspace.vigiang.model.TablePrinter;
 
@@ -18,21 +19,16 @@ import java.util.concurrent.TimeUnit;
 public class CheckProjectsVersions {
 
     public static void main(String[] args) {
-        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-        Path vigiangPath = Paths.get(vigiangPathStr);
-
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int width = (int) screenSize.getWidth();
-        int height = (int) screenSize.getHeight();
-
-        System.out.println("#".repeat(3 * 2));
         System.out.println("## START checking all projects versions\n");
-
         try (Playwright playwright = Playwright.create()) {
             var launchOptions = new BrowserType.LaunchOptions()
                     .setChannel("chrome") // "chrome", "msedge", "chrome-beta", "msedge-beta" or "msedge-dev"
                     .setHeadless(true)
                     .setSlowMo(500);
+
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int width = (int) screenSize.getWidth();
+            int height = (int) screenSize.getHeight();
 
             Browser browser = playwright.chromium().launch(launchOptions);
             BrowserContext context = browser.newContext(new Browser.NewContextOptions().setViewportSize(width, height));
@@ -45,19 +41,18 @@ public class CheckProjectsVersions {
             page.locator("#ldapmain > form > button").click();
             await();
 
-            updateContainersFile(vigiangPath, page);
+            updateContainersFile(page);
 //            checkFrontEndTags(page);
 
             browser.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("## END checking all projects versions.");
-        System.out.println("#".repeat(3 * 2));
+        System.out.println("\n## END checking all projects versions.");
     }
 
-    private static void updateContainersFile(Path vigiangPath, Page page) throws IOException {
+    private static void updateContainersFile(Page page) throws IOException {
+        Path vigiangPath = EnvironmentService.getVigiaNgPath();
         Path containersPath = Paths.get(vigiangPath + "\\containers.txt");
 
         var initialFileContent = "";

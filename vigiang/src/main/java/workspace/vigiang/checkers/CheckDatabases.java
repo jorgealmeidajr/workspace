@@ -1,61 +1,46 @@
 package workspace.vigiang.checkers;
 
 import workspace.vigiang.service.EnvironmentService;
-import workspace.vigiang.service.FilesService;
+import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
 
 public class CheckDatabases {
 
-    public static void main(String[] args) throws IOException {
-        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-        Path vigiangPath = Paths.get(vigiangPathStr);
-
-        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
-            throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
-        }
-
-        System.out.println("#".repeat(3 * 2));
+    public static void main(String[] args) {
         System.out.println("## START checking all environment databases\n");
+        try {
+            for (Environment env : EnvironmentService.getEnvironments()) {
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
+                System.out.println(env.getName() + ":");
 
-        for (Environment env : EnvironmentService.getEnvironments()) {
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
-            System.out.println(env + ":");
+                updateLocalFeatureFiles(env, dao);
+                updateLocalConfigurationFiles(env, dao);
 
-            try {
-                updateLocalFeatureFiles(vigiangPath, env, dao);
-                updateLocalConfigurationFiles(vigiangPath, env, dao);
+                updateLocalModuleFiles(env, dao);
+                updateLocalPrivilegeFiles(env, dao);
+                updateLocalProfileFiles(env, dao);
 
-                updateLocalModuleFiles(vigiangPath, env, dao);
-                updateLocalPrivilegeFiles(vigiangPath, env, dao);
-                updateLocalProfileFiles(vigiangPath, env, dao);
+                updateLocalFilterQueryFiles(env, dao);
+                updateLocalZoneInterceptionFiles(env, dao);
+                updateLocalValidationRuleFiles(env, dao);
+                updateLocalQdsValidationRuleFiles(env, dao);
+                updateLocalCarriersFiles(env, dao);
+                updateLocalZonesFiles(env, dao);
 
-                updateLocalFilterQueryFiles(vigiangPath, env, dao);
-                updateLocalZoneInterceptionFiles(vigiangPath, env, dao);
-                updateLocalValidationRuleFiles(vigiangPath, env, dao);
-                updateLocalQdsValidationRuleFiles(vigiangPath, env, dao);
-                updateLocalCarriersFiles(vigiangPath, env, dao);
-                updateLocalZonesFiles(vigiangPath, env, dao);
-
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
+                System.out.println();
             }
-
-            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        System.out.println("## END checking all environment databases.");
-        System.out.println("#".repeat(3 * 2));
+        System.out.println("\n## END checking all environment databases.");
     }
 
-    private static void updateLocalFeatureFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalFeatureFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -67,10 +52,10 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listFeatures(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalConfigurationFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalConfigurationFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -82,10 +67,10 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listConfigurationValues(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalModuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalModuleFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -96,10 +81,10 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listModules(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalPrivilegeFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalPrivilegeFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -111,10 +96,10 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listPrivileges(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalProfileFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalProfileFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -126,10 +111,10 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listProfiles(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalFilterQueryFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalFilterQueryFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -141,10 +126,10 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listFilterQueries(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalZoneInterceptionFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
+    private static void updateLocalZoneInterceptionFiles(Environment env, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -165,13 +150,13 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listZoneInterceptions(env);
-            FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            FileService.updateLocalFiles(env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void updateLocalValidationRuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
+    private static void updateLocalValidationRuleFiles(Environment env, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -184,13 +169,13 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listValidationRules(env);
-            FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            FileService.updateLocalFiles(env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void updateLocalQdsValidationRuleFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) {
+    private static void updateLocalQdsValidationRuleFiles(Environment env, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -202,13 +187,13 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listQdsValidationRules(env);
-            FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+            FileService.updateLocalFiles(env, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void updateLocalCarriersFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalCarriersFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
@@ -230,17 +215,17 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listCarriers(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalZonesFiles(Path vigiangPath, Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalZonesFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "CFG_ZONA_MONIT";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
-                "CD_ZONA_MONIT", "NM_ZONA_MONIT", "DE_COMENTARIOS", "IN_ATIVO"
+                "CD_ZONA_MONIT", "NM_ZONA_MONIT", "DE_COMENTARIOS"//, "IN_ATIVO"
             };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
             fileName = "conf.zone_monit";
@@ -251,7 +236,7 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listZones(env);
-        FilesService.updateLocalFiles(vigiangPath, env, fileName, columns, data);
+        FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
 }

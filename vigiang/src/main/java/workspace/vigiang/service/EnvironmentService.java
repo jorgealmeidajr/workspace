@@ -13,6 +13,8 @@ import java.util.List;
 
 public class EnvironmentService {
 
+    private static final String VIGIANG_PATH_STR = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
+
     public static List<Environment> getEnvironments() throws IOException {
         Path path = Paths.get("src/main/java/workspace/vigiang/environments.json");
         String read = Files.readString(path);
@@ -31,6 +33,35 @@ public class EnvironmentService {
         if (Environment.Database.ORACLE.equals(environment.getDatabase())) return new OracleSchemaDAO();
         if (Environment.Database.POSTGRES.equals(environment.getDatabase())) return new PostgresSchemaDAO();
         return null;
+    }
+
+    public static Path getVigiaNgPath() {
+        Path vigiangPath = Paths.get(VIGIANG_PATH_STR);
+        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
+            throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
+        }
+        return vigiangPath;
+    }
+
+    public static Path getEnvironmentPath(Environment environment) throws IOException {
+        Path vigiangPath = getVigiaNgPath();
+
+        Path environmentPath = Paths.get(vigiangPath + "\\environments\\" + environment.getName());
+        if (!Files.exists(environmentPath)) {
+            Files.createDirectories(environmentPath);
+        }
+        return environmentPath;
+    }
+
+    public static Path getDatabaseDataPath(Environment environment) throws IOException {
+        Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
+        String database = environment.getDatabase().toString().toLowerCase();
+
+        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "_data");
+        if (!Files.exists(databaseDataPath)) {
+            Files.createDirectories(databaseDataPath);
+        }
+        return databaseDataPath;
     }
 
 }

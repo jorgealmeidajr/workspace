@@ -426,7 +426,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         String sql =
             "select\n" +
             "  t2.CD_OPERADORA, t2.NM_OPERADORA,\n" +
-            "  t1.CD_ZONA_MONIT, t1.NM_ZONA_MONIT, t1.DE_COMENTARIOS, t1.IN_ATIVO\n" +
+            "  t1.CD_ZONA_MONIT, t1.NM_ZONA_MONIT, t1.DE_COMENTARIOS\n" + //, t1.IN_ATIVO
             "from CFG_ZONA_MONIT t1\n" +
             "left join CFG_OPERADORA t2 on (t1.CD_OPERADORA = t2.CD_OPERADORA)\n" +
             "where lower(t1.NM_ZONA_MONIT) not like '%test%'\n" +
@@ -443,7 +443,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("CD_ZONA_MONIT"),
                     rs.getString("NM_ZONA_MONIT"),
                     rs.getString("DE_COMENTARIOS"),
-                    rs.getString("IN_ATIVO")
+                    //rs.getString("IN_ATIVO")
                 };
                 data.add(row);
             }

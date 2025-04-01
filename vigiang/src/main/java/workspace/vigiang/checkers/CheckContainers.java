@@ -19,22 +19,11 @@ import java.util.stream.Collectors;
 public class CheckContainers {
 
     public static void main(String[] args) {
-        var vigiangPathStr = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-        Path vigiangPath = Paths.get(vigiangPathStr);
-
         System.out.println("## START checking all containers\n");
         try {
-            if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
-                throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
-            }
-
             for (Environment environment : EnvironmentService.getEnvironments()) {
                 System.out.println(environment.getName() + ":");
-
-                Path environmentPath = Paths.get(vigiangPath + "\\environments\\" + environment.getName());
-                if (!Files.exists(environmentPath)) {
-                    Files.createDirectories(environmentPath);
-                }
+                Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
 
                 updateContainersFile(environmentPath, environment);
                 updateDockerComposeFile(environmentPath, environment);
@@ -43,9 +32,8 @@ public class CheckContainers {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
-        System.out.println("## END checking all containers.");
+        System.out.println("\n## END checking all containers.");
     }
 
     private static void updateDockerComposeFile(Path environmentPath, Environment env) throws Exception {
