@@ -8,7 +8,7 @@ public class CheckersMain {
         CheckContainers.main(new String[] { });
         CheckDatabases.main(new String[] { });
         CheckEmailTemplates.main(new String[] { });
-//        CheckReportTemplates.main(new String[] { });
+        CheckReportTemplates.main(new String[] { });
         CheckProjectsVersions.main(new String[] { });
     }
 

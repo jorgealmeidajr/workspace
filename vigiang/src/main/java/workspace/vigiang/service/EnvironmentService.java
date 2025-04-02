@@ -74,4 +74,14 @@ public class EnvironmentService {
         return emailTemplatesPath;
     }
 
+    public static Path getReportTemplatesPath(Environment environment) throws IOException {
+        Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
+
+        Path reportTemplatesPath = Paths.get(environmentPath + "\\report_templates");
+        if (!Files.exists(reportTemplatesPath)) {
+            Files.createDirectories(reportTemplatesPath);
+        }
+        return reportTemplatesPath;
+    }
+
 }

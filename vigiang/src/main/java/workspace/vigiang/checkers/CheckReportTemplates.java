@@ -17,31 +17,25 @@ import java.util.stream.Collectors;
 
 public class CheckReportTemplates {
 
-    public static void main(String[] args) throws IOException {
-        Path vigiangPath = EnvironmentService.getVigiaNgPath();
-
+    public static void main(String[] args) {
         System.out.println("## START checking all report templates\n");
-        execute(vigiangPath);
-        System.out.println("## END checking all report templates.");
-    }
+        try {
+            for (Environment env : EnvironmentService.getEnvironments()) {
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
+                System.out.println(env.getName() + ":");
 
-    private static void execute(Path vigiangPath) throws IOException {
-        for (Environment env : EnvironmentService.getEnvironments()) {
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
-            System.out.println(env.getName() + ":");
-
-            try {
                 List<ReportTemplate> reportTemplates = dao.listReportTemplates(env);
                 updateLocalReportFiles(env, reportTemplates);
-                updateLocalReportTemplates(vigiangPath, env, reportTemplates);
+                updateLocalReportTemplates(env, reportTemplates);
 
                 updateLocalConfigReportFiles(env, dao);
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
 
-            System.out.println();
+                System.out.println();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        System.out.println("## END checking all report templates.");
     }
 
     private static void updateLocalReportFiles(Environment env, List<ReportTemplate> reportTemplates) throws IOException {
@@ -62,22 +56,19 @@ public class CheckReportTemplates {
         FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateLocalReportTemplates(Path vigiangPath, Environment env, List<ReportTemplate> reportTemplates) throws IOException {
-        Path reportPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\report_templates");
-        if (!Files.exists(reportPath)) {
-            Files.createDirectories(reportPath);
-        }
+    private static void updateLocalReportTemplates(Environment env, List<ReportTemplate> reportTemplates) throws IOException {
+        Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(env);
 
         for (ReportTemplate reportTemplate : reportTemplates) {
             try {
-                writeReportTemplate(reportPath, reportTemplate);
+                writeReportTemplate(reportTemplatesPath, reportTemplate);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private static void writeReportTemplate(Path reportPath, ReportTemplate reportTemplate) throws IOException {
+    private static void writeReportTemplate(Path reportTemplatesPath, ReportTemplate reportTemplate) throws IOException {
         int code = Integer.parseInt(reportTemplate.getCarrierCode());
         String carrierCode = String.format("%02d", code);
 
@@ -95,7 +86,7 @@ public class CheckReportTemplates {
 
         var bytes = reportTemplate.getTemplate();
         var templateName = carrierCode + "_" + reportCode + "_" + id + "." + templateExtension;
-        Path templatePath = Paths.get(reportPath + "\\" + templateName);
+        Path templatePath = Paths.get(reportTemplatesPath + "\\" + templateName);
 
         if (Files.exists(templatePath)) {
             byte[] fileContent = Files.readAllBytes(templatePath);
