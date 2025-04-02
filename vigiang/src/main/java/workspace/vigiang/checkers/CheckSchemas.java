@@ -5,6 +5,10 @@ import workspace.vigiang.model.Environment;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -12,33 +16,29 @@ import java.util.concurrent.*;
 public class CheckSchemas {
 
     public static void main(String[] args) {
-        System.out.println("## START checking all database schemas\n");
+        System.out.println("\n## START checking all database schemas\n");
         try {
             execute();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("## END checking all database schemas.");
     }
 
-    private static void execute() throws IOException {
+    private static void execute() throws IOException, InterruptedException, ExecutionException {
         List<Environment> environments = EnvironmentService.getEnvironments();
         ExecutorService executorService = Executors.newFixedThreadPool(environments.size());
-        List<Callable<String>> callableTasks = new ArrayList<>();
+        List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 
         for (Environment env : environments) {
-            Callable<String> callableTask = getCallableTask(env);
+            Callable<SchemaResult> callableTask = getCallableTask(env);
             callableTasks.add(callableTask);
+//            break;
         }
 
-        try {
-            List<Future<String>> futures = executorService.invokeAll(callableTasks);
-
-            for (Future<String> future : futures) {
-                String result = future.get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+        List<Future<SchemaResult>> futures = executorService.invokeAll(callableTasks);
+        for (Future<SchemaResult> future : futures) {
+            handleResult(future);
         }
 
         try {
@@ -50,22 +50,65 @@ public class CheckSchemas {
         }
     }
 
-    private static Callable<String> getCallableTask(Environment env) {
+    private static void handleResult(Future<SchemaResult> future) throws InterruptedException, ExecutionException, IOException {
+        SchemaResult result = future.get();
+        Environment env = result.environment;
+        Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(env);
+
+        System.out.println(env.getName() + ":");
+        updateLocalFiles(databaseSchemaPath, "tables", result.tables);
+        updateLocalFiles(databaseSchemaPath, "views", result.views);
+        //indexes
+        //functions
+        //procedures
+        //packages
+        //packageBodies
+        System.out.println();
+    }
+
+    private static void updateLocalFiles(Path databaseSchemaPath, String fileName, List<String> data) throws IOException {
+        var finalLines = new ArrayList<String>();
+        for (String row : data) {
+            String line = "## " + row + "\n```\n```\n";
+            finalLines.add(line);
+        }
+
+        var newFileContent = String.join(System.lineSeparator(), finalLines);
+
+        Path finalFilePath = Paths.get(databaseSchemaPath + "\\" + fileName + ".md");
+
+        var initialFileContent = "";
+        if (Files.exists(finalFilePath)) {
+            initialFileContent = new String(Files.readAllBytes(finalFilePath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + finalFilePath);
+            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
+        }
+    }
+
+    private static Callable<SchemaResult> getCallableTask(Environment env) {
         return () -> {
             DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(env);
-            System.out.println(env.getName() + ":");
 
-            try {
+            List<String> tables = dao.listTables(env);
+            List<String> views = dao.listViews(env);
 
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
-
-            System.out.println();
-
-            TimeUnit.MILLISECONDS.sleep(1000);
-            return "Task execution completed";
+            return new SchemaResult(env, tables, views);
         };
+    }
+
+    static class SchemaResult {
+        final Environment environment;
+        final List<String> tables;
+        final List<String> views;
+
+        SchemaResult(Environment environment, List<String> tables, List<String> views) {
+            this.environment = environment;
+            this.tables = tables;
+            this.views = views;
+        }
     }
 
 }

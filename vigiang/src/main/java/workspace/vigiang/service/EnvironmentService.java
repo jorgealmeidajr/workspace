@@ -64,6 +64,17 @@ public class EnvironmentService {
         return databaseDataPath;
     }
 
+    public static Path getDatabaseSchemaPath(Environment environment) throws IOException {
+        Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
+        String database = environment.getDatabase().toString().toLowerCase();
+
+        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "_schema");
+        if (!Files.exists(databaseDataPath)) {
+            Files.createDirectories(databaseDataPath);
+        }
+        return databaseDataPath;
+    }
+
     public static Path getEmailTemplatesPath(Environment environment) throws IOException {
         Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
 
