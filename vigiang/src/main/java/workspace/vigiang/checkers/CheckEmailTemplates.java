@@ -16,23 +16,21 @@ import java.util.stream.Collectors;
 
 public class CheckEmailTemplates {
 
-    public static void main(String[] args) throws IOException {
-        Path vigiangPath = EnvironmentService.getVigiaNgPath();
-
+    public static void main(String[] args) {
         System.out.println("## START checking all email templates\n");
-        for (Environment env : EnvironmentService.getEnvironments()) {
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
-            System.out.println(env + ":");
+        try {
+            for (Environment env : EnvironmentService.getEnvironments()) {
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
+                System.out.println(env.getName() + ":");
 
-            try {
                 List<EmailTemplate> emailTemplates = dao.listEmailTemplates(env);
                 updateLocalEmailTemplatesFiles(env, emailTemplates);
-                updateEmailTemplates(vigiangPath, env, emailTemplates);
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
+                updateEmailTemplates(env, emailTemplates);
 
-            System.out.println();
+                System.out.println();
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
         System.out.println("## END checking all email templates.");
     }
@@ -59,16 +57,13 @@ public class CheckEmailTemplates {
         FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
-    private static void updateEmailTemplates(Path vigiangPath, Environment env, List<EmailTemplate> emailTemplates) {
+    private static void updateEmailTemplates(Environment env, List<EmailTemplate> emailTemplates) {
         for (EmailTemplate emailTemplate : emailTemplates) {
             var newFileContent = emailTemplate.getBody();
             var fileName = emailTemplate.getCarrierId() + "_" + emailTemplate.getId();
 
             try {
-                Path emailTemplatesPath = Paths.get(vigiangPath + "\\envs\\" + env + "\\DEV\\email_templates");
-                if (!Files.exists(emailTemplatesPath)) {
-                    Files.createDirectories(emailTemplatesPath);
-                }
+                Path emailTemplatesPath = EnvironmentService.getEmailTemplatesPath(env);
 
                 Path finalFilePath = Paths.get(emailTemplatesPath + "\\" + fileName + ".html");
                 var initialFileContent = "";

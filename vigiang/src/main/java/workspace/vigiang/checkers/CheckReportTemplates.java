@@ -28,7 +28,7 @@ public class CheckReportTemplates {
     private static void execute(Path vigiangPath) throws IOException {
         for (Environment env : EnvironmentService.getEnvironments()) {
             VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
-            System.out.println(env + ":");
+            System.out.println(env.getName() + ":");
 
             try {
                 List<ReportTemplate> reportTemplates = dao.listReportTemplates(env);
