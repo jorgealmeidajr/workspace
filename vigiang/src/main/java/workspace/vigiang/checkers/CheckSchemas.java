@@ -58,11 +58,13 @@ public class CheckSchemas {
         System.out.println(env.getName() + ":");
         updateLocalFiles(databaseSchemaPath, "tables", result.tables);
         updateLocalFiles(databaseSchemaPath, "views", result.views);
-        //indexes
-        //functions
+        updateLocalFiles(databaseSchemaPath, "indexes", result.indexes);
+        updateLocalFiles(databaseSchemaPath, "functions", result.functions);
         //procedures
-        //packages
-        //packageBodies
+
+        //if oracle
+        //  packages
+        //  packageBodies
         System.out.println();
     }
 
@@ -94,8 +96,10 @@ public class CheckSchemas {
 
             List<String> tables = dao.listTables(env);
             List<String> views = dao.listViews(env);
+            List<String> functions = dao.listFunctions(env);
+            List<String> indexes = dao.listIndexes(env);
 
-            return new SchemaResult(env, tables, views);
+            return new SchemaResult(env, tables, views, functions, indexes);
         };
     }
 
@@ -103,11 +107,15 @@ public class CheckSchemas {
         final Environment environment;
         final List<String> tables;
         final List<String> views;
+        final List<String> functions;
+        final List<String> indexes;
 
-        SchemaResult(Environment environment, List<String> tables, List<String> views) {
+        SchemaResult(Environment environment, List<String> tables, List<String> views, List<String> functions, List<String> indexes) {
             this.environment = environment;
             this.tables = tables;
             this.views = views;
+            this.functions = functions;
+            this.indexes = indexes;
         }
     }
 

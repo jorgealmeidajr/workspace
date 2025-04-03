@@ -13,7 +13,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listTables(Environment env) throws SQLException {
-        return listOracleObjects(env, "TABLE", "  and SUBSTR(ao.object_name, 0, 4) in ('ITC_', 'CFG_', 'LOG_', 'SIT_', 'SEG_', 'OFC_', 'PTB_', 'QDS_', 'LOC_')");
+        return listOracleObjects(env, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
     }
 
     private List<String> listOracleObjects(Environment env, String objectType, String where) throws SQLException {
@@ -39,7 +39,17 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listViews(Environment env) throws SQLException {
-        return listOracleObjects(env, "VIEW", "");
+        return listOracleObjects(env, "VIEW", "  and ao.object_name like 'VW_NG_%'");
+    }
+
+    @Override
+    public List<String> listFunctions(Environment env) throws SQLException {
+        return listOracleObjects(env, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
+    }
+
+    @Override
+    public List<String> listIndexes(Environment env) throws SQLException {
+        return listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
     }
 
 }

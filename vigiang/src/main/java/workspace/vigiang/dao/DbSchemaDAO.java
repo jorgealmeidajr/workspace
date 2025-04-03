@@ -13,6 +13,10 @@ public interface DbSchemaDAO {
 
     List<String> listViews(Environment env) throws SQLException;
 
+    List<String> listFunctions(Environment env) throws SQLException;
+
+    List<String> listIndexes(Environment env) throws SQLException;
+
     default Connection getConnection(Environment environment) throws SQLException {
         return DriverManager.getConnection(
                 environment.getDatabaseUrl(),

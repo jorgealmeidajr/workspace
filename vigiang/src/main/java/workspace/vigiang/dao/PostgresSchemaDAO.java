@@ -17,4 +17,14 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
         return List.of();
     }
 
+    @Override
+    public List<String> listFunctions(Environment env) throws SQLException {
+        return List.of();
+    }
+
+    @Override
+    public List<String> listIndexes(Environment env) throws SQLException {
+        return List.of();
+    }
+
 }
