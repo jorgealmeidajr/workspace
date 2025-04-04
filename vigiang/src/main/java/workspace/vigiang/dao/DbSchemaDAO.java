@@ -14,9 +14,9 @@ public interface DbSchemaDAO {
 
     List<DbObjectDefinition> listViews(Environment env) throws SQLException;
 
-    List<String> listFunctions(Environment env) throws SQLException;
+    List<DbObjectDefinition> listFunctions(Environment env) throws SQLException;
 
-    List<String> listIndexes(Environment env) throws SQLException;
+    List<DbObjectDefinition> listIndexes(Environment env) throws SQLException;
 
     default Connection getConnection(Environment environment) throws SQLException {
         return DriverManager.getConnection(

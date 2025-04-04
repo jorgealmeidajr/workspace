@@ -48,13 +48,19 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listFunctions(Environment env) throws SQLException {
-        return listOracleObjects(env, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
+    public List<DbObjectDefinition> listFunctions(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
+        return objects.stream()
+                .map((result) -> new DbObjectDefinition(result, ""))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<String> listIndexes(Environment env) throws SQLException {
-        return listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+    public List<DbObjectDefinition> listIndexes(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        return objects.stream()
+                .map((result) -> new DbObjectDefinition(result, ""))
+                .collect(Collectors.toList());
     }
 
 }

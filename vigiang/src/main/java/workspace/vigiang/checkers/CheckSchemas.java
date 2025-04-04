@@ -59,13 +59,18 @@ public class CheckSchemas {
         System.out.println(env.getName() + ":");
         updateLocalFiles(databaseSchemaPath, "tables", result.getTables());
         updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
-        updateLocalFiles(databaseSchemaPath, "indexes", result.getIndexes());
-        updateLocalFiles(databaseSchemaPath, "functions", result.getFunctions());
-        //procedures
+        updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
+        updateLocalSchemaFiles(databaseSchemaPath, "functions", result.getFunctions());
 
-        //if oracle
-        //  packages
-        //  packageBodies
+        if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+            //procedures
+        }
+
+        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+            //packages
+            //packageBodies
+        }
+
         System.out.println();
     }
 
@@ -119,8 +124,8 @@ public class CheckSchemas {
 
             List<String> tables = dao.listTables(env);
             List<DbObjectDefinition> views = dao.listViews(env);
-            List<String> functions = dao.listFunctions(env);
-            List<String> indexes = dao.listIndexes(env);
+            List<DbObjectDefinition> functions = dao.listFunctions(env);
+            List<DbObjectDefinition> indexes = dao.listIndexes(env);
 
             return new SchemaResult(env, tables, views, functions, indexes);
         };

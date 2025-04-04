@@ -11,6 +11,6 @@ public class SchemaResult {
     private final Environment environment;
     private final List<String> tables;
     private final List<DbObjectDefinition> views;
-    private final List<String> functions;
-    private final List<String> indexes;
+    private final List<DbObjectDefinition> functions;
+    private final List<DbObjectDefinition> indexes;
 }
