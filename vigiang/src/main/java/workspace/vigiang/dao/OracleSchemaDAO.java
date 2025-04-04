@@ -1,5 +1,6 @@
 package workspace.vigiang.dao;
 
+import workspace.vigiang.model.DbObjectDefinition;
 import workspace.vigiang.model.Environment;
 
 import java.sql.Connection;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OracleSchemaDAO implements DbSchemaDAO {
 
@@ -38,8 +40,11 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listViews(Environment env) throws SQLException {
-        return listOracleObjects(env, "VIEW", "  and ao.object_name like 'VW_NG_%'");
+    public List<DbObjectDefinition> listViews(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "VIEW", "  and ao.object_name like 'VW_NG_%'");;
+        return objects.stream()
+                .map((result) -> new DbObjectDefinition(result, ""))
+                .collect(Collectors.toList());
     }
 
     @Override

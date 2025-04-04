@@ -1,5 +1,6 @@
 package workspace.vigiang.dao;
 
+import workspace.vigiang.model.DbObjectDefinition;
 import workspace.vigiang.model.Environment;
 
 import java.sql.Connection;
@@ -11,7 +12,7 @@ public interface DbSchemaDAO {
 
     List<String> listTables(Environment env) throws SQLException;
 
-    List<String> listViews(Environment env) throws SQLException;
+    List<DbObjectDefinition> listViews(Environment env) throws SQLException;
 
     List<String> listFunctions(Environment env) throws SQLException;
 

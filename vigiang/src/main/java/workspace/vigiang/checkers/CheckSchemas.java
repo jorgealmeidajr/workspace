@@ -1,7 +1,9 @@
 package workspace.vigiang.checkers;
 
 import workspace.vigiang.dao.DbSchemaDAO;
+import workspace.vigiang.model.DbObjectDefinition;
 import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.SchemaResult;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -33,7 +35,6 @@ public class CheckSchemas {
         for (Environment env : environments) {
             Callable<SchemaResult> callableTask = getCallableTask(env);
             callableTasks.add(callableTask);
-//            break;
         }
 
         List<Future<SchemaResult>> futures = executorService.invokeAll(callableTasks);
@@ -52,20 +53,42 @@ public class CheckSchemas {
 
     private static void handleResult(Future<SchemaResult> future) throws InterruptedException, ExecutionException, IOException {
         SchemaResult result = future.get();
-        Environment env = result.environment;
+        Environment env = result.getEnvironment();
         Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(env);
 
         System.out.println(env.getName() + ":");
-        updateLocalFiles(databaseSchemaPath, "tables", result.tables);
-        updateLocalFiles(databaseSchemaPath, "views", result.views);
-        updateLocalFiles(databaseSchemaPath, "indexes", result.indexes);
-        updateLocalFiles(databaseSchemaPath, "functions", result.functions);
+        updateLocalFiles(databaseSchemaPath, "tables", result.getTables());
+        updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
+        updateLocalFiles(databaseSchemaPath, "indexes", result.getIndexes());
+        updateLocalFiles(databaseSchemaPath, "functions", result.getFunctions());
         //procedures
 
         //if oracle
         //  packages
         //  packageBodies
         System.out.println();
+    }
+
+    private static void updateLocalSchemaFiles(Path databaseSchemaPath, String fileName, List<DbObjectDefinition> data) throws IOException {
+        var finalLines = new ArrayList<String>();
+        for (DbObjectDefinition row : data) {
+            String line = "## " + row.getName() + "\n```\n" + row.getDefinition().trim() + "\n```\n";
+            finalLines.add(line);
+        }
+
+        var newFileContent = String.join(System.lineSeparator(), finalLines);
+
+        Path finalFilePath = Paths.get(databaseSchemaPath + "\\" + fileName + ".md");
+
+        var initialFileContent = "";
+        if (Files.exists(finalFilePath)) {
+            initialFileContent = new String(Files.readAllBytes(finalFilePath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + finalFilePath);
+            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
+        }
     }
 
     private static void updateLocalFiles(Path databaseSchemaPath, String fileName, List<String> data) throws IOException {
@@ -95,28 +118,12 @@ public class CheckSchemas {
             DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(env);
 
             List<String> tables = dao.listTables(env);
-            List<String> views = dao.listViews(env);
+            List<DbObjectDefinition> views = dao.listViews(env);
             List<String> functions = dao.listFunctions(env);
             List<String> indexes = dao.listIndexes(env);
 
             return new SchemaResult(env, tables, views, functions, indexes);
         };
-    }
-
-    static class SchemaResult {
-        final Environment environment;
-        final List<String> tables;
-        final List<String> views;
-        final List<String> functions;
-        final List<String> indexes;
-
-        SchemaResult(Environment environment, List<String> tables, List<String> views, List<String> functions, List<String> indexes) {
-            this.environment = environment;
-            this.tables = tables;
-            this.views = views;
-            this.functions = functions;
-            this.indexes = indexes;
-        }
     }
 
 }
