@@ -10,13 +10,17 @@ import java.util.List;
 
 public interface DbSchemaDAO {
 
-    List<String> listTables(Environment env) throws SQLException;
+    List<DbObjectDefinition> listTables(Environment env) throws SQLException;
 
     List<DbObjectDefinition> listViews(Environment env) throws SQLException;
 
     List<DbObjectDefinition> listFunctions(Environment env) throws SQLException;
 
     List<DbObjectDefinition> listIndexes(Environment env) throws SQLException;
+
+    List<DbObjectDefinition> listProcedures(Environment env) throws SQLException;
+
+    List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException;
 
     default Connection getConnection(Environment environment) throws SQLException {
         return DriverManager.getConnection(

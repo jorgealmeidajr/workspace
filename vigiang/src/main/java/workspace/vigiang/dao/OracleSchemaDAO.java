@@ -14,8 +14,11 @@ import java.util.stream.Collectors;
 public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
-    public List<String> listTables(Environment env) throws SQLException {
-        return listOracleObjects(env, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+    public List<DbObjectDefinition> listTables(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        return objects.stream()
+                .map((result) -> new DbObjectDefinition(result, ""))
+                .collect(Collectors.toList());
     }
 
     private List<String> listOracleObjects(Environment env, String objectType, String where) throws SQLException {
@@ -61,6 +64,16 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         return objects.stream()
                 .map((result) -> new DbObjectDefinition(result, ""))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DbObjectDefinition> listProcedures(Environment env) throws SQLException {
+        return List.of();
+    }
+
+    @Override
+    public List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException {
+        return List.of();
     }
 
 }

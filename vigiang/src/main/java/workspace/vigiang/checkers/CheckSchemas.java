@@ -57,18 +57,17 @@ public class CheckSchemas {
         Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(env);
 
         System.out.println(env.getName() + ":");
-        updateLocalFiles(databaseSchemaPath, "tables", result.getTables());
+        updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
         updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
         updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
         updateLocalSchemaFiles(databaseSchemaPath, "functions", result.getFunctions());
 
         if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
-            //procedures
+            updateLocalSchemaFiles(databaseSchemaPath, "procedures", result.getProcedures());
         }
 
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
-            //packages
-            //packageBodies
+            updateLocalSchemaFiles(databaseSchemaPath, "packageBodies", result.getPackageBodies());
         }
 
         System.out.println();
@@ -122,12 +121,14 @@ public class CheckSchemas {
         return () -> {
             DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(env);
 
-            List<String> tables = dao.listTables(env);
+            List<DbObjectDefinition> tables = dao.listTables(env);
             List<DbObjectDefinition> views = dao.listViews(env);
             List<DbObjectDefinition> functions = dao.listFunctions(env);
             List<DbObjectDefinition> indexes = dao.listIndexes(env);
+            List<DbObjectDefinition> procedures = dao.listProcedures(env);
+            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(env);
 
-            return new SchemaResult(env, tables, views, functions, indexes);
+            return new SchemaResult(env, tables, views, functions, indexes, procedures, packageBodies);
         };
     }
 
