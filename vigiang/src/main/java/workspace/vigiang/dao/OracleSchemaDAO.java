@@ -16,9 +16,37 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     @Override
     public List<DbObjectDefinition> listTables(Environment env) throws SQLException {
         List<String> objects = listOracleObjects(env, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        return listObjectDefinitions(env, objects, "TABLE");
+    }
+
+    @Override
+    public List<DbObjectDefinition> listViews(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "VIEW", "  and ao.object_name like 'VW_NG_%'");;
+        return listObjectDefinitions(env, objects, "VIEW");
+    }
+
+    @Override
+    public List<DbObjectDefinition> listFunctions(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
+        return listObjectDefinitions(env, objects, "FUNCTION");
+    }
+
+    @Override
+    public List<DbObjectDefinition> listIndexes(Environment env) throws SQLException {
+        List<String> objects = listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
         return objects.stream()
                 .map((result) -> new DbObjectDefinition(result, ""))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DbObjectDefinition> listProcedures(Environment env) throws SQLException {
+        return List.of();
+    }
+
+    @Override
+    public List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException {
+        return List.of();
     }
 
     private List<String> listOracleObjects(Environment env, String objectType, String where) throws SQLException {
@@ -42,38 +70,25 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         return result;
     }
 
-    @Override
-    public List<DbObjectDefinition> listViews(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "VIEW", "  and ao.object_name like 'VW_NG_%'");;
-        return objects.stream()
-                .map((result) -> new DbObjectDefinition(result, ""))
-                .collect(Collectors.toList());
-    }
+    private List<DbObjectDefinition> listObjectDefinitions(Environment env, List<String> objects, String objectType) throws SQLException {
+        List<DbObjectDefinition> result = new ArrayList<>();
 
-    @Override
-    public List<DbObjectDefinition> listFunctions(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
-        return objects.stream()
-                .map((result) -> new DbObjectDefinition(result, ""))
-                .collect(Collectors.toList());
-    }
+        try (Connection conn = getConnection(env)) {
+            for (String object : objects) {
+                String objectName = object.substring(object.indexOf(".") + 1);
+                String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";
 
-    @Override
-    public List<DbObjectDefinition> listIndexes(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
-        return objects.stream()
-                .map((result) -> new DbObjectDefinition(result, ""))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<DbObjectDefinition> listProcedures(Environment env) throws SQLException {
-        return List.of();
-    }
-
-    @Override
-    public List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException {
-        return List.of();
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(sql)) {
+                    if (rs.next()) {
+                        String definition = rs.getString("DDL");
+                        DbObjectDefinition dbObjectDefinition = new DbObjectDefinition(object, definition);
+                        result.add(dbObjectDefinition);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
 }

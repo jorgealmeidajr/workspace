@@ -27,7 +27,7 @@ public class CheckSchemas {
         System.out.println("## END checking all database schemas.");
     }
 
-    private static void execute() throws IOException, InterruptedException, ExecutionException {
+    private static void execute() throws IOException, ExecutionException {
         List<Environment> environments = EnvironmentService.getEnvironments();
         ExecutorService executorService = Executors.newFixedThreadPool(environments.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
@@ -37,12 +37,12 @@ public class CheckSchemas {
             callableTasks.add(callableTask);
         }
 
-        List<Future<SchemaResult>> futures = executorService.invokeAll(callableTasks);
-        for (Future<SchemaResult> future : futures) {
-            handleResult(future);
-        }
-
         try {
+            List<Future<SchemaResult>> futures = executorService.invokeAll(callableTasks);
+            for (Future<SchemaResult> future : futures) {
+                handleResult(future);
+            }
+
             if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
                 executorService.shutdownNow();
             }
@@ -77,28 +77,6 @@ public class CheckSchemas {
         var finalLines = new ArrayList<String>();
         for (DbObjectDefinition row : data) {
             String line = "## " + row.getName() + "\n```\n" + row.getDefinition().trim() + "\n```\n";
-            finalLines.add(line);
-        }
-
-        var newFileContent = String.join(System.lineSeparator(), finalLines);
-
-        Path finalFilePath = Paths.get(databaseSchemaPath + "\\" + fileName + ".md");
-
-        var initialFileContent = "";
-        if (Files.exists(finalFilePath)) {
-            initialFileContent = new String(Files.readAllBytes(finalFilePath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + finalFilePath);
-            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
-        }
-    }
-
-    private static void updateLocalFiles(Path databaseSchemaPath, String fileName, List<String> data) throws IOException {
-        var finalLines = new ArrayList<String>();
-        for (String row : data) {
-            String line = "## " + row + "\n```\n```\n";
             finalLines.add(line);
         }
 
