@@ -335,52 +335,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String> listObjects(Environment env, String objectType) throws SQLException {
-        String sql =
-            "select ao.owner, ao.object_type, ao.object_name, ao.status\n" +
-            "from all_objects ao\n" +
-            "where ao.owner like 'VIGIANG_" + env + "'\n" +
-            "  and ao.object_type = '" + objectType + "'\n" +
-            "order by ao.owner, ao.object_type, ao.object_name";
-
-        List<String> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while(rs.next()) {
-                data.add(rs.getString("OBJECT_NAME"));
-            }
-        }
-        return data;
-    }
-
-    @Override
-    public List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException {
-        List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env)) {
-            int count = 0;
-            for (String objectName : objectNames) {
-                String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";
-
-                try (Statement stmt = conn.createStatement();
-                     ResultSet rs = stmt.executeQuery(sql)) {
-                    while(rs.next()) {
-                        String[] row = new String[] {
-                            objectName,
-                            rs.getString("DDL")
-                        };
-                        data.add(row);
-                    }
-                }
-                count++;
-                if (count > 10) break; // todo: this routine takes time, in a large database
-            }
-        }
-
-        return data;
-    }
-
-    @Override
     public List<String[]> listCarriers(Environment env) throws SQLException {
         String sql =
             "select\n" +

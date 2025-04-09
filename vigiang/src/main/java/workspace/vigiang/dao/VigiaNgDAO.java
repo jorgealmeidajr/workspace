@@ -35,10 +35,6 @@ public interface VigiaNgDAO {
 
     List<String[]> listConfigurationReports(Environment env) throws SQLException;
 
-    List<String> listObjects(Environment env, String objectType) throws SQLException;
-
-    List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException;
-
     List<String[]> listCarriers(Environment env) throws SQLException;
 
     List<String[]> listZones(Environment env) throws SQLException;

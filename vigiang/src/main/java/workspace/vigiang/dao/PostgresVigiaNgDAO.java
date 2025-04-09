@@ -291,16 +291,6 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String> listObjects(Environment env, String objectType) throws SQLException {
-        return List.of();
-    }
-
-    @Override
-    public List<String[]> listDdlStatements(Environment env, List<String> objectNames, String objectType) throws SQLException {
-        return List.of();
-    }
-
-    @Override
     public List<String[]> listCarriers(Environment env) throws SQLException {
         String sql =
             "select\n" +

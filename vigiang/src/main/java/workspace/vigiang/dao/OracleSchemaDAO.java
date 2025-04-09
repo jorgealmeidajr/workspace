@@ -34,9 +34,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     @Override
     public List<DbObjectDefinition> listIndexes(Environment env) throws SQLException {
         List<String> objects = listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
-        return objects.stream()
-                .map((result) -> new DbObjectDefinition(result, ""))
-                .collect(Collectors.toList());
+        return listObjectDefinitions(env, objects, "INDEX");
     }
 
     @Override
@@ -46,7 +44,8 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException {
-        return List.of();
+        List<String> objects = listOracleObjects(env, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')");
+        return listObjectDefinitions(env, objects, "PACKAGE_BODY");
     }
 
     private List<String> listOracleObjects(Environment env, String objectType, String where) throws SQLException {
