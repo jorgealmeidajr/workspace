@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class OracleSchemaDAO implements DbSchemaDAO {
@@ -84,6 +85,12 @@ public class OracleSchemaDAO implements DbSchemaDAO {
                         DbObjectDefinition dbObjectDefinition = new DbObjectDefinition(object, definition);
                         result.add(dbObjectDefinition);
                     }
+                }
+
+                try {
+                    TimeUnit.MILLISECONDS.sleep(250);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
                 }
             }
         }
