@@ -1,9 +1,9 @@
 package workspace.vigiang.checkers;
 
 import com.microsoft.playwright.*;
+import workspace.vigiang.model.TablePrinter;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.GitLabService;
-import workspace.vigiang.model.TablePrinter;
 
 import java.awt.*;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.concurrent.TimeUnit;
 
 public class CheckProjectsVersions {
 
@@ -34,12 +33,7 @@ public class CheckProjectsVersions {
             BrowserContext context = browser.newContext(new Browser.NewContextOptions().setViewportSize(width, height));
 
             Page page = context.newPage();
-            page.navigate("https://flngit01.cognyte.local/dev");
-
-            page.locator("#ldapmain_username").pressSequentially("jjunior");
-            page.locator("#ldapmain_password").pressSequentially("Floripa2025#");
-            page.locator("#ldapmain > form > button").click();
-            await();
+            GitLabService.login(page);
 
             updateContainersFile(page);
 //            checkFrontEndTags(page);
@@ -84,7 +78,7 @@ public class CheckProjectsVersions {
             var version = page.locator(firstVersionSelector).textContent();
             data.add(new String[] { project.trim(), version.trim() });
 
-            await();
+            GitLabService.await();
         }
 
         Collections.sort(data, (data1, data2) -> data1[0].compareTo(data2[0]));
@@ -112,15 +106,7 @@ public class CheckProjectsVersions {
             System.out.println(tags.nth(i).textContent().trim());
         }
 
-        await();
-    }
-
-    private static void await() {
-        try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
+        GitLabService.await();
     }
 
 }

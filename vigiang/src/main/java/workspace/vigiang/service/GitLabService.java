@@ -1,7 +1,10 @@
 package workspace.vigiang.service;
 
+import com.microsoft.playwright.Page;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GitLabService {
 
@@ -59,6 +62,22 @@ public class GitLabService {
                 initialUrl + "vtal",
                 initialUrl + "wom"
             );
+        }
+    }
+
+    public static void login(Page page) {
+        page.navigate("https://flngit01.cognyte.local/dev");
+        page.locator("#ldapmain_username").pressSequentially("jjunior");
+        page.locator("#ldapmain_password").pressSequentially("Floripa2025#");
+        page.locator("#ldapmain > form > button").click();
+        await();
+    }
+
+    public static void await() {
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         }
     }
 

@@ -29,12 +29,7 @@ public class GetGitChanges {
             BrowserContext context = browser.newContext(new Browser.NewContextOptions().setViewportSize(width, height));
 
             Page page = context.newPage();
-            page.navigate("https://flngit01.cognyte.local/dev");
-
-            page.locator("#ldapmain_username").pressSequentially("jjunior");
-            page.locator("#ldapmain_password").pressSequentially("Floripa2025#");
-            page.locator("#ldapmain > form > button").click();
-            await();
+            GitLabService.login(page);
 
             {
                 var tags = getTags(frontendRepositoryUrl, page);
@@ -55,7 +50,7 @@ public class GetGitChanges {
             {
                 for (String url : GitLabService.VigiaNG.getDatabaseRepositoryUrls()) {
                     page.navigate(url + "/-/issues/?sort=created_date&state=all&first_page_size=100");
-                    await();
+                    GitLabService.await();
                     var selector = "#content-body > div.js-issues-list-app > div > ul > li";
                     for (Locator li : page.locator(selector).all()) {
                         String text = li.textContent();
@@ -93,14 +88,6 @@ public class GetGitChanges {
             tags.add(li.textContent());
         }
         return tags;
-    }
-
-    private static void await() {
-        try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
     }
 
 }
