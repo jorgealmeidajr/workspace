@@ -37,10 +37,13 @@ public class CompareGitChanges {
                         System.out.println(fileName);
 
                         for (Locator locator3 : locator1.locator("tr.line_holder.new").all()) {
-                            var newLineNumber = locator3.locator("td.new_line.diff-line-num.new").all().get(0).textContent().trim();
+                            var newLineNumber = locator3.locator("td.new_line.diff-line-num.new").all().get(0).getAttribute("data-linenumber");
                             var newLineContent = locator3.locator("td.line_content.new").all().get(0).textContent().trim();
                             System.out.println(newLineNumber + ": " + newLineContent);
                         }
+
+                        var href = locator1.locator("a.gl-button").all().get(0).getAttribute("href");
+                        System.out.println(href);
                     }
                 }
             }
