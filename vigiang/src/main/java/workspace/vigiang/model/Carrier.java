@@ -10,5 +10,6 @@ public enum Carrier {
     TIM,
     VIVO,
     VTAL,
-    WOM
+    WOM,
+    VERO
 }
