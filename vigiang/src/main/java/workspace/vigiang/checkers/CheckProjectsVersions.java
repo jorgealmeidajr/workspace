@@ -70,13 +70,13 @@ public class CheckProjectsVersions {
             page.navigate(url + "/-/tags");
 
             // copy selector from page
-            String projectSelector = "#super-sidebar > div.contextual-nav.gl-flex.gl-grow.gl-flex-col.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-grow.bottom-scrim-visible.gl-border-b > div.gl-relative.gl-p-2 > ul.gl-m-0.gl-list-none.gl-p-0 > li > a > div.gl-grow.gl-text-gray-900";
-            var project = page.locator(projectSelector).textContent();
+            String projectSelector = "#super-sidebar > div.contextual-nav.gl-flex.gl-grow.gl-flex-col.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-grow.bottom-scrim-visible.gl-border-b > div.gl-relative.gl-p-2 > ul.gl-m-0.gl-list-none.gl-p-0 > li > a > div.gl-grow.gl-text-default.gl-break-anywhere";
+            var project = page.locator(projectSelector).textContent().trim();
 
             // copy selector from page
             String firstVersionSelector = "#content-body > ul > li:nth-child(1) > div.row-main-content > a";
-            var version = page.locator(firstVersionSelector).textContent();
-            data.add(new String[] { project.trim(), version.trim() });
+            var version = page.locator(firstVersionSelector).textContent().trim();
+            data.add(new String[] { project, version });
 
             GitLabService.await();
         }
