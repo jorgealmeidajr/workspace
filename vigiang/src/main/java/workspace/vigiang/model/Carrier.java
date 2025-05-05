@@ -8,6 +8,7 @@ public enum Carrier {
     SKY,
     SURF,
     TIM,
+    TRANSATEL,
     VIVO,
     VTAL,
     WOM,

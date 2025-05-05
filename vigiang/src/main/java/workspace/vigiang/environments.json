@@ -142,5 +142,17 @@
 //    "sshUsername": "root",
 //    "sshPassword": "jacare1",
 //    "sshPort": 22
+//  },
+//  {
+//    "name": "TRANSATEL_POSTGRES_DEV",
+//    "carrier": "TRANSATEL",
+//    "database": "POSTGRES",
+//    "databaseUsername": "vigiang",
+//    "databasePassword": "vigiang-sun",
+//    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_transatel",
+//    "sshHost": "10.50.153.141",
+//    "sshUsername": "root",
+//    "sshPassword": "jacare1",
+//    "sshPort": 22
 //  }
 ]
