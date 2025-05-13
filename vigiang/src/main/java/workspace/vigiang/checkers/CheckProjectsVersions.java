@@ -73,9 +73,8 @@ public class CheckProjectsVersions {
             String projectSelector = "#super-sidebar > div.contextual-nav.gl-flex.gl-grow.gl-flex-col.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-grow.bottom-scrim-visible.gl-border-b > div.gl-relative.gl-p-2 > ul.gl-m-0.gl-list-none.gl-p-0 > li > a > div.gl-grow.gl-text-default.gl-break-anywhere";
             var project = page.locator(projectSelector).textContent().trim();
 
-            // copy selector from page
-            String firstVersionSelector = "#content-body > ul > li:nth-child(1) > div.row-main-content > a";
-            var version = page.locator(firstVersionSelector).textContent().trim();
+            String version = getLastMainTag(page);
+
             data.add(new String[] { project, version });
 
             GitLabService.await();
@@ -83,6 +82,18 @@ public class CheckProjectsVersions {
 
         Collections.sort(data, (data1, data2) -> data1[0].compareTo(data2[0]));
         return getTableStr(data);
+    }
+
+    private static String getLastMainTag(Page page) {
+        String lastTag = "";
+        for (Locator locator1 : page.locator("div.row-main-content > a").all()) {
+            String tag = locator1.textContent().trim();
+            if (!tag.contains("-")) {
+                lastTag = tag;
+                break;
+            }
+        }
+        return lastTag;
     }
 
     private static String getTableStr(ArrayList<String[]> data) {
