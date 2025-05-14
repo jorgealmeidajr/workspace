@@ -4,39 +4,41 @@ import workspace.vigiang.model.ProjectVersion;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class GetVersionsFromCompose {
+public class GetVersionsFromText {
 
     public static void main(String[] args) {
-        Path scriptsPath = getScriptsPath();
-        Path inputPath = Paths.get(scriptsPath.toString(), "get-versions-from-compose-input.txt");
+        Path vigiangTempPath = getVigiangTempPath();
+        Path inputPath = Paths.get(vigiangTempPath.toString(), "get-versions-from-text-input.txt");
+        Path outputPath = Paths.get(vigiangTempPath.toString(), "get-versions-from-text-output.csv");
 
         try {
-            List<ProjectVersion> versionsFromCompose = getVersionsFromCompose(inputPath);
+            List<ProjectVersion> versionsFromText = getVersionsFromText(inputPath);
             List<ProjectVersion> versionsFromContainersTxt = getVersionsFromContainersTxt();
 
             String csv = "\"Tag Atual\";\"Nova Tag\"\n";
-            for (ProjectVersion project1 : versionsFromCompose) {
+            for (ProjectVersion project1 : versionsFromText) {
                 for (ProjectVersion project2 : versionsFromContainersTxt) {
                     if (project1.getName().equals(project2.getName())) {
                         if (!project1.getVersion().equals(project2.getVersion())) {
-                            csv += "\"" + project1 + "\";\"" + project2 + "\"\n";
+                            csv += "\"" + project1 + "\";\"" + project2 + "\";\"\"\n";
                         }
                         break;
                     }
                 }
             }
 
-            System.out.println(csv.trim());
+            String csvFileContent = csv.trim();
+            Files.writeString(outputPath, csvFileContent, StandardCharsets.UTF_8);
+            System.out.println(outputPath.toAbsolutePath() + " file updated successfully");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,17 +60,13 @@ public class GetVersionsFromCompose {
         return versions;
     }
 
-    private static List<ProjectVersion> getVersionsFromCompose(Path inputPath) throws IOException {
-        String input = new String(Files.readAllBytes(inputPath));
+    private static List<ProjectVersion> getVersionsFromText(Path inputPath) throws IOException {
         List<ProjectVersion> versions = new ArrayList<>();
+        var fileLines = Files.readAllLines(inputPath);
 
-        Pattern pattern = Pattern.compile("\\s*image:\\s*.*[/](.*)");
-        Matcher matcher = pattern.matcher(input);
-        while (matcher.find()) {
-            String version = matcher.group(1);
-
-            if (!version.contains("admin-server:") && !version.contains("integration-service")) {
-                String[] versionSplit = version.split(":");
+        for (var line : fileLines) {
+            if (!line.contains("admin-server:") && !line.contains("integration-service")) {
+                String[] versionSplit = line.split(":");
                 ProjectVersion projectVersion = new ProjectVersion(versionSplit[0].trim(), versionSplit[1].trim());
                 versions.add(projectVersion);
             }
@@ -80,10 +78,10 @@ public class GetVersionsFromCompose {
         return versions;
     }
 
-    public static Path getScriptsPath() {
-        Path scriptsPath = Paths.get("scripts");
+    public static Path getVigiangTempPath() {
+        Path scriptsPath = Paths.get("C:\\Users\\jjunior\\MyDocuments\\vigiang-temp");
         if (!Files.exists(scriptsPath) || !Files.isDirectory(scriptsPath)) {
-            throw new IllegalArgumentException("o diretorio 'scripts' nao existe ou nao eh um diretorio");
+            throw new IllegalArgumentException("o diretorio 'vigiang-temp' nao existe ou nao eh um diretorio");
         }
         return scriptsPath;
     }
