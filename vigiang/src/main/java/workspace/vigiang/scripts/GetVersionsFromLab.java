@@ -1,6 +1,7 @@
 package workspace.vigiang.scripts;
 
 import workspace.vigiang.model.ProjectVersion;
+import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -8,19 +9,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static workspace.vigiang.service.EnvironmentService.getVigiaNgPath;
 
 public class GetVersionsFromLab {
 
     public static void main(String[] args) {
         Path vigiangTempPath = getVigiangTempPath();
 
-        String environment = "TRANSATEL_POSTGRES_DEV";
-        Path vigiangPath = getVigiaNgPath();
+        String environment = "?_DEV";
+        Path vigiangPath = EnvironmentService.getVigiaNgPath();
         Path inputPath = Paths.get(vigiangPath + "\\environments\\" + environment + "\\containers.txt");
 
         Path outputPath = Paths.get(vigiangTempPath.toString(), "output.csv");
@@ -29,7 +26,7 @@ public class GetVersionsFromLab {
             List<ProjectVersion> versionsFromText = getProjectVersions(inputPath);
             List<ProjectVersion> versionsFromContainersTxt = getVersionsFromContainersTxt();
 
-            String csv = "\"Tag Atual\";\"Nova Tag\"\n";
+            String csv = "\"Tag Atual\";\"Nova Tag\";\"Modificacoes\"\n";
             for (ProjectVersion project1 : versionsFromText) {
                 for (ProjectVersion project2 : versionsFromContainersTxt) {
                     if (project1.getName().equals(project2.getName())) {
@@ -51,7 +48,7 @@ public class GetVersionsFromLab {
     }
 
     private static List<ProjectVersion> getVersionsFromContainersTxt() throws IOException {
-        Path vigiangPath = getVigiaNgPath();
+        Path vigiangPath = EnvironmentService.getVigiaNgPath();
         Path containersPath = Paths.get(vigiangPath + "\\containers.txt");
 
         return getProjectVersions(containersPath);
@@ -63,7 +60,12 @@ public class GetVersionsFromLab {
         var fileLines = Files.readAllLines(inputPath);
         for (var line : fileLines) {
             String[] lineSplit = line.split("[|]");
-            ProjectVersion projectVersion = new ProjectVersion(lineSplit[1].trim(), lineSplit[2].trim());
+            String name = lineSplit[1].trim();
+            if (name.equals("admin-server")) {
+                continue;
+            }
+
+            ProjectVersion projectVersion = new ProjectVersion(name, lineSplit[2].trim());
             versions.add(projectVersion);
         }
         return versions;

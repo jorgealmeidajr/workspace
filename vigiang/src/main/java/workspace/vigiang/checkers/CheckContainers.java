@@ -27,6 +27,7 @@ public class CheckContainers {
 
                 updateContainersFile(environmentPath, environment);
                 updateDockerComposeFile(environmentPath, environment);
+                updateFrontendScriptFiles(environmentPath, environment);
 
                 System.out.println();
             }
@@ -65,6 +66,29 @@ public class CheckContainers {
         if (!initialFileContent.equals(newFileContent)) {
             System.out.println("updating file: " + containersPath);
             Files.writeString(containersPath, newFileContent, StandardCharsets.UTF_8);
+        }
+    }
+
+    private static void updateFrontendScriptFiles(Path environmentPath, Environment environment) throws Exception {
+        updateScriptFile(environmentPath, environment, "webviewer_docker_run.sh");
+        updateScriptFile(environmentPath, environment, "workflow_docker_run.sh");
+    }
+
+    private static void updateScriptFile(Path environmentPath, Environment environment, String script) throws Exception {
+        var command = "cat /opt/vigiang/scripts/" + script;
+        String sshResponse = SshExecutor.execute(environment.getSshUsername(), environment.getSshPassword(), environment.getSshHost(), environment.getSshPort(), command);
+
+        Path inputPath = Paths.get(environmentPath + "\\" + script);
+        String newFileContent = sshResponse.trim();
+
+        var initialFileContent = "";
+        if (Files.exists(inputPath)) {
+            initialFileContent = new String(Files.readAllBytes(inputPath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + inputPath);
+            Files.writeString(inputPath, newFileContent, StandardCharsets.UTF_8);
         }
     }
 
