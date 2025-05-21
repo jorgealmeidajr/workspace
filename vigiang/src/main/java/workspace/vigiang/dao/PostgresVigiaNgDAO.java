@@ -1,8 +1,6 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.EmailTemplate;
-import workspace.vigiang.model.Environment;
-import workspace.vigiang.model.ReportTemplate;
+import workspace.vigiang.model.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,48 +10,50 @@ import java.util.List;
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<String[]> listFeatures(Environment env) throws SQLException {
+    public List<Feature> listFeatures(Environment env) throws SQLException {
         String sql =
             "select feature, status, description\n" +
             "from conf.feature\n" +
             "order by feature";
 
-        List<String[]> data = new ArrayList<>();
+        List<Feature> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var description = (rs.getString("description") == null) ? "NULL" : rs.getString("description");
-                String[] row = new String[] {
+
+                var feature = new Feature(
                     rs.getString("feature"),
                     rs.getString("status"),
                     description
-                };
-                data.add(row);
+                );
+
+                data.add(feature);
             }
         }
         return data;
     }
 
     @Override
-    public List<String[]> listConfigurationValues(Environment env) throws SQLException {
+    public List<Configuration> listConfigurationValues(Environment env) throws SQLException {
         String sql =
             "select carrier_id, parameter_id, parameter_description, value\n" +
             "from conf.site\n" +
             "order by carrier_id, parameter_id";
 
-        List<String[]> data = new ArrayList<>();
+        List<Configuration> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var value = (rs.getString("value") == null) ? "NULL" : rs.getString("value");
-                String[] row = new String[] {
+                var row = new Configuration(
                     rs.getString("carrier_id"),
                     rs.getString("parameter_id"),
                     rs.getString("parameter_description"),
-                    value,
-                };
+                    value
+                );
                 data.add(row);
             }
         }

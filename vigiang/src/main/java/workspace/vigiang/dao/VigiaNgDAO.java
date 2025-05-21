@@ -1,8 +1,6 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.EmailTemplate;
-import workspace.vigiang.model.Environment;
-import workspace.vigiang.model.ReportTemplate;
+import workspace.vigiang.model.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,9 +9,9 @@ import java.util.List;
 
 public interface VigiaNgDAO {
 
-    List<String[]> listFeatures(Environment env) throws SQLException;
+    List<Feature> listFeatures(Environment env) throws SQLException;
 
-    List<String[]> listConfigurationValues(Environment env) throws SQLException;
+    List<Configuration> listConfigurationValues(Environment env) throws SQLException;
 
     List<String[]> listModules(Environment env) throws SQLException;
 

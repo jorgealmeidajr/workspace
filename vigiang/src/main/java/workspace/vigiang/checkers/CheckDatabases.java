@@ -1,5 +1,7 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.model.Configuration;
+import workspace.vigiang.model.Feature;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.Environment;
@@ -8,6 +10,7 @@ import workspace.vigiang.dao.VigiaNgDAO;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CheckDatabases {
 
@@ -51,7 +54,9 @@ public class CheckDatabases {
             columns = new String[] { "feature", "status", "description" };
         }
 
-        List<String[]> data = dao.listFeatures(env);
+        List<String[]> data = dao.listFeatures(env).stream()
+                .map(Feature::toArray)
+                .collect(Collectors.toList());
         FileService.updateLocalFiles(env, fileName, columns, data);
     }
 
@@ -66,7 +71,9 @@ public class CheckDatabases {
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value" };
         }
 
-        List<String[]> data = dao.listConfigurationValues(env);
+        List<String[]> data = dao.listConfigurationValues(env).stream()
+                .map(Configuration::toArray)
+                .collect(Collectors.toList());
         FileService.updateLocalFiles(env, fileName, columns, data);
     }
 

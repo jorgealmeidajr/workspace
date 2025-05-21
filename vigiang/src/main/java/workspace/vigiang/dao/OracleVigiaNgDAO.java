@@ -1,8 +1,6 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.EmailTemplate;
-import workspace.vigiang.model.Environment;
-import workspace.vigiang.model.ReportTemplate;
+import workspace.vigiang.model.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,48 +13,50 @@ import java.util.List;
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<String[]> listFeatures(Environment env) throws SQLException {
+    public List<Feature> listFeatures(Environment env) throws SQLException {
         String sql =
             "select ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +
             "order by ID_FEATURE";
 
-        List<String[]> data = new ArrayList<>();
+        List<Feature> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var descricao = (rs.getString("ID_DESCRICAO") == null) ? "NULL" : rs.getString("ID_DESCRICAO");
-                String[] row = new String[] {
+
+                var feature = new Feature(
                     rs.getString("ID_FEATURE"),
                     rs.getString("ID_STATUS"),
                     descricao
-                };
-                data.add(row);
+                );
+
+                data.add(feature);
             }
         }
         return data;
     }
 
     @Override
-    public List<String[]> listConfigurationValues(Environment env) throws SQLException {
+    public List<Configuration> listConfigurationValues(Environment env) throws SQLException {
         String sql =
             "select CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
             "order by CD_OPERADORA, ID_PARAMETRO";
 
-        List<String[]> data = new ArrayList<>();
+        List<Configuration> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var value = (rs.getString("VL_PARAMETRO") == null) ? "NULL" : rs.getString("VL_PARAMETRO");
-                String[] row = new String[] {
+                var row = new Configuration(
                     rs.getString("CD_OPERADORA"),
                     rs.getString("ID_PARAMETRO"),
                     rs.getString("DE_PARAMETRO"),
-                    value,
-                };
+                    value
+                );
                 data.add(row);
             }
         }
