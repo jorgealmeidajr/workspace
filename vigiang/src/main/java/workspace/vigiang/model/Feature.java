@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public class Feature {
 
+    private Integer code;
     private String id;
     private String status;
     private String description;

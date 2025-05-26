@@ -12,7 +12,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<Feature> listFeatures(Environment env) throws SQLException {
         String sql =
-            "select feature, status, description\n" +
+            "select id, feature, status, description\n" +
             "from conf.feature\n" +
             "order by feature";
 
@@ -24,6 +24,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
                 var description = (rs.getString("description") == null) ? "NULL" : rs.getString("description");
 
                 var feature = new Feature(
+                    rs.getInt("id"),
                     rs.getString("feature"),
                     rs.getString("status"),
                     description
@@ -38,7 +39,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<Configuration> listConfigurationValues(Environment env) throws SQLException {
         String sql =
-            "select carrier_id, parameter_id, parameter_description, value\n" +
+            "select id, carrier_id, parameter_id, parameter_description, value\n" +
             "from conf.site\n" +
             "order by carrier_id, parameter_id";
 
@@ -49,6 +50,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             while(rs.next()) {
                 var value = (rs.getString("value") == null) ? "NULL" : rs.getString("value");
                 var row = new Configuration(
+                    rs.getInt("id"),
                     rs.getString("carrier_id"),
                     rs.getString("parameter_id"),
                     rs.getString("parameter_description"),

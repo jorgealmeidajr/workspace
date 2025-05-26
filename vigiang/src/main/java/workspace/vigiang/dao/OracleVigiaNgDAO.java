@@ -15,7 +15,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<Feature> listFeatures(Environment env) throws SQLException {
         String sql =
-            "select ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
+            "select CD_FEATURE, ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +
             "order by ID_FEATURE";
 
@@ -27,6 +27,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                 var descricao = (rs.getString("ID_DESCRICAO") == null) ? "NULL" : rs.getString("ID_DESCRICAO");
 
                 var feature = new Feature(
+                    rs.getInt("CD_FEATURE"),
                     rs.getString("ID_FEATURE"),
                     rs.getString("ID_STATUS"),
                     descricao
@@ -41,7 +42,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<Configuration> listConfigurationValues(Environment env) throws SQLException {
         String sql =
-            "select CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
+            "select CD_PARAMETRO, CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
             "order by CD_OPERADORA, ID_PARAMETRO";
 
@@ -52,6 +53,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             while(rs.next()) {
                 var value = (rs.getString("VL_PARAMETRO") == null) ? "NULL" : rs.getString("VL_PARAMETRO");
                 var row = new Configuration(
+                    rs.getInt("CD_PARAMETRO"),
                     rs.getString("CD_OPERADORA"),
                     rs.getString("ID_PARAMETRO"),
                     rs.getString("DE_PARAMETRO"),

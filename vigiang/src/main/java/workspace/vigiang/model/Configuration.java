@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public class Configuration {
 
+    private Integer code;
     private String carrierId;
     private String id;
     private String description;

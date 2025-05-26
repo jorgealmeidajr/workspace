@@ -84,6 +84,18 @@
     "sshPort": 22
   },
   {
+    "name": "TRANSATEL_POSTGRES_DEV",
+    "carrier": "TRANSATEL",
+    "database": "POSTGRES",
+    "databaseUsername": "vigiang",
+    "databasePassword": "vigiang-sun",
+    "databaseUrl": "jdbc:postgresql://10.50.153.19:5435/vigiang",
+    "sshHost": "10.50.153.141",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22
+  },
+  {
     "name": "VIVO_ORACLE_DEV",
     "carrier": "VIVO",
     "database": "ORACLE",
@@ -139,18 +151,6 @@
 //    "databasePassword": "vigiang-sun",
 //    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_vero",
 //    "sshHost": "10.50.153.140",
-//    "sshUsername": "root",
-//    "sshPassword": "jacare1",
-//    "sshPort": 22
-//  },
-//  {
-//    "name": "TRANSATEL_POSTGRES_DEV",
-//    "carrier": "TRANSATEL",
-//    "database": "POSTGRES",
-//    "databaseUsername": "vigiang",
-//    "databasePassword": "vigiang-sun",
-//    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_transatel",
-//    "sshHost": "10.50.153.141",
 //    "sshUsername": "root",
 //    "sshPassword": "jacare1",
 //    "sshPort": 22
