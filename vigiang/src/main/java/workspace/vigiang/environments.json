@@ -96,6 +96,18 @@
     "sshPort": 22
   },
   {
+    "name": "VERO_POSTGRES_DEV",
+    "carrier": "VERO",
+    "database": "POSTGRES",
+    "databaseUsername": "vigiang",
+    "databasePassword": "vigiang-sun",
+    "databaseUrl": "jdbc:postgresql://10.50.153.19:5434/vigiang",
+    "sshHost": "10.50.153.140",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22
+  },
+  {
     "name": "VIVO_ORACLE_DEV",
     "carrier": "VIVO",
     "database": "ORACLE",
@@ -143,16 +155,4 @@
     "sshPassword": "jacare1",
     "sshPort": 22
   }
-//  ,{
-//    "name": "VERO_POSTGRES_DEV",
-//    "carrier": "VERO",
-//    "database": "POSTGRES",
-//    "databaseUsername": "vigiang",
-//    "databasePassword": "vigiang-sun",
-//    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_vero",
-//    "sshHost": "10.50.153.140",
-//    "sshUsername": "root",
-//    "sshPassword": "jacare1",
-//    "sshPort": 22
-//  }
 ]
