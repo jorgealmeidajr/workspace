@@ -19,6 +19,7 @@ public class Environment {
     private String sshUsername;
     private String sshPassword;
     private int sshPort;
+    private boolean active;
 
     public enum Database {
         ORACLE, POSTGRES

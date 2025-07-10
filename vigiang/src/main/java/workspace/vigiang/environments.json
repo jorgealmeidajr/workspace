@@ -9,7 +9,8 @@
     "sshHost": "10.50.240.161",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "CLARO_ORACLE_DEV",
@@ -21,7 +22,8 @@
     "sshHost": "10.50.150.101",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": true
   },
   {
     "name": "LIGGA_ORACLE_DEV",
@@ -33,7 +35,8 @@
     "sshHost": "10.50.150.77",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "OI_ORACLE_DEV",
@@ -45,7 +48,8 @@
     "sshHost": "10.50.240.148",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "SKY_ORACLE_DEV",
@@ -57,7 +61,8 @@
     "sshHost": "10.50.153.226",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "SURF_POSTGRES_DEV",
@@ -69,7 +74,8 @@
     "sshHost": "10.50.150.78",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "TIM_ORACLE_DEV",
@@ -81,7 +87,8 @@
     "sshHost": "10.50.150.59",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "TRANSATEL_POSTGRES_DEV",
@@ -93,7 +100,8 @@
     "sshHost": "10.50.153.141",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "VERO_POSTGRES_DEV",
@@ -105,7 +113,8 @@
     "sshHost": "10.50.153.140",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "VIVO_ORACLE_DEV",
@@ -117,7 +126,8 @@
     "sshHost": "10.50.240.124",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": true
   },
   {
     "name": "VTAL_ORACLE_DEV",
@@ -129,7 +139,8 @@
     "sshHost": "10.50.153.249",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "WOM_ORACLE_DEV",
@@ -141,7 +152,8 @@
     "sshHost": "10.50.150.57",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   },
   {
     "name": "WOM_POSTGRES_DEV",
@@ -153,6 +165,7 @@
     "sshHost": "10.50.153.139",
     "sshUsername": "root",
     "sshPassword": "jacare1",
-    "sshPort": 22
+    "sshPort": 22,
+    "active": false
   }
 ]

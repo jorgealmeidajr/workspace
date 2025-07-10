@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EnvironmentService {
 
@@ -20,7 +21,10 @@ public class EnvironmentService {
         String read = Files.readString(path);
 
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(read, new TypeReference<>(){});
+        List<Environment> environments = mapper.readValue(read, new TypeReference<>(){});
+        return environments.stream()
+                .filter(Environment::isActive)
+                .collect(Collectors.toList());
     }
 
     public static VigiaNgDAO getVigiaNgDAO(Environment environment) {

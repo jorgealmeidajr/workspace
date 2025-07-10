@@ -87,8 +87,8 @@ public class CheckProjectsVersions {
     private static String getLastMainTag(Page page) {
         String lastTag = "";
         for (Locator locator1 : page.locator("div.row-main-content > a").all()) {
-            String tag = locator1.textContent().trim();
-            if (!tag.contains("-")) {
+            String tag = locator1.textContent().trim().toLowerCase();
+            if (!tag.contains("-") && !tag.matches(".*rc\\d*$")) {
                 lastTag = tag;
                 break;
             }
