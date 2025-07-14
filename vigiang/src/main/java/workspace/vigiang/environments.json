@@ -32,11 +32,11 @@
     "databaseUsername": "VIGIANG_LIGGA",
     "databasePassword": "VIGIANG_LIGGA-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.150.77",
+    "sshHost": "10.50.153.105",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "OI_ORACLE_DEV",
@@ -71,11 +71,11 @@
     "databaseUsername": "vigiang",
     "databasePassword": "vigiang-sun",
     "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_surf",
-    "sshHost": "10.50.150.78",
+    "sshHost": "10.50.153.106",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "TIM_ORACLE_DEV",
@@ -84,11 +84,11 @@
     "databaseUsername": "VIGIANG_TIM",
     "databasePassword": "VIGIANG_TIM-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.150.59",
+    "sshHost": "10.50.153.103",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "TRANSATEL_POSTGRES_DEV",
@@ -97,11 +97,11 @@
     "databaseUsername": "vigiang",
     "databasePassword": "vigiang-sun",
     "databaseUrl": "jdbc:postgresql://10.50.153.19:5435/vigiang",
-    "sshHost": "10.50.153.141",
+    "sshHost": "10.50.153.113",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "VERO_POSTGRES_DEV",
@@ -114,7 +114,7 @@
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "VIVO_ORACLE_DEV",
@@ -149,11 +149,11 @@
     "databaseUsername": "VIGIANG_WOM",
     "databasePassword": "VIGIANG_WOM-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.150.57",
+    "sshHost": "10.50.153.108",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "WOM_POSTGRES_DEV",
@@ -162,10 +162,10 @@
     "databaseUsername": "vigiang",
     "databasePassword": "vigiang-sun",
     "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_wom",
-    "sshHost": "10.50.153.139",
+    "sshHost": "10.50.153.109",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   }
 ]
