@@ -58,11 +58,11 @@
     "databaseUsername": "VIGIANG_SKY",
     "databasePassword": "VIGIANG_SKY-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.153.226",
+    "sshHost": "10.50.153.110",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "SURF_POSTGRES_DEV",
@@ -136,11 +136,11 @@
     "databaseUsername": "VIGIANG_VTAL",
     "databasePassword": "VIGIANG_VTAL-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.153.249",
+    "sshHost": "10.50.153.111",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "WOM_ORACLE_DEV",
