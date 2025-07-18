@@ -50,7 +50,7 @@ public class EnvironmentService {
     public static Path getEnvironmentPath(Environment environment) throws IOException {
         Path vigiangPath = getVigiaNgPath();
 
-        Path environmentPath = Paths.get(vigiangPath + "\\environments\\" + environment.getName());
+        Path environmentPath = Paths.get(vigiangPath + "\\laboratories\\" + environment.getName());
         if (!Files.exists(environmentPath)) {
             Files.createDirectories(environmentPath);
         }

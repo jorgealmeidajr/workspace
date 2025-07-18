@@ -2,19 +2,13 @@ package workspace.vigiang.checkers;
 
 import workspace.vigiang.model.Environment;
 import workspace.vigiang.model.SshExecutor;
-import workspace.vigiang.model.TablePrinter;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class CheckContainers {
 
@@ -95,14 +89,80 @@ public class CheckContainers {
     private static String listContainers(String username, String password, String host, int port) throws Exception {
         List<String[]> data = listDockerContainers(username, password, host, port);
 
-        var finalLines = new ArrayList<String>();
-        int[] columnWidths = new int[] { 35, 35 };
+        List<String> frontendTags = List.of("webviewer", "workflow");
+
+        List<String> cloudControlTags = List.of(
+                "auth-service",
+                "config-server",
+                "eureka-server",
+                "user-service",
+                "zuul-server"
+        );
+
+        List<String> cloudVigiangTags = List.of(
+                "block-service",
+                "carrier-service",
+                "dashboard-service",
+                "data-retention-service",
+                "event-service",
+                "interception-service",
+                "log-service",
+                "message-service",
+                "operation-service",
+                "portability-service",
+                "process-service",
+                "report-service",
+                "scheduler-service",
+                "system-service",
+                "tracking-service",
+                "voucher-service",
+                "warrant-service"
+        );
+
+        var tagGroups = new HashMap<String, List<String>>();
+        tagGroups.put("frontend", new ArrayList<>());
+        tagGroups.put("cloud-control", new ArrayList<>());
+        tagGroups.put("cloud-vigiang", new ArrayList<>());
+        tagGroups.put("others", new ArrayList<>());
+
         for (String[] row : data) {
-            finalLines.add(TablePrinter.printRow(row, columnWidths));
+            String projectInitial = row[0];
+            String project = row[0] + ":" + row[1];
+
+            if (frontendTags.stream().anyMatch(projectInitial::contains)) {
+                tagGroups.get("frontend").add(project);
+            } else if (cloudControlTags.stream().anyMatch(projectInitial::contains)) {
+                tagGroups.get("cloud-control").add(project);
+            } else if (cloudVigiangTags.stream().anyMatch(projectInitial::contains)) {
+                tagGroups.get("cloud-vigiang").add(project);
+            } else {
+                tagGroups.get("others").add(project);
+            }
         }
 
-        finalLines.sort(Comparator.naturalOrder());
-        return String.join(System.lineSeparator(), finalLines);
+        String content = "";
+        content += getTagGroupContent(tagGroups, "frontend");
+        content += getTagGroupContent(tagGroups, "cloud-control");
+        content += getTagGroupContent(tagGroups, "cloud-vigiang");
+        content += getTagGroupContent(tagGroups, "others");
+        content = content.trim();
+        content += "\n";
+
+        return content;
+    }
+
+    private static String getTagGroupContent(HashMap<String, List<String>> tagGroups, String tagGroup) {
+        String content = "";
+        var tags = tagGroups.get(tagGroup);
+        tags.sort(Comparator.naturalOrder());
+        if (!tags.isEmpty()) {
+            content += tagGroup + ":\n";
+            for (var tag : tags) {
+                content += "  " + tag + "\n";
+            }
+            content += "\n";
+        }
+        return content;
     }
 
     private static List<String[]> listDockerContainers(String username, String password, String host, int port) throws Exception {
@@ -112,15 +172,20 @@ public class CheckContainers {
         initialLines.remove(0);
         initialLines.sort(Comparator.naturalOrder());
 
-        Predicate<String> linesToIgnore = (line) -> !(line.startsWith("kafka") || line.startsWith("mock-smtp") || line.startsWith("zookeeper"));
-        initialLines = initialLines.stream()
-                .filter(linesToIgnore)
-                .collect(Collectors.toList());
+        List<String> projectsToIgnore = List.of(
+            "kafka", "mock-smtp", "zookeeper", "admin-server", "objective_moser", "cadvisor", "docker_state_exporter",
+            "node_exporter", "process_exporter", "quirky_shaw"
+        );
 
         List<String[]> data = new ArrayList<>();
         for (String line : initialLines) {
             String[] firstSplit = line.split(" ");
             String project = firstSplit[0];
+
+            boolean shouldIgnore = projectsToIgnore.stream()
+                    .anyMatch(project::contains);
+            if (shouldIgnore) continue;
+
             String lastString = firstSplit[firstSplit.length - 1];
 
             String[] secondSplit = lastString.split(":");
