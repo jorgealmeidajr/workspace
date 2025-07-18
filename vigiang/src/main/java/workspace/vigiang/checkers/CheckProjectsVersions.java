@@ -109,13 +109,21 @@ public class CheckProjectsVersions {
     }
 
     private static void checkFrontEndTags(Page page) {
-        page.navigate("https://flngit01.cognyte.local/dev/vigiang/front-end/vigia_ng_app/-/tags");
+        var url = GitLabService.VigiaNG.getFrontEndUrl();
+        page.navigate(url + "/-/tags");
 
-        Locator tags = page.locator("#content-body > div.flex-list > div.tags > ul > li > div.row-main-content > a");
+        var selector = "#content-body > ul > li > div.row-main-content > a";
+        Locator tags = page.locator(selector);
 
+        String lastTag = "";
         for (int i = 0; i < tags.count(); i++) {
-            System.out.println(tags.nth(i).textContent().trim());
+            String tag = tags.nth(i).textContent().trim();
+            if (!tag.contains("-") && !tag.matches(".*rc\\d*$")) {
+                lastTag = tag;
+                break;
+            }
         }
+        System.out.println(lastTag);
 
         GitLabService.await();
     }

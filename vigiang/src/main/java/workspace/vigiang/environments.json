@@ -10,7 +10,7 @@
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "CLARO_ORACLE_DEV",
@@ -49,7 +49,7 @@
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "SKY_ORACLE_DEV",
