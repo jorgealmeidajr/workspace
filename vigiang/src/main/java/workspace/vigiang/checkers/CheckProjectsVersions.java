@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
 import com.microsoft.playwright.*;
-import workspace.vigiang.model.TablePrinter;
+import workspace.vigiang.service.ContainersService;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.GitLabService;
 
@@ -12,8 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class CheckProjectsVersions {
 
@@ -72,16 +70,14 @@ public class CheckProjectsVersions {
             // copy selector from page
             String projectSelector = "#super-sidebar > div.contextual-nav.gl-flex.gl-grow.gl-flex-col.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-grow.bottom-scrim-visible.gl-border-b > div.gl-relative.gl-p-2 > ul.gl-m-0.gl-list-none.gl-p-0 > li > a > div.gl-grow.gl-text-default.gl-break-anywhere";
             var project = page.locator(projectSelector).textContent().trim();
+            if ("admin-server".equals(project)) continue;
 
             String version = getLastMainTag(page);
-
             data.add(new String[] { project, version });
-
             GitLabService.await();
         }
 
-        Collections.sort(data, (data1, data2) -> data1[0].compareTo(data2[0]));
-        return getTableStr(data);
+        return ContainersService.getContainersContent(data);
     }
 
     private static String getLastMainTag(Page page) {
@@ -94,18 +90,6 @@ public class CheckProjectsVersions {
             }
         }
         return lastTag;
-    }
-
-    private static String getTableStr(ArrayList<String[]> data) {
-        var lines = new ArrayList<String>();
-        int[] columnWidths = TablePrinter.calculateColumnWidths(data);
-        columnWidths = new int[] { 35, 35 };
-        for (String[] row : data) {
-            lines.add(TablePrinter.printRow(row, columnWidths));
-        }
-
-        lines.sort(Comparator.naturalOrder());
-        return String.join(System.lineSeparator(), lines);
     }
 
     private static void checkFrontEndTags(Page page) {
