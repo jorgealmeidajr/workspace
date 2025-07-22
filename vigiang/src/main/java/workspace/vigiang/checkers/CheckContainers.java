@@ -99,19 +99,10 @@ public class CheckContainers {
         initialLines.remove(0);
         initialLines.sort(Comparator.naturalOrder());
 
-        List<String> projectsToIgnore = List.of(
-            "kafka", "mock-smtp", "zookeeper", "admin-server", "objective_moser", "cadvisor", "docker_state_exporter",
-            "node_exporter", "process_exporter", "quirky_shaw", "brave_wright", "schema-registry"
-        );
-
         List<String[]> data = new ArrayList<>();
         for (String line : initialLines) {
             String[] firstSplit = line.split(" ");
             String project = firstSplit[0];
-
-            boolean shouldIgnore = projectsToIgnore.stream()
-                    .anyMatch(project::contains);
-            if (shouldIgnore) continue;
 
             String lastString = firstSplit[firstSplit.length - 1];
 

@@ -38,14 +38,35 @@ public class ContainersService {
                 "warrant-service"
         );
 
+        var tagGroups = getTagGroups(data, frontendTags, cloudControlTags, cloudVigiangTags);
+
+        String content = "";
+        content += getTagGroupContent(tagGroups, "frontend");
+        content += getTagGroupContent(tagGroups, "cloud-control");
+        content += getTagGroupContent(tagGroups, "cloud-vigiang");
+        content += getTagGroupContent(tagGroups, "others");
+        content = content.trim();
+        content += "\n";
+
+        return content;
+    }
+
+    private static HashMap<String, List<String>> getTagGroups(List<String[]> data, List<String> frontendTags, List<String> cloudControlTags, List<String> cloudVigiangTags) {
         var tagGroups = new HashMap<String, List<String>>();
         tagGroups.put("frontend", new ArrayList<>());
         tagGroups.put("cloud-control", new ArrayList<>());
         tagGroups.put("cloud-vigiang", new ArrayList<>());
         tagGroups.put("others", new ArrayList<>());
 
+        List<String> projectsToIgnore = List.of(
+                "kafka", "mock-smtp", "zookeeper", "admin-server", "objective_moser", "cadvisor", "docker_state_exporter",
+                "node_exporter", "process_exporter", "quirky_shaw", "brave_wright", "schema-registry"
+        );
+
         for (String[] row : data) {
             String projectInitial = row[0];
+            if (projectsToIgnore.stream().anyMatch(projectInitial::contains)) continue;
+
             String project = row[0] + ":" + row[1];
 
             if (frontendTags.stream().anyMatch(projectInitial::contains)) {
@@ -58,16 +79,7 @@ public class ContainersService {
                 tagGroups.get("others").add(project);
             }
         }
-
-        String content = "";
-        content += getTagGroupContent(tagGroups, "frontend");
-        content += getTagGroupContent(tagGroups, "cloud-control");
-        content += getTagGroupContent(tagGroups, "cloud-vigiang");
-        content += getTagGroupContent(tagGroups, "others");
-        content = content.trim();
-        content += "\n";
-
-        return content;
+        return tagGroups;
     }
 
     private static String getTagGroupContent(HashMap<String, List<String>> tagGroups, String tagGroup) {

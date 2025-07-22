@@ -70,7 +70,6 @@ public class CheckProjectsVersions {
             // copy selector from page
             String projectSelector = "#super-sidebar > div.contextual-nav.gl-flex.gl-grow.gl-flex-col.gl-overflow-hidden > div.gl-scroll-scrim.gl-overflow-auto.gl-grow.bottom-scrim-visible.gl-border-b > div.gl-relative.gl-p-2 > ul.gl-m-0.gl-list-none.gl-p-0 > li > a > div.gl-grow.gl-text-default.gl-break-anywhere";
             var project = page.locator(projectSelector).textContent().trim();
-            if ("admin-server".equals(project)) continue;
 
             String version = getLastMainTag(page);
             data.add(new String[] { project, version });
