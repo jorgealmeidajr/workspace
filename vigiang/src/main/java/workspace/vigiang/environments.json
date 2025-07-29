@@ -19,7 +19,7 @@
     "databaseUsername": "VIGIANG_CLARO",
     "databasePassword": "VIGIANG_CLARO-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.150.101",
+    "sshHost": "10.50.153.101",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
@@ -70,7 +70,7 @@
     "database": "POSTGRES",
     "databaseUsername": "vigiang",
     "databasePassword": "vigiang-sun",
-    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_surf",
+    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang",
     "sshHost": "10.50.153.106",
     "sshUsername": "root",
     "sshPassword": "jacare1",
@@ -110,7 +110,7 @@
     "databaseUsername": "vigiang",
     "databasePassword": "vigiang-sun",
     "databaseUrl": "jdbc:postgresql://10.50.153.19:5434/vigiang",
-    "sshHost": "10.50.153.140",
+    "sshHost": "10.50.153.114",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
@@ -166,6 +166,6 @@
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": true
+    "active": false
   }
 ]
