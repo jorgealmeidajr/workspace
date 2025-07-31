@@ -13,4 +13,8 @@ public class ProjectVersion {
     public String toString() {
         return name + ":" + version;
     }
+
+    public String[] toArray() {
+        return new String[] { name , version };
+    }
 }
