@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 
 public class GetVersions {
 
-    static Path INPUT_TXT_PATH = Paths.get("C:\\Users\\jjunior\\MyDocuments\\vigiang-temp\\input.txt");
-    static Path OUTPUT_TXT_PATH = Paths.get("C:\\Users\\jjunior\\MyDocuments\\vigiang-temp\\output.txt");
-    static Path OUTPUT_CSV_PATH = Paths.get("C:\\Users\\jjunior\\MyDocuments\\vigiang-temp\\output.csv");
+    static Path INPUT_TXT_PATH = Paths.get(getVigiangTempPath().toString(), "input.txt");
+    static Path OUTPUT_TXT_PATH = Paths.get(getVigiangTempPath().toString(), "output.txt");
+    static Path OUTPUT_CSV_PATH = Paths.get(getVigiangTempPath().toString(), "output.csv");
 
     static class FromCompose {
         public static void main(String[] args) {
@@ -103,6 +103,14 @@ public class GetVersions {
             versions.add(projectVersion);
         }
         return versions;
+    }
+
+    static Path getVigiangTempPath() {
+        Path scriptsPath = Paths.get("C:\\Users\\jjunior\\MyDocuments\\vigiang-temp");
+        if (!Files.exists(scriptsPath) || !Files.isDirectory(scriptsPath)) {
+            throw new IllegalArgumentException("o diretorio 'vigiang-temp' nao existe ou nao eh um diretorio");
+        }
+        return scriptsPath;
     }
 
 }
