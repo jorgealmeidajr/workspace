@@ -409,7 +409,20 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+        String sql =
+            "update CFG_RELATORIO set DC_RELATORIO = ?\n" +
+            "where CD_OPERADORA = ?\n" +
+            "  and CD_RELATORIO = ?\n" +
+            "  and ID_RELATORIO = ?";
 
+        try (Connection conn = getConnection(env);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBytes(1, fileBytes);
+            stmt.setInt(2, Integer.parseInt(carrierId));
+            stmt.setInt(3, Integer.parseInt(reportId));
+            stmt.setString(4, reportName);
+            stmt.executeUpdate();
+        }
     }
 
     private String getBlobAsString(Blob blob) {

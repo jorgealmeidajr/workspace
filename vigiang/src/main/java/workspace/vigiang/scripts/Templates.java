@@ -13,7 +13,7 @@ public class Templates {
     static class UpdateReports {
         public static void main(String[] args) {
             try {
-                String environmentName = "TRANSATEL_POSTGRES_DEV"; // this name should be in environments.json
+                String environmentName = "?"; // this name should be in environments.json
                 Environment environment = EnvironmentService.getEnvironments().stream()
                         .filter(env -> env.getName().equals(environmentName))
                         .findFirst()
