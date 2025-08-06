@@ -1,0 +1,48 @@
+package workspace.vigiang.scripts;
+
+import workspace.vigiang.dao.VigiaNgDAO;
+import workspace.vigiang.model.Environment;
+import workspace.vigiang.service.EnvironmentService;
+
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class Templates {
+
+    static class UpdateReports {
+        public static void main(String[] args) {
+            try {
+                String environmentName = "TRANSATEL_POSTGRES_DEV"; // this name should be in environments.json
+                Environment environment = EnvironmentService.getEnvironments().stream()
+                        .filter(env -> env.getName().equals(environmentName))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + environmentName));
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(environment);
+
+                Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(environment);
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(reportTemplatesPath)) {
+                    for (Path entry : stream) {
+                        String fullFileName = entry.getFileName().toString();
+                        String[] split = fullFileName.split("_");
+                        String carrierId = split[0];
+                        String reportId = split[1];
+
+                        int firstUnderscore = fullFileName.indexOf('_');
+                        int secondUnderscore = fullFileName.indexOf('_', firstUnderscore + 1);
+                        int lastDot = fullFileName.lastIndexOf('.');
+                        String reportName = fullFileName.substring(secondUnderscore + 1, lastDot);
+
+                        byte[] fileBytes = Files.readAllBytes(entry);
+                        dao.updateTemplateReport(environment, carrierId, reportId, reportName, fileBytes);
+                    }
+                }
+
+                System.out.println("ending of execution...");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}

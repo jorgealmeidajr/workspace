@@ -407,6 +407,11 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         return data;
     }
 
+    @Override
+    public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+
+    }
+
     private String getBlobAsString(Blob blob) {
         StringBuffer result = new StringBuffer();
 

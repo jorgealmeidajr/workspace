@@ -364,4 +364,24 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
         return data;
     }
 
+    @Override
+    public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+        String base64Content = Base64.getEncoder().encodeToString(fileBytes);
+
+        String sql =
+            "update conf.report set file = ?\n" +
+            "where carrier_id = ?\n" +
+            "  and id = ?\n" +
+            "  and report_id = ?";
+
+        try (Connection conn = getConnection(env);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, base64Content);
+            stmt.setInt(2, Integer.parseInt(carrierId));
+            stmt.setInt(3, Integer.parseInt(reportId));
+            stmt.setString(4, reportName);
+            stmt.executeUpdate();
+        }
+    }
+
 }
