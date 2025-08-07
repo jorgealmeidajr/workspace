@@ -12,12 +12,14 @@ public class Templates {
 
     static class UpdateReports {
         public static void main(String[] args) {
+            String ENVIRONMENT_NAME = "?"; // this name should be in environments.json
+            Integer CARRIER_ID = 0; // this id is from database
+
             try {
-                String environmentName = "?"; // this name should be in environments.json
                 Environment environment = EnvironmentService.getEnvironments().stream()
-                        .filter(env -> env.getName().equals(environmentName))
+                        .filter(env -> env.getName().equals(ENVIRONMENT_NAME))
                         .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + environmentName));
+                        .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(environment);
 
                 Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(environment);
@@ -27,6 +29,8 @@ public class Templates {
                         String[] split = fullFileName.split("_");
                         String carrierId = split[0];
                         String reportId = split[1];
+
+                        if (!CARRIER_ID.equals(Integer.parseInt(carrierId))) continue;
 
                         int firstUnderscore = fullFileName.indexOf('_');
                         int secondUnderscore = fullFileName.indexOf('_', firstUnderscore + 1);

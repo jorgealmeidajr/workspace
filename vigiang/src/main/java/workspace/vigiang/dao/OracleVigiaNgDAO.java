@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class OracleVigiaNgDAO implements VigiaNgDAO {
@@ -409,6 +410,9 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+        byte[] originalContent = getTemplateReportContent(env, carrierId, reportId, reportName);
+        if (Arrays.equals(originalContent, fileBytes)) return;
+
         String sql =
             "update CFG_RELATORIO set DC_RELATORIO = ?\n" +
             "where CD_OPERADORA = ?\n" +
@@ -421,8 +425,30 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             stmt.setInt(2, Integer.parseInt(carrierId));
             stmt.setInt(3, Integer.parseInt(reportId));
             stmt.setString(4, reportName);
-            stmt.executeUpdate();
+            int updated = stmt.executeUpdate();
+            System.out.println("Updated CFG_RELATORIO: carrierId=" + carrierId + ", reportId=" + reportId + ", reportName=" + reportName + ", rows=" + updated);
         }
+    }
+
+    private byte[] getTemplateReportContent(Environment env, String carrierId, String reportId, String reportName) throws SQLException {
+        String sql =
+            "select DC_RELATORIO from CFG_RELATORIO\n" +
+            "where CD_OPERADORA = ?\n" +
+            "  and CD_RELATORIO = ?\n" +
+            "  and ID_RELATORIO = ?";
+
+        try (Connection conn = getConnection(env);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, Integer.parseInt(carrierId));
+            stmt.setInt(2, Integer.parseInt(reportId));
+            stmt.setString(3, reportName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBytes("DC_RELATORIO");
+                }
+            }
+        }
+        return new byte[0];
     }
 
     private String getBlobAsString(Blob blob) {

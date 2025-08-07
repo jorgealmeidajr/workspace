@@ -366,7 +366,9 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+        String originalContent = getTemplateReportContent(env, carrierId, reportId, reportName);
         String base64Content = Base64.getEncoder().encodeToString(fileBytes);
+        if (originalContent.equals(base64Content)) return;
 
         String sql =
             "update conf.report set file = ?\n" +
@@ -380,8 +382,30 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             stmt.setInt(2, Integer.parseInt(carrierId));
             stmt.setInt(3, Integer.parseInt(reportId));
             stmt.setString(4, reportName);
-            stmt.executeUpdate();
+            int updated = stmt.executeUpdate();
+            System.out.println("Updated conf.report: carrierId=" + carrierId + ", reportId=" + reportId + ", reportName=" + reportName + ", rows=" + updated);
         }
+    }
+
+    private String getTemplateReportContent(Environment env, String carrierId, String reportId, String reportName) throws SQLException {
+        String sql =
+            "select file from conf.report\n" +
+            "where carrier_id = ?\n" +
+            "  and id = ?\n" +
+            "  and report_id = ?";
+
+        try (Connection conn = getConnection(env);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, Integer.parseInt(carrierId));
+            stmt.setInt(2, Integer.parseInt(reportId));
+            stmt.setString(3, reportName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("file");
+                }
+            }
+        }
+        return "";
     }
 
 }
