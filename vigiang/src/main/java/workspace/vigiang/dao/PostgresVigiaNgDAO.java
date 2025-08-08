@@ -387,6 +387,25 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
         }
     }
 
+    @Override
+    public void updateConfigurarionValue(Environment env, Configuration configuration, String newValue) throws SQLException {
+        String sql =
+            "update conf.site set value = ?\n" +
+            "where id = ?\n" +
+            "  and parameter_id = ?\n" +
+            "  and carrier_id = ?";
+
+        try (Connection conn = getConnection(env);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newValue);
+            stmt.setInt(2, configuration.getCode());
+            stmt.setString(3, configuration.getId());
+            stmt.setInt(4, Integer.parseInt(configuration.getCarrierId()));
+            int updated = stmt.executeUpdate();
+            System.out.println("Updated conf.site, rows=" + updated);
+        }
+    }
+
     private String getTemplateReportContent(Environment env, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select file from conf.report\n" +

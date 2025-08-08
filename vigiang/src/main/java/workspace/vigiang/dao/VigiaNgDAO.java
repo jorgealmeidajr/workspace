@@ -39,6 +39,8 @@ public interface VigiaNgDAO {
 
     void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException;
 
+    void updateConfigurarionValue(Environment env, Configuration configuration, String newValue) throws SQLException;
+
     default Connection getConnection(Environment environment) throws SQLException {
         return DriverManager.getConnection(
                 environment.getDatabaseUrl(),

@@ -430,6 +430,11 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         }
     }
 
+    @Override
+    public void updateConfigurarionValue(Environment env, Configuration configuration, String newValue) throws SQLException {
+
+    }
+
     private byte[] getTemplateReportContent(Environment env, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select DC_RELATORIO from CFG_RELATORIO\n" +

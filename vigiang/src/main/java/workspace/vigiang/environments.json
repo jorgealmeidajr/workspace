@@ -10,7 +10,7 @@
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": true
+    "active": false
   },
   {
     "name": "CLARO_ORACLE_DEV",
@@ -154,18 +154,5 @@
     "sshPassword": "jacare1",
     "sshPort": 22,
     "active": true
-  },
-  {
-    "name": "WOM_POSTGRES_DEV",
-    "carrier": "WOM",
-    "database": "POSTGRES",
-    "databaseUsername": "vigiang",
-    "databasePassword": "vigiang-sun",
-    "databaseUrl": "jdbc:postgresql://10.50.153.19:5432/vigiang_wom",
-    "sshHost": "10.50.153.109",
-    "sshUsername": "root",
-    "sshPassword": "jacare1",
-    "sshPort": 22,
-    "active": false
   }
 ]
