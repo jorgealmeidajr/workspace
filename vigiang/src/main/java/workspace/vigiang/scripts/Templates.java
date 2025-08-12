@@ -131,6 +131,8 @@ public class Templates {
             configurationsMap.put("cnfg.operation.password.report.id", "report_operation_password_xls");
             configurationsMap.put("cnfg.event.pdf.report.id", "operation_events_pdf_template");
             configurationsMap.put("cnfg.event.report.id", "operation_events_template");
+
+            // workflow warrant extract
             configurationsMap.put("cnfg.extract.call.pdf.report.id", "events_call_mesage_pdf_template");
             configurationsMap.put("cnfg.extract.call.report.id", "events_call_message_template");
             configurationsMap.put("cnfg.extract.connection.pdf.report.id", "events_connection_pdf_template");
@@ -139,13 +141,23 @@ public class Templates {
             configurationsMap.put("cnfg.extract.customer.report.id", "events_customer_template");
             configurationsMap.put("cnfg.extract.web.pdf.report.id", "events_web_pdf_template");
             configurationsMap.put("cnfg.extract.web.report.id", "events_web_template");
+
             configurationsMap.put("cnfg.cell.pdf.report.id", "report_events_cell_pdf_template");
             configurationsMap.put("cnfg.cell.report.id", "report_events_cell_template");
-//                configMap.put("cnfg.cnj.report.pdf.id", "");
-//                configMap.put("cnfg.cnj.report.xls.id", "");
             configurationsMap.put("cnfg.customer.pdf.report.id", "report_events_customer_pdf_template");
             configurationsMap.put("cnfg.customer.report.id", "report_events_customer_template");
             configurationsMap.put("cnfg.roaming.report.id", "roaming_template");
+//                configMap.put("cnfg.cnj.report.pdf.id", "");
+//                configMap.put("cnfg.cnj.report.xls.id", "");
+
+            configurationsMap.put("cnfg.voucher.report.id", "voucher_unattended_template");
+
+            // voucher request
+            configurationsMap.put("cnfg.voucher.request.report.crm.report.id", "voucher_crm_data_template");
+            configurationsMap.put("cnfg.voucher.request.report.interception.call.report.id", "voucher_interception_call_template");
+            configurationsMap.put("cnfg.voucher.request.report.interception.call.sms.report.id", "vocuher_interception_call_sms_template");
+            configurationsMap.put("cnfg.voucher.request.report.tracking.call.report.id", "voucher_tracking_call_template");
+            configurationsMap.put("cnfg.voucher.request.report.tracking.event.report.id", "voucher_tracking_event_template");
             return configurationsMap;
         }
     }
