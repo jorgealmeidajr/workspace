@@ -70,17 +70,19 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listPrivileges(Environment env) throws SQLException {
         String sql =
-            "select module_id, \"name\"\n" +
-            "from sec.privilege\n" +
-            "order by name";
+            "select t1.id, t1.privilegeid, t1.\"name\"\n" +
+            "from sec.privilege t1\n" +
+            "order by t1.id desc";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
+                Integer id = rs.getInt("id");
                 String[] row = new String[] {
-                    (rs.getString("module_id") == null) ? "NULL" : rs.getString("module_id"),
+                    id.toString(),
+                    rs.getString("privilegeid"),
                     rs.getString("name"),
                 };
                 data.add(row);

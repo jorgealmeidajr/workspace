@@ -96,10 +96,10 @@ public class CheckDatabases {
         String[] columns = null;
         if (Environment.Database.ORACLE.equals(env.getDatabase())) {
             fileName = "SEG_PRIVILEGIO";
-            columns = new String[] { "NM_MODULO", "STATUS_MODULO", "NM_PRIVILEGIO" };
+            columns = new String[] { "CD_PRIVILEGIO", "ID_PRIVILEGIO", "NM_PRIVILEGIO" };
         } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
             fileName = "sec.privilege";
-            columns = new String[] { "module_id", "name" };
+            columns = new String[] { "id", "privilegeid", "name" };
         }
 
         List<String[]> data = dao.listPrivileges(env);

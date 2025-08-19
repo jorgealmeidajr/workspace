@@ -6,11 +6,11 @@
     "databaseUsername": "VIGIANG_ALGAR",
     "databasePassword": "VIGIANG_ALGAR-sun",
     "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
-    "sshHost": "10.50.240.161",
+    "sshHost": "10.50.153.117",
     "sshUsername": "root",
     "sshPassword": "jacare1",
     "sshPort": 22,
-    "active": false
+    "active": true
   },
   {
     "name": "CLARO_ORACLE_DEV",

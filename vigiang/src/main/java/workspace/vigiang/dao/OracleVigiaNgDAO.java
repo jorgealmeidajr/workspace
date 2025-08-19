@@ -92,20 +92,20 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listPrivileges(Environment env) throws SQLException {
         String sql =
-            "select ID_CHAVE as NM_MODULO, ID_STATUS as STATUS_MODULO, t1.NM_PRIVILEGIO\n" +
+            "select t1.CD_PRIVILEGIO, t1.ID_PRIVILEGIO, t1.NM_PRIVILEGIO\n" +
             "from SEG_PRIVILEGIO t1\n" +
-            "left join CFG_MODULO t2 on (t1.CD_MODULO = t2.CD_MODULO)\n" +
-            "order by NM_MODULO, t1.NM_PRIVILEGIO";
+            "order by t1.CD_PRIVILEGIO desc";
 
         List<String[]> data = new ArrayList<>();
         try (Connection conn = getConnection(env);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
+                Integer code = rs.getInt("CD_PRIVILEGIO");
                 String[] row = new String[] {
-                    (rs.getString("NM_MODULO") == null) ? "NULL" : rs.getString("NM_MODULO"),
-                    (rs.getString("STATUS_MODULO") == null) ? "NULL" : rs.getString("STATUS_MODULO"),
-                    rs.getString("NM_PRIVILEGIO"),
+                    code.toString(),
+                    rs.getString("ID_PRIVILEGIO"),
+                    rs.getString("NM_PRIVILEGIO")
                 };
                 data.add(row);
             }
