@@ -3,7 +3,9 @@ package workspace.vigiang.model;
 public enum Carrier {
     ALGAR,
     CLARO,
+    ENTEL,
     LIGGA,
+    MOVISTAR,
     OI,
     SKY,
     SURF,

@@ -154,5 +154,31 @@
     "sshPassword": "jacare1",
     "sshPort": 22,
     "active": true
+  },
+  {
+    "name": "MOVISTAR_ORACLE_DEV",
+    "carrier": "MOVISTAR",
+    "database": "ORACLE",
+    "databaseUsername": "VIGIANG_MOVISTAR",
+    "databasePassword": "VIGIANG_MOVISTAR-sun",
+    "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
+    "sshHost": "10.50.153.112",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": false
+  },
+  {
+    "name": "ENTEL_ORACLE_DEV",
+    "carrier": "ENTEL",
+    "database": "ORACLE",
+    "databaseUsername": "VIGIANG_ENTEL",
+    "databasePassword": "VIGIANG_ENTEL-sun",
+    "databaseUrl": "jdbc:oracle:thin:@10.50.150.236:1521:ORADEV",
+    "sshHost": "10.50.153.107",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": false
   }
 ]
