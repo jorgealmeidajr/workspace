@@ -8,16 +8,17 @@ import java.util.concurrent.TimeUnit;
 
 public class GitLabService {
 
-    public static class VigiaNG {
-        private static final String VIGIANG = "https://flngit01.cognyte.local/dev/vigiang/";
+    public static final String GITLAB = "https://brgit01.cognyte.local/";
+    public static final String GITLAB_VIGIANG = GITLAB + "dev/vigiang/";
 
+    public static class VigiaNG {
         public static String getFrontEndUrl() {
-            return VIGIANG + "front-end/vigia_ng_app";
+            return GITLAB_VIGIANG + "front-end/vigia_ng_app";
         }
 
         public static List<String> getBackendRepositoryUrls() {
-            var cloudControlInitialUrl = VIGIANG + "back-end/cloud-control/";
-            var cloudVigiangInitialUrl = VIGIANG + "back-end/cloud-vigiang/";
+            var cloudControlInitialUrl = GITLAB_VIGIANG + "back-end/cloud-control/";
+            var cloudVigiangInitialUrl = GITLAB_VIGIANG + "back-end/cloud-vigiang/";
 
             return Arrays.asList(
                 cloudControlInitialUrl + "admin-server",
@@ -49,7 +50,7 @@ public class GitLabService {
         }
 
         public static List<String> getDatabaseRepositoryUrls() {
-            var initialUrl = VIGIANG + "database/";
+            var initialUrl = GITLAB_VIGIANG + "database/";
             return Arrays.asList(
                 initialUrl + "algar",
                 initialUrl + "claro",
@@ -66,7 +67,7 @@ public class GitLabService {
     }
 
     public static void login(Page page) {
-        page.navigate("https://flngit01.cognyte.local/dev");
+        page.navigate(GITLAB + "dev");
         page.locator("#ldapmain_username").pressSequentially("jjunior");
         page.locator("#ldapmain_password").pressSequentially("Floripa2025#");
         page.locator("#ldapmain > form > button").click();
