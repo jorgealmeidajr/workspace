@@ -13,8 +13,10 @@ public class RenameImages {
     private final String folder;
     private final Path folderPath;
     private final boolean forceRename;
+    private final int maxCount;
+    private final int increment;
 
-    public RenameImages(String folder, boolean forceRename) throws IOException {
+    public RenameImages(String folder, boolean forceRename, int maxCount, int increment) throws IOException {
         var folderPath = Paths.get(folder);
         if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
             throw new IOException("The folder does not exist or it is not a directory");
@@ -23,6 +25,8 @@ public class RenameImages {
         this.folder = folder;
         this.folderPath = folderPath;
         this.forceRename = forceRename;
+        this.maxCount = maxCount;
+        this.increment = increment;
     }
 
     public void execute() throws IOException {
@@ -37,11 +41,10 @@ public class RenameImages {
     }
 
     private void renameFilesByCounter(List<LocalFile> localFilesToRename, String initial) throws IOException {
-        var maxCount = 995;
-        var count = 5;
+        var count = 1;
 
         if (!this.forceRename) {
-            count = LocalFileService.getAvailableCount(count, initial, localFilesToRename);
+            count = LocalFileService.getAvailableCount(count, this.increment, initial, localFilesToRename);
         }
 
         for (var localFile : localFilesToRename) {
@@ -59,8 +62,8 @@ public class RenameImages {
             Files.move(localFile.getPath(), newNamePath);
             System.out.println("file renamed to [" + newName + "]");
 
-            count = count + 5;
-            if (count >= maxCount) throw new IOException("The count value cant be larger than " + maxCount);
+            count = count + this.increment;
+            if (count >= this.maxCount) throw new IOException("The count value cant be larger than " + this.maxCount);
             await();
         }
     }

@@ -11,7 +11,7 @@ public class RenameImagesMain {
         var forceRename = false;
 
         try {
-            RenameImages renameImages = new RenameImages(folder, forceRename);
+            RenameImages renameImages = new RenameImages(folder, forceRename, 999, 1);
             renameImages.execute();
         } catch (IOException e) {
             e.printStackTrace();
