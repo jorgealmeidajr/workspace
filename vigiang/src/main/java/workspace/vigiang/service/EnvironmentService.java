@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.vigiang.dao.*;
 import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.Laboratory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class EnvironmentService {
 
     private static final String VIGIANG_PATH_STR = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
+    private static final String VIGIANG_LABS_PATH = "C:\\work\\COGNYTE1\\vigiang_labs";
 
     public static List<Environment> getEnvironments() throws IOException {
         Path path = Paths.get("src/main/java/workspace/vigiang/environments.json");
@@ -24,6 +26,17 @@ public class EnvironmentService {
         List<Environment> environments = mapper.readValue(read, new TypeReference<>(){});
         return environments.stream()
                 .filter(Environment::isActive)
+                .collect(Collectors.toList());
+    }
+
+    public static List<Laboratory> getVigiangLaboratories() throws IOException {
+        Path path = Paths.get(VIGIANG_LABS_PATH + "\\laboratories.json");
+        String read = Files.readString(path);
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<Laboratory> environments = mapper.readValue(read, new TypeReference<>(){});
+        return environments.stream()
+                .filter(Laboratory::isActive)
                 .collect(Collectors.toList());
     }
 
@@ -47,6 +60,14 @@ public class EnvironmentService {
         return vigiangPath;
     }
 
+    public static Path getVigiaNgLaboratoriesPath() {
+        Path vigiangPath = Paths.get(VIGIANG_LABS_PATH);
+        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
+            throw new IllegalArgumentException("o diretorio do vigiang laboratories nao existe ou nao eh um diretorio");
+        }
+        return vigiangPath;
+    }
+
     public static Path getEnvironmentPath(Environment environment) throws IOException {
         Path vigiangPath = getVigiaNgPath();
 
@@ -55,6 +76,16 @@ public class EnvironmentService {
             Files.createDirectories(environmentPath);
         }
         return environmentPath;
+    }
+
+    public static Path getLaboratoryPath(Laboratory laboratory) throws IOException {
+        Path vigiaNgLaboratoriesPath = getVigiaNgLaboratoriesPath();
+
+        Path laboratoryPath = Paths.get(vigiaNgLaboratoriesPath + "\\" + laboratory.getName());
+        if (!Files.exists(laboratoryPath)) {
+            Files.createDirectories(laboratoryPath);
+        }
+        return laboratoryPath;
     }
 
     public static Path getDatabaseDataPath(Environment environment) throws IOException {
