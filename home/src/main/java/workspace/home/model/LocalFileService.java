@@ -61,7 +61,7 @@ public class LocalFileService {
         return filename.replaceAll(extPattern, "");
     }
 
-    public static int getAvailableCount(int startCount, String initial, List<LocalFile> localFilesToRename) {
+    public static int getAvailableCount(int startCount, int increment, String initial, List<LocalFile> localFilesToRename) {
         int count = startCount;
 
         for (var localFile : localFilesToRename) {
@@ -70,7 +70,7 @@ public class LocalFileService {
             if (fileNameNoExtension.matches(initial + "\\d{3}")) {
                 int currentCount = Integer.parseInt(fileNameNoExtension.substring(1));
                 if (currentCount >= count) {
-                    count = currentCount + 5;
+                    count = currentCount + increment;
                 }
             }
         }
