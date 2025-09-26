@@ -28,7 +28,7 @@ public class CheckSchemas {
     }
 
     private static void execute() throws IOException, ExecutionException {
-        List<Environment> environments = EnvironmentService.getEnvironments();
+        List<Environment> environments = EnvironmentService.getVigiangDatabases();
         ExecutorService executorService = Executors.newFixedThreadPool(environments.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 

@@ -115,7 +115,7 @@ class VigiaNgData {
     }
 
     private static Environment getEnvironmentByName(String vigiaNgLabName) throws IOException {
-        return EnvironmentService.getEnvironments().stream()
+        return EnvironmentService.getVigiangDatabases().stream()
                 .filter((env) -> env.getName().toString().equalsIgnoreCase(vigiaNgLabName))
                 .findFirst()
                 .orElseThrow();

@@ -15,10 +15,6 @@ public class Environment {
     private String databaseUsername;
     private String databasePassword;
     private String databaseUrl;
-    private String sshHost;
-    private String sshUsername;
-    private String sshPassword;
-    private int sshPort;
     private boolean active;
 
     public enum Database {

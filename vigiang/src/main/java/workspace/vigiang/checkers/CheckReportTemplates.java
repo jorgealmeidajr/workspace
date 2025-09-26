@@ -20,7 +20,7 @@ public class CheckReportTemplates {
     public static void main(String[] args) {
         System.out.println("## START checking all report templates\n");
         try {
-            for (Environment env : EnvironmentService.getEnvironments()) {
+            for (Environment env : EnvironmentService.getVigiangDatabases()) {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
                 System.out.println(env.getName() + ":");
 

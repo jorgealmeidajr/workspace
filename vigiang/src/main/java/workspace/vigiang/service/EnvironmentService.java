@@ -15,11 +15,12 @@ import java.util.stream.Collectors;
 
 public class EnvironmentService {
 
-    private static final String VIGIANG_PATH_STR = "C:\\Users\\jjunior\\MyDocuments\\COGNYTE\\VIGIANG";
-    private static final String VIGIANG_LABS_PATH = "C:\\work\\COGNYTE1\\vigiang_labs";
+    private static final String VIGIANG_PATH_STR = "C:\\work\\COGNYTE1\\VIGIANG";
+    private static final String VIGIANG_LABORATORIES_PATH = "C:\\work\\COGNYTE1\\vigiang_labs";
+    private static final String VIGIANG_DATABASES_PATH = "C:\\work\\COGNYTE1\\vigiang_dbs";
 
-    public static List<Environment> getEnvironments() throws IOException {
-        Path path = Paths.get("src/main/java/workspace/vigiang/environments.json");
+    public static List<Environment> getVigiangDatabases() throws IOException {
+        Path path = Paths.get(VIGIANG_DATABASES_PATH + "\\databases.json");
         String read = Files.readString(path);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -30,7 +31,7 @@ public class EnvironmentService {
     }
 
     public static List<Laboratory> getVigiangLaboratories() throws IOException {
-        Path path = Paths.get(VIGIANG_LABS_PATH + "\\laboratories.json");
+        Path path = Paths.get(VIGIANG_LABORATORIES_PATH + "\\laboratories.json");
         String read = Files.readString(path);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -61,7 +62,7 @@ public class EnvironmentService {
     }
 
     public static Path getVigiaNgLaboratoriesPath() {
-        Path vigiangPath = Paths.get(VIGIANG_LABS_PATH);
+        Path vigiangPath = Paths.get(VIGIANG_LABORATORIES_PATH);
         if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
             throw new IllegalArgumentException("o diretorio do vigiang laboratories nao existe ou nao eh um diretorio");
         }
@@ -89,10 +90,10 @@ public class EnvironmentService {
     }
 
     public static Path getDatabaseDataPath(Environment environment) throws IOException {
-        Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
-        String database = environment.getDatabase().toString().toLowerCase();
+        Path environmentPath = Paths.get(VIGIANG_DATABASES_PATH);
+        String database = environment.getDatabase().toString();
 
-        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "_data");
+        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + environment.getName() + "\\data");
         if (!Files.exists(databaseDataPath)) {
             Files.createDirectories(databaseDataPath);
         }
@@ -110,8 +111,19 @@ public class EnvironmentService {
         return databaseDataPath;
     }
 
+    public static Path getDatabasePath(Environment environment) throws IOException {
+        Path environmentPath = Paths.get(VIGIANG_DATABASES_PATH);
+        String database = environment.getDatabase().toString();
+
+        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + environment.getName());
+        if (!Files.exists(databaseDataPath)) {
+            Files.createDirectories(databaseDataPath);
+        }
+        return databaseDataPath;
+    }
+
     public static Path getEmailTemplatesPath(Environment environment) throws IOException {
-        Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
+        Path environmentPath = getDatabasePath(environment);
 
         Path emailTemplatesPath = Paths.get(environmentPath + "\\email_templates");
         if (!Files.exists(emailTemplatesPath)) {
@@ -121,7 +133,7 @@ public class EnvironmentService {
     }
 
     public static Path getReportTemplatesPath(Environment environment) throws IOException {
-        Path environmentPath = EnvironmentService.getEnvironmentPath(environment);
+        Path environmentPath = getDatabasePath(environment);
 
         Path reportTemplatesPath = Paths.get(environmentPath + "\\report_templates");
         if (!Files.exists(reportTemplatesPath)) {

@@ -15,7 +15,7 @@ public class UpdateReports {
         Integer CARRIER_ID = 0; // this id is from database
 
         try {
-            Environment environment = EnvironmentService.getEnvironments().stream()
+            Environment environment = EnvironmentService.getVigiangDatabases().stream()
                     .filter(env -> env.getName().equals(ENVIRONMENT_NAME))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
