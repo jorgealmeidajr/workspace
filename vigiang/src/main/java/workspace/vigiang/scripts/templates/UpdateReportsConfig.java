@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class UpdateReportsConfig {
 
     public static void main(String[] args) {
-        String ENVIRONMENT_NAME = "?"; // this name should be in environments.json
+        String ENVIRONMENT_NAME = "?"; // TODO: this name should be in environments
         String CARRIER_ID = "0"; // this id is from database
 
         try {

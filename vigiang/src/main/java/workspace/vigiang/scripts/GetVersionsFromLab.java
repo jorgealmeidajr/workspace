@@ -16,7 +16,7 @@ public class GetVersionsFromLab {
     public static void main(String[] args) {
         Path vigiangTempPath = getVigiangTempPath();
 
-        String environment = "?_DEV"; // this name should be in environments.json
+        String environment = "?_DEV"; // TODO: this name should be in environments
         Path vigiangPath = EnvironmentService.getVigiaNgPath();
         Path inputPath = Paths.get(vigiangPath + "\\environments\\" + environment + "\\containers.txt");
 

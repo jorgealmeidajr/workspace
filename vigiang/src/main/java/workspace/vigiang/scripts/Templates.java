@@ -20,7 +20,7 @@ public class Templates {
 
     static class UpdateReports {
         public static void main(String[] args) {
-            String ENVIRONMENT_NAME = "?"; // this name should be in environments.json
+            String ENVIRONMENT_NAME = "?"; // TODO: this name should be in environments
             Integer CARRIER_ID = 0; // this id is from database
 
             try {
@@ -59,7 +59,7 @@ public class Templates {
 
     static class UpdateReportsConfig {
         public static void main(String[] args) {
-            String ENVIRONMENT_NAME = "?"; // this name should be in environments.json
+            String ENVIRONMENT_NAME = "?"; // TODO: this name should be in environments
             String CARRIER_ID = "0"; // this id is from database
 
             try {
