@@ -17,23 +17,23 @@ public class CheckDatabases {
     public static void main(String[] args) {
         System.out.println("## START checking all environment databases\n");
         try {
-            for (DatabaseCredentials env : EnvironmentService.getVigiangDatabases()) {
-                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
-                System.out.println(env.getName() + ":");
+            for (DatabaseCredentials databaseCredentials : EnvironmentService.getVigiangDatabases()) {
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
+                System.out.println(databaseCredentials.getName() + ":");
 
-                updateLocalFeatureFiles(env, dao);
-                updateLocalConfigurationFiles(env, dao);
+                updateLocalFeatureFiles(databaseCredentials, dao);
+                updateLocalConfigurationFiles(databaseCredentials, dao);
 
-                updateLocalModuleFiles(env, dao);
-                updateLocalPrivilegeFiles(env, dao);
-                updateLocalProfileFiles(env, dao);
+                updateLocalModuleFiles(databaseCredentials, dao);
+                updateLocalPrivilegeFiles(databaseCredentials, dao);
+                updateLocalProfileFiles(databaseCredentials, dao);
 
-                updateLocalFilterQueryFiles(env, dao);
-                updateLocalZoneInterceptionFiles(env, dao);
-                updateLocalValidationRuleFiles(env, dao);
-                updateLocalQdsValidationRuleFiles(env, dao);
-                updateLocalCarriersFiles(env, dao);
-                updateLocalZonesFiles(env, dao);
+                updateLocalFilterQueryFiles(databaseCredentials, dao);
+                updateLocalZoneInterceptionFiles(databaseCredentials, dao);
+                updateLocalValidationRuleFiles(databaseCredentials, dao);
+                updateLocalQdsValidationRuleFiles(databaseCredentials, dao);
+                updateLocalCarriersFiles(databaseCredentials, dao);
+                updateLocalZonesFiles(databaseCredentials, dao);
 
                 System.out.println();
             }

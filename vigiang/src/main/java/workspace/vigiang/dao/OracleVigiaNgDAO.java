@@ -14,14 +14,14 @@ import java.util.List;
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<Feature> listFeatures(DatabaseCredentials env) throws SQLException {
+    public List<Feature> listFeatures(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select CD_FEATURE, ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +
             "order by ID_FEATURE";
 
         List<Feature> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -41,14 +41,14 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(DatabaseCredentials env) throws SQLException {
+    public List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select CD_PARAMETRO, CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
             "order by CD_OPERADORA, ID_PARAMETRO";
 
         List<Configuration> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -67,14 +67,14 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listModules(DatabaseCredentials env) throws SQLException {
+    public List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select ID_CHAVE, ID_STATUS, ID_TIPO\n" +
             "from CFG_MODULO\n" +
             "order by ID_CHAVE";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {

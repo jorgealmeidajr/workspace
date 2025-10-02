@@ -14,17 +14,11 @@
   </properties>
 
   <dependencies>
-    <!-- https://mvnrepository.com/artifact/org.gitlab4j/gitlab4j-api -->
+    <!-- https://mvnrepository.com/artifact/com.github.mwiede/jsch -->
     <dependency>
-      <groupId>org.gitlab4j</groupId>
-      <artifactId>gitlab4j-api</artifactId>
-      <version>5.8.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.jcraft</groupId>
+      <groupId>com.github.mwiede</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.55</version>
+      <version>0.2.26</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc8 -->

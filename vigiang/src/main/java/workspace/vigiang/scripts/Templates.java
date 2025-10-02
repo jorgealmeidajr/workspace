@@ -25,7 +25,7 @@ public class Templates {
 
             try {
                 DatabaseCredentials databaseCredentials = EnvironmentService.getVigiangDatabases().stream()
-                        .filter(env -> env.getName().equals(ENVIRONMENT_NAME))
+                        .filter(credentials -> credentials.getName().equals(ENVIRONMENT_NAME))
                         .findFirst()
                         .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
@@ -64,7 +64,7 @@ public class Templates {
 
             try {
                 DatabaseCredentials databaseCredentials = EnvironmentService.getVigiangDatabases().stream()
-                        .filter(env -> env.getName().equals(ENVIRONMENT_NAME))
+                        .filter(credentials -> credentials.getName().equals(ENVIRONMENT_NAME))
                         .findFirst()
                         .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
