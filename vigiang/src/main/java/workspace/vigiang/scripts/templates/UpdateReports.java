@@ -1,7 +1,7 @@
 package workspace.vigiang.scripts.templates;
 
 import workspace.vigiang.dao.VigiaNgDAO;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.nio.file.DirectoryStream;
@@ -15,13 +15,13 @@ public class UpdateReports {
         Integer CARRIER_ID = 0; // this id is from database
 
         try {
-            Environment environment = EnvironmentService.getVigiangDatabases().stream()
+            DatabaseCredentials databaseCredentials = EnvironmentService.getVigiangDatabases().stream()
                     .filter(env -> env.getName().equals(ENVIRONMENT_NAME))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(environment);
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
 
-            Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(environment);
+            Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(databaseCredentials);
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(reportTemplatesPath)) {
                 for (Path entry : stream) {
                     String fullFileName = entry.getFileName().toString();
@@ -37,7 +37,7 @@ public class UpdateReports {
                     String reportName = fullFileName.substring(secondUnderscore + 1, lastDot);
 
                     byte[] fileBytes = Files.readAllBytes(entry);
-                    dao.updateTemplateReport(environment, carrierId, reportId, reportName, fileBytes);
+                    dao.updateTemplateReport(databaseCredentials, carrierId, reportId, reportName, fileBytes);
                 }
             }
 

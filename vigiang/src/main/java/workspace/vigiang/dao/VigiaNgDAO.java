@@ -9,43 +9,43 @@ import java.util.List;
 
 public interface VigiaNgDAO {
 
-    List<Feature> listFeatures(Environment env) throws SQLException;
+    List<Feature> listFeatures(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<Configuration> listConfigurationValues(Environment env) throws SQLException;
+    List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listModules(Environment env) throws SQLException;
+    List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listPrivileges(Environment env) throws SQLException;
+    List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listProfiles(Environment env) throws SQLException;
+    List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listFilterQueries(Environment env) throws SQLException;
+    List<String[]> listFilterQueries(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listZoneInterceptions(Environment env) throws SQLException;
+    List<String[]> listZoneInterceptions(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listValidationRules(Environment env) throws SQLException;
+    List<String[]> listValidationRules(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listQdsValidationRules(Environment env) throws SQLException;
+    List<String[]> listQdsValidationRules(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException;
+    List<EmailTemplate> listEmailTemplates(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<ReportTemplate> listReportTemplates(Environment env) throws SQLException;
+    List<ReportTemplate> listReportTemplates(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listConfigurationReports(Environment env) throws SQLException;
+    List<String[]> listConfigurationReports(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listCarriers(Environment env) throws SQLException;
+    List<String[]> listCarriers(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listZones(Environment env) throws SQLException;
+    List<String[]> listZones(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException;
+    void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException;
 
-    void updateConfigurarionValue(Environment env, Configuration configuration, String newValue) throws SQLException;
+    void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException;
 
-    default Connection getConnection(Environment environment) throws SQLException {
+    default Connection getConnection(DatabaseCredentials databaseCredentials) throws SQLException {
         return DriverManager.getConnection(
-                environment.getDatabaseUrl(),
-                environment.getDatabaseUsername(),
-                environment.getDatabasePassword());
+                databaseCredentials.getDatabaseUrl(),
+                databaseCredentials.getDatabaseUsername(),
+                databaseCredentials.getDatabasePassword());
     }
 
 }

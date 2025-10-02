@@ -7,11 +7,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Environment {
+public class DatabaseCredentials {
 
     private String name;
     private Carrier carrier;
-    private Environment.Database database;
+    private DatabaseCredentials.Database database;
     private String databaseUsername;
     private String databasePassword;
     private String databaseUrl;

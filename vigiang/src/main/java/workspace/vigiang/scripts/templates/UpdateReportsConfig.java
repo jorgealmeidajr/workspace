@@ -2,7 +2,7 @@ package workspace.vigiang.scripts.templates;
 
 import workspace.vigiang.dao.VigiaNgDAO;
 import workspace.vigiang.model.Configuration;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.ReportTemplate;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -19,18 +19,18 @@ public class UpdateReportsConfig {
         String CARRIER_ID = "0"; // this id is from database
 
         try {
-            Environment environment = EnvironmentService.getVigiangDatabases().stream()
+            DatabaseCredentials databaseCredentials = EnvironmentService.getVigiangDatabases().stream()
                     .filter(env -> env.getName().equals(ENVIRONMENT_NAME))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(environment);
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
 
-            List<Configuration> configurations = dao.listConfigurationValues(environment).stream()
+            List<Configuration> configurations = dao.listConfigurationValues(databaseCredentials).stream()
                     .filter(configuration -> configuration.getCarrierId().equals(CARRIER_ID))
                     .filter(configuration -> configuration.getId().toLowerCase().contains("report") && configuration.getId().toLowerCase().contains("id"))
                     .collect(Collectors.toList());
 
-            List<ReportTemplate> reportTemplates = dao.listReportTemplates(environment).stream()
+            List<ReportTemplate> reportTemplates = dao.listReportTemplates(databaseCredentials).stream()
                     .filter(reportTemplate -> reportTemplate.getCarrierCode().equals(CARRIER_ID))
                     .collect(Collectors.toList());
 
@@ -54,7 +54,7 @@ public class UpdateReportsConfig {
                         System.out.println(configuration.getId() + " -> " + matchingTemplate.getReportId());
 
                         if (!originalValue.equals(newValue)) {
-                            dao.updateConfigurarionValue(environment, configuration, newValue);
+                            dao.updateConfigurarionValue(databaseCredentials, configuration, newValue);
                             System.out.println("  original value: " + originalValue + " -> new value: " + newValue);
                         }
 

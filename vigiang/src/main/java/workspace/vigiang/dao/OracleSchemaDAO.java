@@ -1,7 +1,7 @@
 package workspace.vigiang.dao;
 
 import workspace.vigiang.model.DbObjectDefinition;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -10,56 +10,55 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
-    public List<DbObjectDefinition> listTables(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
-        return listObjectDefinitions(env, objects, "TABLE");
+    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        return listObjectDefinitions(databaseCredentials, objects, "TABLE");
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "VIEW", "  and ao.object_name like 'VW_NG_%'");;
-        return listObjectDefinitions(env, objects, "VIEW");
+    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'");;
+        return listObjectDefinitions(databaseCredentials, objects, "VIEW");
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
-        return listObjectDefinitions(env, objects, "FUNCTION");
+    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
+        return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
-        return listObjectDefinitions(env, objects, "INDEX");
+    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        return listObjectDefinitions(databaseCredentials, objects, "INDEX");
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials) throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException {
-        List<String> objects = listOracleObjects(env, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')");
-        return listObjectDefinitions(env, objects, "PACKAGE_BODY");
+    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')");
+        return listObjectDefinitions(databaseCredentials, objects, "PACKAGE_BODY");
     }
 
-    private List<String> listOracleObjects(Environment env, String objectType, String where) throws SQLException {
+    private List<String> listOracleObjects(DatabaseCredentials databaseCredentials, String objectType, String where) throws SQLException {
         String sql =
             "select ao.owner, ao.object_name\n" +
             "from all_objects ao\n" +
-            "where ao.owner like 'VIGIANG_" + env.getCarrier().toString() + "'\n" +
+            "where ao.owner like 'VIGIANG_" + databaseCredentials.getCarrier().toString() + "'\n" +
             "  and ao.object_type = '" + objectType + "'\n" +
             where + "\n" +
             "order by ao.owner, ao.object_name";
 
         List<String> result = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -70,10 +69,10 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         return result;
     }
 
-    private List<DbObjectDefinition> listObjectDefinitions(Environment env, List<String> objects, String objectType) throws SQLException {
+    private List<DbObjectDefinition> listObjectDefinitions(DatabaseCredentials databaseCredentials, List<String> objects, String objectType) throws SQLException {
         List<DbObjectDefinition> result = new ArrayList<>();
 
-        try (Connection conn = getConnection(env)) {
+        try (Connection conn = getConnection(databaseCredentials)) {
             for (String object : objects) {
                 String objectName = object.substring(object.indexOf(".") + 1);
                 String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";

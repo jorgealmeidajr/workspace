@@ -1,6 +1,6 @@
 package workspace.vigiang.service;
 
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class FileService {
 
-    public static void updateLocalFiles(Environment env, String fileName, String[] columns, List<String[]> data) throws IOException {
+    public static void updateLocalFiles(DatabaseCredentials databaseCredentials, String fileName, String[] columns, List<String[]> data) throws IOException {
         var finalLines = new ArrayList<String>();
         int columnWidth = calculateColumnWidth(columns);
 
@@ -26,12 +26,12 @@ public class FileService {
         }
 
         var newFileContent =
-            "# " + env.getName() + " | " + fileName + "\n" +
+            "# " + databaseCredentials.getName() + " | " + fileName + "\n" +
             "```\n" +
             String.join(System.lineSeparator(), finalLines) +
             "```\n";
 
-        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(env);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
         Path finalFilePath = Paths.get(databaseDataPath + "\\" + fileName + ".md");
 
         var initialFileContent = "";

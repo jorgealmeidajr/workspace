@@ -4,7 +4,7 @@ import workspace.vigiang.model.Configuration;
 import workspace.vigiang.model.Feature;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class CheckDatabases {
     public static void main(String[] args) {
         System.out.println("## START checking all environment databases\n");
         try {
-            for (Environment env : EnvironmentService.getVigiangDatabases()) {
+            for (DatabaseCredentials env : EnvironmentService.getVigiangDatabases()) {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
                 System.out.println(env.getName() + ":");
 
@@ -43,110 +43,110 @@ public class CheckDatabases {
         System.out.println("\n## END checking all environment databases.");
     }
 
-    private static void updateLocalFeatureFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalFeatureFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_FEATURE";
             columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.feature";
             columns = new String[] { "feature", "status", "description" };
         }
 
-        List<String[]> data = dao.listFeatures(env).stream()
+        List<String[]> data = dao.listFeatures(databaseCredentials).stream()
                 .map(Feature::toArray)
                 .collect(Collectors.toList());
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalConfigurationFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalConfigurationFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_SITE";
             columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.site";
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value" };
         }
 
-        List<String[]> data = dao.listConfigurationValues(env).stream()
+        List<String[]> data = dao.listConfigurationValues(databaseCredentials).stream()
                 .map(Configuration::toArray)
                 .collect(Collectors.toList());
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalModuleFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalModuleFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_MODULO";
             columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             return;
         }
 
-        List<String[]> data = dao.listModules(env);
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        List<String[]> data = dao.listModules(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalPrivilegeFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalPrivilegeFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "SEG_PRIVILEGIO";
             columns = new String[] { "CD_PRIVILEGIO", "ID_PRIVILEGIO", "NM_PRIVILEGIO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "sec.privilege";
             columns = new String[] { "id", "privilegeid", "name" };
         }
 
-        List<String[]> data = dao.listPrivileges(env);
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        List<String[]> data = dao.listPrivileges(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalProfileFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalProfileFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "SEG_PERFIL_PRIVILEGIO";
             columns = new String[] { "CD_OPERADORA", "NM_PERFIL", "NM_PRIVILEGIO", "CD_MODULO", "NM_MODULO" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "sec.profile_privilege";
             columns = new String[] { "carrier_id", "profile_name", "privilege_name", "module_id" };
         }
 
-        List<String[]> data = dao.listProfiles(env);
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        List<String[]> data = dao.listProfiles(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalFilterQueryFiles(Environment env, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalFilterQueryFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_FILTERQUERY";
             columns = new String[] { "MODULE", "LABEL", "VALUE" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.filterquery";
             columns = new String[] { "module", "label", "value" };
         }
 
-        List<String[]> data = dao.listFilterQueries(env);
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        List<String[]> data = dao.listFilterQueries(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalZoneInterceptionFiles(Environment env, VigiaNgDAO dao) {
+    private static void updateLocalZoneInterceptionFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_TP_ZONA_TP_VL_ITC";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
                 "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO",
                 "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS"
             };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.tp_zone_tp_vl_itc";
             columns = new String[] {
                 "carrier_id", "carrier_name",
@@ -156,54 +156,54 @@ public class CheckDatabases {
         }
 
         try {
-            List<String[]> data = dao.listZoneInterceptions(env);
-            FileService.updateLocalFiles(env, fileName, columns, data);
+            List<String[]> data = dao.listZoneInterceptions(databaseCredentials);
+            FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void updateLocalValidationRuleFiles(Environment env, VigiaNgDAO dao) {
+    private static void updateLocalValidationRuleFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_VALIDATRULES";
             columns = new String[] { "CD_OPERADORA", "NM_OPERADORA", "MODULO", "VALID_RULES" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.validatrules";
             columns = new String[] { "carrier_id", "carrier_name", "module", "valid_rules" };
         }
 
         try {
-            List<String[]> data = dao.listValidationRules(env);
-            FileService.updateLocalFiles(env, fileName, columns, data);
+            List<String[]> data = dao.listValidationRules(databaseCredentials);
+            FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void updateLocalQdsValidationRuleFiles(Environment env, VigiaNgDAO dao) {
+    private static void updateLocalQdsValidationRuleFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_TIPO_NUMERO_QDS";
             columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             return;
         }
 
         try {
-            List<String[]> data = dao.listQdsValidationRules(env);
-            FileService.updateLocalFiles(env, fileName, columns, data);
+            List<String[]> data = dao.listQdsValidationRules(databaseCredentials);
+            FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static void updateLocalCarriersFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalCarriersFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_OPERADORA";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
@@ -211,7 +211,7 @@ public class CheckDatabases {
                 "DE_COMENTARIO", "SN_MULTIOPERADORA", "ID_REGEX", "DS_LOCAL_IMAGENS",  "DS_REGEX", "ID_API_KEY_MAPS", "SN_TOKEN",
                 "IM_LOGO", "IM_LOGO_FOOTER"
             };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.carrier";
             columns = new String[] {
                 "id", "name",
@@ -221,20 +221,21 @@ public class CheckDatabases {
             };
         }
 
-        List<String[]> data = dao.listCarriers(env);
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        // TODO: write logo in a separated file
+        List<String[]> data = dao.listCarriers(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalZonesFiles(Environment env, VigiaNgDAO dao) throws SQLException, IOException {
+    private static void updateLocalZonesFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_ZONA_MONIT";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
                 "CD_ZONA_MONIT", "NM_ZONA_MONIT", "DE_COMENTARIOS"//, "IN_ATIVO"
             };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.zone_monit";
             columns = new String[] {
                 "carrier_id", "carrier_name",
@@ -242,8 +243,8 @@ public class CheckDatabases {
             };
         }
 
-        List<String[]> data = dao.listZones(env);
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        List<String[]> data = dao.listZones(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
 }

@@ -2,7 +2,7 @@ package workspace.vigiang.checkers;
 
 import workspace.vigiang.dao.DbSchemaDAO;
 import workspace.vigiang.model.DbObjectDefinition;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.SchemaResult;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+@Deprecated
 public class CheckSchemas {
 
     public static void main(String[] args) {
@@ -28,12 +29,12 @@ public class CheckSchemas {
     }
 
     private static void execute() throws IOException, ExecutionException {
-        List<Environment> environments = EnvironmentService.getVigiangDatabases();
-        ExecutorService executorService = Executors.newFixedThreadPool(environments.size());
+        List<DatabaseCredentials> databasesCredentials = EnvironmentService.getVigiangDatabases();
+        ExecutorService executorService = Executors.newFixedThreadPool(databasesCredentials.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 
-        for (Environment env : environments) {
-            Callable<SchemaResult> callableTask = getCallableTask(env);
+        for (DatabaseCredentials databaseCredentials : databasesCredentials) {
+            Callable<SchemaResult> callableTask = getCallableTask(databaseCredentials);
             callableTasks.add(callableTask);
         }
 
@@ -53,20 +54,20 @@ public class CheckSchemas {
 
     private static void handleResult(Future<SchemaResult> future) throws InterruptedException, ExecutionException, IOException {
         SchemaResult result = future.get();
-        Environment env = result.getEnvironment();
-        Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(env);
+        DatabaseCredentials databaseCredentials = result.getDatabaseCredentials();
+        Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(databaseCredentials);
 
-        System.out.println(env.getName() + ":");
+        System.out.println(databaseCredentials.getName() + ":");
         updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
         updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
         updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
         updateLocalSchemaFiles(databaseSchemaPath, "functions", result.getFunctions());
 
-        if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             updateLocalSchemaFiles(databaseSchemaPath, "procedures", result.getProcedures());
         }
 
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             updateLocalSchemaFiles(databaseSchemaPath, "packageBodies", result.getPackageBodies());
         }
 
@@ -95,18 +96,18 @@ public class CheckSchemas {
         }
     }
 
-    private static Callable<SchemaResult> getCallableTask(Environment env) {
+    private static Callable<SchemaResult> getCallableTask(DatabaseCredentials databaseCredentials) {
         return () -> {
-            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(env);
+            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
-            List<DbObjectDefinition> tables = dao.listTables(env);
-            List<DbObjectDefinition> views = dao.listViews(env);
-            List<DbObjectDefinition> functions = dao.listFunctions(env);
-            List<DbObjectDefinition> indexes = dao.listIndexes(env);
-            List<DbObjectDefinition> procedures = dao.listProcedures(env);
-            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(env);
+            List<DbObjectDefinition> tables = dao.listTables(databaseCredentials);
+            List<DbObjectDefinition> views = dao.listViews(databaseCredentials);
+            List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentials);
+            List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentials);
+            List<DbObjectDefinition> procedures = dao.listProcedures(databaseCredentials);
+            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(databaseCredentials);
 
-            return new SchemaResult(env, tables, views, functions, indexes, procedures, packageBodies);
+            return new SchemaResult(databaseCredentials, tables, views, functions, indexes, procedures, packageBodies);
         };
     }
 

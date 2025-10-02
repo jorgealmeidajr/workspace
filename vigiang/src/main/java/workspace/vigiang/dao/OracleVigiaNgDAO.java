@@ -14,7 +14,7 @@ import java.util.List;
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<Feature> listFeatures(Environment env) throws SQLException {
+    public List<Feature> listFeatures(DatabaseCredentials env) throws SQLException {
         String sql =
             "select CD_FEATURE, ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +
@@ -41,7 +41,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(Environment env) throws SQLException {
+    public List<Configuration> listConfigurationValues(DatabaseCredentials env) throws SQLException {
         String sql =
             "select CD_PARAMETRO, CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
@@ -67,7 +67,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listModules(Environment env) throws SQLException {
+    public List<String[]> listModules(DatabaseCredentials env) throws SQLException {
         String sql =
             "select ID_CHAVE, ID_STATUS, ID_TIPO\n" +
             "from CFG_MODULO\n" +
@@ -90,14 +90,14 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listPrivileges(Environment env) throws SQLException {
+    public List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.CD_PRIVILEGIO, t1.ID_PRIVILEGIO, t1.NM_PRIVILEGIO\n" +
             "from SEG_PRIVILEGIO t1\n" +
             "order by t1.CD_PRIVILEGIO desc";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -114,7 +114,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listProfiles(Environment env) throws SQLException {
+    public List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO, t2.CD_MODULO, t4.ID_CHAVE as NM_MODULO\n" +
             "from SEG_PERFIL_PRIVILEGIO t1\n" +
@@ -125,7 +125,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -143,13 +143,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listFilterQueries(Environment env) throws SQLException {
+    public List<String[]> listFilterQueries(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select * from CFG_NG_FILTERQUERY\n" +
             "order by MODULE, LABEL";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -165,7 +165,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZoneInterceptions(Environment env) throws SQLException {
+    public List<String[]> listZoneInterceptions(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select\n" +
             "  t4.CD_OPERADORA, t4.NM_OPERADORA,\n" +
@@ -178,7 +178,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t4.CD_OPERADORA, t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -198,7 +198,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listValidationRules(Environment env) throws SQLException {
+    public List<String[]> listValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.CD_OPERADORA, t2.NM_OPERADORA, t1.MODULO, t1.VALID_RULES\n" +
             "from CFG_NG_VALIDATRULES t1\n" +
@@ -206,7 +206,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t1.CD_OPERADORA, t1.MODULO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -223,14 +223,14 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listQdsValidationRules(Environment env) throws SQLException {
+    public List<String[]> listQdsValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select ID_TIPO_NUMERO_QDS, NM_CHAVE, TP_CONSULTA, SN_VOUCHER_DATE, VALID_RULES\n" +
             "from CFG_TIPO_NUMERO_QDS\n" +
             "order by ID_TIPO_NUMERO_QDS";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -248,7 +248,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException {
+    public List<EmailTemplate> listEmailTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO, t2.NM_OPERADORA\n" +
             "from CFG_EMAIL_SERVICOS t1\n" +
@@ -256,7 +256,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA, ID_TIPO_SERVICO";
 
         List<EmailTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -277,7 +277,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<ReportTemplate> listReportTemplates(Environment env) throws SQLException {
+    public List<ReportTemplate> listReportTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, t1.CD_OPERADORA, t2.NM_OPERADORA, DC_RELATORIO\n" +
             "from CFG_RELATORIO t1\n" +
@@ -285,7 +285,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA, ID_RELATORIO";
 
         List<ReportTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -310,7 +310,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listConfigurationReports(Environment env) throws SQLException {
+    public List<String[]> listConfigurationReports(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select cfg.CD_OPERADORA, cfg.ID_PARAMETRO, cfg.DE_PARAMETRO, cfg.VL_PARAMETRO, rel.CD_RELATORIO, rel.ID_RELATORIO\n" +
             "from CFG_NG_SITE cfg\n" +
@@ -319,7 +319,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by cfg.CD_OPERADORA, cfg.ID_PARAMETRO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -338,7 +338,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listCarriers(Environment env) throws SQLException {
+    public List<String[]> listCarriers(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select\n" +
             "  CD_OPERADORA, NM_OPERADORA,\n" +
@@ -350,7 +350,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -379,7 +379,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZones(Environment env) throws SQLException {
+    public List<String[]> listZones(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select\n" +
             "  t2.CD_OPERADORA, t2.NM_OPERADORA,\n" +
@@ -390,7 +390,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t1.CD_OPERADORA, t1.CD_ZONA_MONIT";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -409,8 +409,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
-        byte[] originalContent = getTemplateReportContent(env, carrierId, reportId, reportName);
+    public void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+        byte[] originalContent = getTemplateReportContent(databaseCredentials, carrierId, reportId, reportName);
         if (Arrays.equals(originalContent, fileBytes)) return;
 
         String sql =
@@ -419,7 +419,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "  and CD_RELATORIO = ?\n" +
             "  and ID_RELATORIO = ?";
 
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setBytes(1, fileBytes);
             stmt.setInt(2, Integer.parseInt(carrierId));
@@ -431,18 +431,18 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateConfigurarionValue(Environment env, Configuration configuration, String newValue) throws SQLException {
-
+    public void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
+        // TODO: what is this?
     }
 
-    private byte[] getTemplateReportContent(Environment env, String carrierId, String reportId, String reportName) throws SQLException {
+    private byte[] getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select DC_RELATORIO from CFG_RELATORIO\n" +
             "where CD_OPERADORA = ?\n" +
             "  and CD_RELATORIO = ?\n" +
             "  and ID_RELATORIO = ?";
 
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, Integer.parseInt(carrierId));
             stmt.setInt(2, Integer.parseInt(reportId));

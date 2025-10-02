@@ -1,7 +1,7 @@
 package workspace.vigiang.dao;
 
 import workspace.vigiang.model.DbObjectDefinition;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.TablePrinter;
 
 import java.sql.Connection;
@@ -14,7 +14,7 @@ import java.util.List;
 public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
-    public List<DbObjectDefinition> listTables(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select table_schema, table_name\n" +
             "from information_schema.tables \n" +
@@ -23,7 +23,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             "order by table_schema, table_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -82,7 +82,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select table_schema, table_name, view_definition\n" +
             "from information_schema.views\n" +
@@ -90,7 +90,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             "order by table_schema, table_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -102,7 +102,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select routine_schema, routine_name, routine_definition\n" +
             "from information_schema.routines\n" +
@@ -111,7 +111,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             "order by routine_schema, routine_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -123,7 +123,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select schemaname, tablename, indexname, indexdef\n" +
             "from pg_indexes\n" +
@@ -131,7 +131,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             "order by schemaname, tablename, indexname";
 
         List<DbObjectDefinition> result = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -143,7 +143,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select routine_schema as schema_name, routine_name as procedure_name, routine_definition\n" +
             "from information_schema.routines\n" +
@@ -152,7 +152,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             "order by schema_name, procedure_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -164,7 +164,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(Environment env) throws SQLException {
+    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
         return List.of();
     }
 

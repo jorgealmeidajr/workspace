@@ -3,7 +3,7 @@ package workspace.vigiang.checkers;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.EmailTemplate;
-import workspace.vigiang.model.Environment;
+import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
@@ -19,13 +19,13 @@ public class CheckEmailTemplates {
     public static void main(String[] args) {
         System.out.println("## START checking all email templates\n");
         try {
-            for (Environment env : EnvironmentService.getVigiangDatabases()) {
-                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(env);
-                System.out.println(env.getName() + ":");
+            for (DatabaseCredentials databaseCredentials : EnvironmentService.getVigiangDatabases()) {
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
+                System.out.println(databaseCredentials.getName() + ":");
 
-                List<EmailTemplate> emailTemplates = dao.listEmailTemplates(env);
-                updateLocalEmailTemplatesFiles(env, emailTemplates);
-                updateEmailTemplates(env, emailTemplates);
+                List<EmailTemplate> emailTemplates = dao.listEmailTemplates(databaseCredentials);
+                updateLocalEmailTemplatesFiles(databaseCredentials, emailTemplates);
+                updateEmailTemplates(databaseCredentials, emailTemplates);
 
                 System.out.println();
             }
@@ -35,15 +35,15 @@ public class CheckEmailTemplates {
         System.out.println("## END checking all email templates.");
     }
 
-    private static void updateLocalEmailTemplatesFiles(Environment env, List<EmailTemplate> emailTemplates) throws IOException {
+    private static void updateLocalEmailTemplatesFiles(DatabaseCredentials databaseCredentials, List<EmailTemplate> emailTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
-        if (Environment.Database.ORACLE.equals(env.getDatabase())) {
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_EMAIL_SERVICOS";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO"
             };
-        } else if (Environment.Database.POSTGRES.equals(env.getDatabase())) {
+        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.service_email";
             columns = new String[] {
                 "carrier_id", "carrier_name", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to"
@@ -54,16 +54,16 @@ public class CheckEmailTemplates {
                 .map(EmailTemplate::toArray)
                 .collect(Collectors.toList());
 
-        FileService.updateLocalFiles(env, fileName, columns, data);
+        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateEmailTemplates(Environment env, List<EmailTemplate> emailTemplates) {
+    private static void updateEmailTemplates(DatabaseCredentials databaseCredentials, List<EmailTemplate> emailTemplates) {
         for (EmailTemplate emailTemplate : emailTemplates) {
             var newFileContent = emailTemplate.getBody();
             var fileName = emailTemplate.getCarrierId() + "_" + emailTemplate.getId();
 
             try {
-                Path emailTemplatesPath = EnvironmentService.getEmailTemplatesPath(env);
+                Path emailTemplatesPath = EnvironmentService.getEmailTemplatesPath(databaseCredentials);
 
                 Path finalFilePath = Paths.get(emailTemplatesPath + "\\" + fileName + ".html");
                 var initialFileContent = "";

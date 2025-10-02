@@ -10,14 +10,14 @@ import java.util.List;
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
-    public List<Feature> listFeatures(Environment env) throws SQLException {
+    public List<Feature> listFeatures(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select id, feature, status, description\n" +
             "from conf.feature\n" +
             "order by feature";
 
         List<Feature> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -37,14 +37,14 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(Environment env) throws SQLException {
+    public List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select id, carrier_id, parameter_id, parameter_description, value\n" +
             "from conf.site\n" +
             "order by carrier_id, parameter_id";
 
         List<Configuration> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -63,19 +63,19 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listModules(Environment env) throws SQLException {
+    public List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<String[]> listPrivileges(Environment env) throws SQLException {
+    public List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.id, t1.privilegeid, t1.\"name\"\n" +
             "from sec.privilege t1\n" +
             "order by t1.id desc";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -92,7 +92,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listProfiles(Environment env) throws SQLException {
+    public List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t3.carrier_id, t3.\"name\" as \"profile_name\", t2.\"name\" as \"privilege_name\", t2.module_id\n" +
             "from sec.profile_privilege t1\n" +
@@ -102,7 +102,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t3.carrier_id, t3.\"name\", t2.\"name\"";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -119,14 +119,14 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listFilterQueries(Environment env) throws SQLException {
+    public List<String[]> listFilterQueries(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select module, label, value\n" +
             "from conf.filterquery\n" +
             "order by module, label";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -142,7 +142,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZoneInterceptions(Environment env) throws SQLException {
+    public List<String[]> listZoneInterceptions(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select\n" +
             "  t4.id as \"carrier_id\", t4.\"name\" as \"carrier_name\",\n" +
@@ -155,7 +155,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t4.id, t3.\"name\", t2.\"name\"";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -175,7 +175,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listValidationRules(Environment env) throws SQLException {
+    public List<String[]> listValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.carrier_id, t2.\"name\" as \"carrier_name\", t1.\"module\", t1.valid_rules\n" +
             "from conf.validatrules t1\n" +
@@ -183,7 +183,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t1.carrier_id, t1.\"module\"";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -200,12 +200,12 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listQdsValidationRules(Environment env) throws SQLException {
+    public List<String[]> listQdsValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<EmailTemplate> listEmailTemplates(Environment env) throws SQLException {
+    public List<EmailTemplate> listEmailTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select carrier_id, service_type, email_subject, service_name, attach_name, email_to, email_from, email_body, t2.\"name\" as \"carrier_name\"\n" +
             "from conf.service_email t1\n" +
@@ -213,7 +213,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by carrier_id, service_type";
 
         List<EmailTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -234,7 +234,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<ReportTemplate> listReportTemplates(Environment env) throws SQLException {
+    public List<ReportTemplate> listReportTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.id, report_id, report_type, carrier_id, t2.\"name\" as \"carrier_name\", file\n" +
             "from conf.report t1\n" +
@@ -242,7 +242,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by carrier_id, report_id";
 
         List<ReportTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -267,7 +267,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listConfigurationReports(Environment env) throws SQLException {
+    public List<String[]> listConfigurationReports(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select cfg.carrier_id, cfg.parameter_id, cfg.parameter_description, cfg.value, rel.id as id, rel.report_id\n" +
             "from conf.site cfg\n" +
@@ -276,7 +276,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by cfg.carrier_id, cfg.parameter_id";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -295,7 +295,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listCarriers(Environment env) throws SQLException {
+    public List<String[]> listCarriers(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select\n" +
             "  id, \"name\",\n" +
@@ -307,7 +307,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by id";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -337,7 +337,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZones(Environment env) throws SQLException {
+    public List<String[]> listZones(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select\n" +
             "  t2.id as \"carrier_id\", t2.\"name\" as \"carrier_name\",\n" +
@@ -348,7 +348,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t1.carrier_id, t1.id";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -367,8 +367,8 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateTemplateReport(Environment env, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
-        String originalContent = getTemplateReportContent(env, carrierId, reportId, reportName);
+    public void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+        String originalContent = getTemplateReportContent(databaseCredentials, carrierId, reportId, reportName);
         String base64Content = Base64.getEncoder().encodeToString(fileBytes);
         if (originalContent.equals(base64Content)) return;
 
@@ -378,7 +378,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "  and id = ?\n" +
             "  and report_id = ?";
 
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, base64Content);
             stmt.setInt(2, Integer.parseInt(carrierId));
@@ -390,14 +390,14 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateConfigurarionValue(Environment env, Configuration configuration, String newValue) throws SQLException {
+    public void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
         String sql =
             "update conf.site set value = ?\n" +
             "where id = ?\n" +
             "  and parameter_id = ?\n" +
             "  and carrier_id = ?";
 
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newValue);
             stmt.setInt(2, configuration.getCode());
@@ -408,14 +408,14 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
         }
     }
 
-    private String getTemplateReportContent(Environment env, String carrierId, String reportId, String reportName) throws SQLException {
+    private String getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select file from conf.report\n" +
             "where carrier_id = ?\n" +
             "  and id = ?\n" +
             "  and report_id = ?";
 
-        try (Connection conn = getConnection(env);
+        try (Connection conn = getConnection(databaseCredentials);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, Integer.parseInt(carrierId));
             stmt.setInt(2, Integer.parseInt(reportId));

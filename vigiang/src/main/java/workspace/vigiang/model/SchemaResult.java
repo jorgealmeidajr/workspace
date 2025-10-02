@@ -8,7 +8,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class SchemaResult {
-    private final Environment environment;
+    private final DatabaseCredentials databaseCredentials;
     private final List<DbObjectDefinition> tables;
     private final List<DbObjectDefinition> views;
     private final List<DbObjectDefinition> functions;

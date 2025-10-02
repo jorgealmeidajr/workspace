@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class CompareManagementToLab {
 
     public static void main(String[] args) {
+        // TODO: this will not work anymore
         String carrierManagementName = "CLARO";
         String vigiaNgLabName = "CLARO_ORACLE_DEV";
 
@@ -26,6 +28,7 @@ public class CompareManagementToLab {
 
             checkNewFeaturesToManagement(managementData, vigiaNgData);
             checkNewConfigurationsToManagement(managementData, vigiaNgData);
+            // TODO: missing implementation
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,10 +95,10 @@ class VigiaNgData {
     private final Map<String, Configuration> configurationsMap;
 
     VigiaNgData(String vigiaNgLabName) throws Exception {
-        Environment environment = getEnvironmentByName(vigiaNgLabName);
-        VigiaNgDAO vigiaNgDAO = EnvironmentService.getVigiaNgDAO(environment);
+        DatabaseCredentials databaseCredentials = getEnvironmentByName(vigiaNgLabName);
+        VigiaNgDAO vigiaNgDAO = EnvironmentService.getVigiaNgDAO(databaseCredentials);
 
-        List<Feature> features = vigiaNgDAO.listFeatures(environment).stream()
+        List<Feature> features = vigiaNgDAO.listFeatures(databaseCredentials).stream()
                 .sorted(Comparator.comparing(Feature::getCode).reversed())
                 .collect(Collectors.toList());
         this.featuresIds = features.stream()
@@ -104,7 +107,7 @@ class VigiaNgData {
         this.featuresMap = features.stream()
                 .collect(Collectors.toMap(Feature::getId, Function.identity()));
 
-        List<Configuration> configurations = vigiaNgDAO.listConfigurationValues(environment).stream()
+        List<Configuration> configurations = vigiaNgDAO.listConfigurationValues(databaseCredentials).stream()
                 .sorted(Comparator.comparing(Configuration::getCode).reversed())
                 .collect(Collectors.toList());
         this.configurationsIds = configurations.stream()
@@ -114,9 +117,9 @@ class VigiaNgData {
                 .collect(Collectors.toMap(Configuration::getId, Function.identity()));
     }
 
-    private static Environment getEnvironmentByName(String vigiaNgLabName) throws IOException {
+    private static DatabaseCredentials getEnvironmentByName(String vigiaNgLabName) throws IOException {
         return EnvironmentService.getVigiangDatabases().stream()
-                .filter((env) -> env.getName().toString().equalsIgnoreCase(vigiaNgLabName))
+                .filter((databaseCredentials) -> databaseCredentials.getName().toString().equalsIgnoreCase(vigiaNgLabName))
                 .findFirst()
                 .orElseThrow();
     }
