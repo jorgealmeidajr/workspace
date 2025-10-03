@@ -60,12 +60,20 @@ public class CheckEmailTemplates {
     private static void updateEmailTemplates(DatabaseCredentials databaseCredentials, List<EmailTemplate> emailTemplates) {
         for (EmailTemplate emailTemplate : emailTemplates) {
             var newFileContent = emailTemplate.getBody();
-            var fileName = emailTemplate.getCarrierId() + "_" + emailTemplate.getId();
+            String emailTemplateId = emailTemplate.getId();
+            int carrierIdInt = Integer.parseInt(emailTemplate.getCarrierId());
+            String carrierId = String.format("%02d", carrierIdInt);
+            Path finalFilePath = null;
 
             try {
                 Path emailTemplatesPath = EnvironmentService.getEmailTemplatesPath(databaseCredentials);
 
-                Path finalFilePath = Paths.get(emailTemplatesPath + "\\" + fileName + ".html");
+                Path emailCarrierPath = Paths.get(emailTemplatesPath + "\\" + carrierId);
+                if (!Files.exists(emailCarrierPath)) {
+                    Files.createDirectories(emailCarrierPath);
+                }
+
+                finalFilePath = Paths.get(emailCarrierPath + "\\" + emailTemplateId + ".html");
                 var initialFileContent = "";
                 if (Files.exists(finalFilePath)) {
                     initialFileContent = new String(Files.readAllBytes(finalFilePath));
@@ -76,7 +84,7 @@ public class CheckEmailTemplates {
                     Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
                 }
             } catch (Exception e) {
-                System.err.println("fail on file: " + fileName);
+                System.err.println("fail on file: " + finalFilePath);
                 e.printStackTrace();
             }
         }

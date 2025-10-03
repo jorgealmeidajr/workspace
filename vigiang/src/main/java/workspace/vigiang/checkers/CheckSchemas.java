@@ -100,6 +100,8 @@ public class CheckSchemas {
         return () -> {
             DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
+            // TODO: oracle, tables must be simplify
+            // TODO: postgres, tables should be in create sql
             List<DbObjectDefinition> tables = dao.listTables(databaseCredentials);
             List<DbObjectDefinition> views = dao.listViews(databaseCredentials);
             List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentials);

@@ -85,9 +85,14 @@ public class CheckReportTemplates {
             templateExtension = "xlsx";
         }
 
+        Path reportCarrierPath = Paths.get(reportTemplatesPath + "\\" + carrierCode);
+        if (!Files.exists(reportCarrierPath)) {
+            Files.createDirectories(reportCarrierPath);
+        }
+
         var bytes = reportTemplate.getTemplate();
-        var templateName = carrierCode + "_" + reportCode + "_" + id + "." + templateExtension;
-        Path templatePath = Paths.get(reportTemplatesPath + "\\" + templateName);
+        var templateName = reportCode + "_" + id + "." + templateExtension;
+        Path templatePath = Paths.get(reportCarrierPath + "\\" + templateName);
 
         if (Files.exists(templatePath)) {
             byte[] fileContent = Files.readAllBytes(templatePath);
