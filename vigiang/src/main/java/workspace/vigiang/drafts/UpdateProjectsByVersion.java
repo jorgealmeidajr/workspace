@@ -1,6 +1,7 @@
 package workspace.vigiang.drafts;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,55 +41,51 @@ public class UpdateProjectsByVersion {
     }
 
     private static void updateConfigurations(Path versionPath, List<String> backendFileContents, List<String> frontendFileContents) throws IOException {
-        List<String> allMatches = new ArrayList<>();
+        List<Pattern> backendPatterns = List.of(
+            Pattern.compile("\\.getConfiguration\\(['\"]([^'\"]+)['\"]")
+        );
 
-        {
-            List<Pattern> patterns = List.of(
-                Pattern.compile("\\.getConfiguration\\(['\"]([^'\"]+)['\"]")
-            );
-            allMatches.addAll(getMatches(backendFileContents, patterns));
-        }
+        List<Pattern> frontendPatterns = List.of(
+            Pattern.compile("getConfiguration\\(['\"]([^'\"]+)['\"]")
+        );
 
-        {
-            List<Pattern> patterns = List.of(
-                Pattern.compile("getConfiguration\\(['\"]([^'\"]+)['\"]")
-            );
-            allMatches.addAll(getMatches(frontendFileContents, patterns));
-        }
-
-        Set<String> uniqueMatches = new LinkedHashSet<>(allMatches);
-        List<String> sortedMatches = new ArrayList<>(uniqueMatches);
-        sortedMatches.sort(String::compareTo);
-        String matchesString = String.join("\n", sortedMatches);
-
-        Path allConfigurationsPath = Paths.get(versionPath + "\\configurations.txt");
-        Files.writeString(allConfigurationsPath, matchesString);
+        update(versionPath, backendFileContents, frontendFileContents, "configurations", backendPatterns, frontendPatterns);
     }
 
     private static void updateFeatures(Path versionPath, List<String> backendFileContents, List<String> frontendFileContents) throws IOException {
+        List<Pattern> backendPatterns = List.of(
+            Pattern.compile("\\.ifFeature\\([\"']([^\"']+)[\"']\\)")
+        );
+
+        List<Pattern> frontendPatterns = List.of(
+            Pattern.compile("ifFeature\\(['\"]([^'\"]+)['\"]")
+        );
+
+        update(versionPath, backendFileContents, frontendFileContents, "features", backendPatterns, frontendPatterns);
+    }
+
+    private static void update(Path versionPath, List<String> backendFileContents, List<String> frontendFileContents,
+                               String output, List<Pattern> backendPatterns, List<Pattern> frontendPatterns) throws IOException {
         List<String> allMatches = new ArrayList<>();
-
-        {
-            List<Pattern> patterns = List.of(
-                Pattern.compile("\\.ifFeature\\([\"']([^\"']+)[\"']\\)")
-            );
-            allMatches.addAll(getMatches(backendFileContents, patterns));
-        }
-
-        {
-            List<Pattern> patterns = List.of(
-                Pattern.compile("ifFeature\\(['\"]([^'\"]+)['\"]")
-            );
-            allMatches.addAll(getMatches(frontendFileContents, patterns));
-        }
+        allMatches.addAll(getMatches(backendFileContents, backendPatterns));
+        allMatches.addAll(getMatches(frontendFileContents, frontendPatterns));
 
         Set<String> uniqueMatches = new LinkedHashSet<>(allMatches);
         List<String> sortedMatches = new ArrayList<>(uniqueMatches);
         sortedMatches.sort(String::compareTo);
-        String matchesString = String.join("\n", sortedMatches);
+        String newFileContent = String.join("\n", sortedMatches);
 
-        Path allConfigurationsPath = Paths.get(versionPath + "\\features.txt");
-        Files.writeString(allConfigurationsPath, matchesString);
+        Path allConfigurationsPath = Paths.get(versionPath + "\\" + output + ".txt");
+
+        var initialFileContent = "";
+        if (Files.exists(allConfigurationsPath)) {
+            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + allConfigurationsPath);
+            Files.writeString(allConfigurationsPath, newFileContent);
+        }
     }
 
     private static List<String> getMatches(List<String> fileContents, List<Pattern> patterns) {
