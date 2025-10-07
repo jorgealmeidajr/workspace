@@ -28,13 +28,14 @@ public class UpdateProjectsByVersion {
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
             Path versionPath = Paths.get(getVigiaNgPath() + "\\versions\\" + version);
 
-            var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java"), List.of("commons"));
-            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of(""));
+            var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons"));
+            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of("node_modules"));
             VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
 
             updateConfigurations(versionPath, vigiangFileContents);
             updateFeatures(versionPath, vigiangFileContents);
             updatePrivileges(versionPath, vigiangFileContents);
+            updateEnvironment(versionPath, vigiangFileContents);
         }
     }
 
@@ -64,7 +65,7 @@ public class UpdateProjectsByVersion {
 
     private static void updatePrivileges(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
-//            Pattern.compile("\\b(LIST_|CREATE_|CHANGE_)[A-Z_]*\\b")
+            Pattern.compile("((LIST_|CREATE_|CHANGE_)[A-Z_]*)")
         );
 
         List<Pattern> frontendPatterns = List.of(
@@ -72,6 +73,20 @@ public class UpdateProjectsByVersion {
         );
 
         update(versionPath, vigiangFileContents, "privileges", backendPatterns, frontendPatterns);
+    }
+
+    private static void updateEnvironment(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
+        List<Pattern> backendPatterns = List.of(
+            Pattern.compile("[$][{](\\w+)[}]")
+        );
+
+        List<Pattern> frontendPatterns = List.of(
+            Pattern.compile("import[.]meta[.]env[.](\\w+)"),
+            Pattern.compile("process[.]env[.](\\w+)"),
+            Pattern.compile("env[.](\\w+)")
+        );
+
+        update(versionPath, vigiangFileContents, "environment", backendPatterns, frontendPatterns);
     }
 
     private static void update(Path versionPath, VigiangFileContents vigiangFileContents, String output,
