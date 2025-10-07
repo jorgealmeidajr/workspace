@@ -1,7 +1,9 @@
 package workspace.vigiang.drafts;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,21 +28,17 @@ public class UpdateProjectsByVersion {
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
             Path versionPath = Paths.get(getVigiaNgPath() + "\\versions\\" + version);
 
-            {
-                List<String> backendFileContents = getFileContentsByExtensions(backendPath, List.of("java"), List.of("commons"));
-                List<String> frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of(""));
-                updateConfigurations(versionPath, backendFileContents, frontendFileContents);
-            }
+            var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java"), List.of("commons"));
+            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of(""));
+            VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
 
-            {
-                List<String> backendFileContents = getFileContentsByExtensions(backendPath, List.of("java"), List.of("commons"));
-                List<String> frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of(""));
-                updateFeatures(versionPath, backendFileContents, frontendFileContents);
-            }
+            updateConfigurations(versionPath, vigiangFileContents);
+            updateFeatures(versionPath, vigiangFileContents);
+            updatePrivileges(versionPath, vigiangFileContents);
         }
     }
 
-    private static void updateConfigurations(Path versionPath, List<String> backendFileContents, List<String> frontendFileContents) throws IOException {
+    private static void updateConfigurations(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
             Pattern.compile("\\.getConfiguration\\(['\"]([^'\"]+)['\"]")
         );
@@ -49,10 +47,10 @@ public class UpdateProjectsByVersion {
             Pattern.compile("getConfiguration\\(['\"]([^'\"]+)['\"]")
         );
 
-        update(versionPath, backendFileContents, frontendFileContents, "configurations", backendPatterns, frontendPatterns);
+        update(versionPath, vigiangFileContents, "configurations", backendPatterns, frontendPatterns);
     }
 
-    private static void updateFeatures(Path versionPath, List<String> backendFileContents, List<String> frontendFileContents) throws IOException {
+    private static void updateFeatures(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
             Pattern.compile("\\.ifFeature\\([\"']([^\"']+)[\"']\\)")
         );
@@ -61,20 +59,40 @@ public class UpdateProjectsByVersion {
             Pattern.compile("ifFeature\\(['\"]([^'\"]+)['\"]")
         );
 
-        update(versionPath, backendFileContents, frontendFileContents, "features", backendPatterns, frontendPatterns);
+        update(versionPath, vigiangFileContents, "features", backendPatterns, frontendPatterns);
     }
 
-    private static void update(Path versionPath, List<String> backendFileContents, List<String> frontendFileContents,
-                               String output, List<Pattern> backendPatterns, List<Pattern> frontendPatterns) throws IOException {
-        List<String> allMatches = new ArrayList<>();
-        allMatches.addAll(getMatches(backendFileContents, backendPatterns));
-        allMatches.addAll(getMatches(frontendFileContents, frontendPatterns));
+    private static void updatePrivileges(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
+        List<Pattern> backendPatterns = List.of(
+//            Pattern.compile("\\b(LIST_|CREATE_|CHANGE_)[A-Z_]*\\b")
+        );
 
-        Set<String> uniqueMatches = new LinkedHashSet<>(allMatches);
-        List<String> sortedMatches = new ArrayList<>(uniqueMatches);
-        sortedMatches.sort(String::compareTo);
-        String newFileContent = String.join("\n", sortedMatches);
+        List<Pattern> frontendPatterns = List.of(
+            Pattern.compile("hasRole\\((?:'|\")ROLE_([A-Z0-9_]+)(?:'|\")\\)")
+        );
 
+        update(versionPath, vigiangFileContents, "privileges", backendPatterns, frontendPatterns);
+    }
+
+    private static void update(Path versionPath, VigiangFileContents vigiangFileContents, String output,
+                               List<Pattern> backendPatterns, List<Pattern> frontendPatterns) throws IOException {
+        String resultTxt = "";
+
+        List<String> matches = getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns);
+        if (!matches.isEmpty()) {
+            resultTxt += "frontend:\n";
+            resultTxt = getFileContentsTxt(matches, resultTxt);
+            resultTxt += "\n";
+        }
+
+        matches = getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns);
+        if (!matches.isEmpty()) {
+            resultTxt += "backend:\n";
+            resultTxt = getFileContentsTxt(matches, resultTxt);
+            resultTxt += "\n";
+        }
+
+        String newFileContent = resultTxt;
         Path allConfigurationsPath = Paths.get(versionPath + "\\" + output + ".txt");
 
         var initialFileContent = "";
@@ -88,11 +106,22 @@ public class UpdateProjectsByVersion {
         }
     }
 
+    private static String getFileContentsTxt(List<String> matches, String resultTxt) {
+        Set<String> uniqueMatches = new LinkedHashSet<>(matches);
+        List<String> sortedMatches = new ArrayList<>(uniqueMatches);
+        sortedMatches.sort(String::compareTo);
+
+        for (String match : sortedMatches) {
+            resultTxt += "  " + match + "\n";
+        }
+        return resultTxt;
+    }
+
     private static List<String> getMatches(List<String> fileContents, List<Pattern> patterns) {
         Set<String> matchesSet = new LinkedHashSet<>();
 
-        for (String javaFileContent : fileContents) {
-            String input = javaFileContent.trim();
+        for (String fileContent : fileContents) {
+            String input = fileContent.trim();
 
             for (Pattern pattern : patterns) {
                 Matcher matcher = pattern.matcher(input);
@@ -145,4 +174,11 @@ public class UpdateProjectsByVersion {
         return fileContents;
     }
 
+}
+
+@AllArgsConstructor
+@Getter
+class VigiangFileContents {
+    private final List<String> backendFileContents;
+    private final List<String> frontendFileContents;
 }
