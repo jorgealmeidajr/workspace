@@ -1,16 +1,14 @@
 package workspace.vigiang.drafts;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,8 +26,8 @@ public class UpdateProjectsByVersion {
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
             Path versionPath = Paths.get(getVigiaNgPath() + "\\versions\\" + version);
 
-            var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons"));
-            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of("node_modules"));
+            var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons", "target"));
+            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of("node_modules", "json-server", "tests"));
             VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
 
             updateConfigurations(versionPath, vigiangFileContents);
@@ -48,7 +46,12 @@ public class UpdateProjectsByVersion {
             Pattern.compile("getConfiguration\\(['\"]([^'\"]+)['\"]")
         );
 
-        update(versionPath, vigiangFileContents, "configurations", backendPatterns, frontendPatterns);
+        var vigiangMatches = new VigiangMatches(
+                getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns),
+                getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns));
+
+        updateTxt(versionPath, vigiangMatches, "configurations");
+        updateMd(versionPath, vigiangMatches, "configurations");
     }
 
     private static void updateFeatures(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
@@ -60,7 +63,12 @@ public class UpdateProjectsByVersion {
             Pattern.compile("ifFeature\\(['\"]([^'\"]+)['\"]")
         );
 
-        update(versionPath, vigiangFileContents, "features", backendPatterns, frontendPatterns);
+        var vigiangMatches = new VigiangMatches(
+                getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns),
+                getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns));
+
+        updateTxt(versionPath, vigiangMatches, "features");
+        updateMd(versionPath, vigiangMatches, "features");
     }
 
     private static void updatePrivileges(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
@@ -72,7 +80,12 @@ public class UpdateProjectsByVersion {
             Pattern.compile("hasRole\\((?:'|\")ROLE_([A-Z0-9_]+)(?:'|\")\\)")
         );
 
-        update(versionPath, vigiangFileContents, "privileges", backendPatterns, frontendPatterns);
+        var vigiangMatches = new VigiangMatches(
+                getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns),
+                getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns));
+
+        updateTxt(versionPath, vigiangMatches, "privileges");
+        updateMd(versionPath, vigiangMatches, "privileges");
     }
 
     private static void updateEnvironment(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
@@ -86,24 +99,40 @@ public class UpdateProjectsByVersion {
             Pattern.compile("env[.](\\w+)")
         );
 
-        update(versionPath, vigiangFileContents, "environment", backendPatterns, frontendPatterns);
+        var vigiangMatches = new VigiangMatches(
+                getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns),
+                getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns));
+
+        updateTxt(versionPath, vigiangMatches, "environment");
+        updateMd(versionPath, vigiangMatches, "environment");
     }
 
-    private static void update(Path versionPath, VigiangFileContents vigiangFileContents, String output,
-                               List<Pattern> backendPatterns, List<Pattern> frontendPatterns) throws IOException {
+    private static void updateTxt(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
         String resultTxt = "";
 
-        List<String> matches = getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns);
-        if (!matches.isEmpty()) {
-            resultTxt += "frontend:\n";
-            resultTxt = getFileContentsTxt(matches, resultTxt);
-            resultTxt += "\n";
+        if (!vigiangMatches.getFrontendMatches().isEmpty()) {
+            List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("webviewer"))
+                    .collect(Collectors.toList());
+            if (!matchesFiltered.isEmpty()) {
+                resultTxt += "webviewer:\n";
+                resultTxt = getFileContentsTxt(matchesFiltered, resultTxt);
+                resultTxt += "\n";
+            }
+
+            matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("workflow"))
+                    .collect(Collectors.toList());
+            if (!matchesFiltered.isEmpty()) {
+                resultTxt += "workflow:\n";
+                resultTxt = getFileContentsTxt(matchesFiltered, resultTxt);
+                resultTxt += "\n";
+            }
         }
 
-        matches = getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns);
-        if (!matches.isEmpty()) {
+        if (!vigiangMatches.getBackendMatches().isEmpty()) {
             resultTxt += "backend:\n";
-            resultTxt = getFileContentsTxt(matches, resultTxt);
+            resultTxt = getFileContentsTxt(vigiangMatches.getBackendMatches(), resultTxt);
             resultTxt += "\n";
         }
 
@@ -121,10 +150,58 @@ public class UpdateProjectsByVersion {
         }
     }
 
-    private static String getFileContentsTxt(List<String> matches, String resultTxt) {
-        Set<String> uniqueMatches = new LinkedHashSet<>(matches);
-        List<String> sortedMatches = new ArrayList<>(uniqueMatches);
-        sortedMatches.sort(String::compareTo);
+    private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
+        String resultTxt = "";
+
+        if (!vigiangMatches.getFrontendMatches().isEmpty()) {
+            List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("webviewer"))
+                    .collect(Collectors.toList());
+            if (!matchesFiltered.isEmpty()) {
+                resultTxt += "# webviewer:\n";
+                resultTxt += "```\n";
+                resultTxt = getFileContentsMd(matchesFiltered, resultTxt);
+                resultTxt += "```\n\n";
+            }
+
+            matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("workflow"))
+                    .collect(Collectors.toList());
+            if (!matchesFiltered.isEmpty()) {
+                resultTxt += "# workflow:\n";
+                resultTxt += "```\n";
+                resultTxt = getFileContentsMd(matchesFiltered, resultTxt);
+                resultTxt += "```\n\n";
+            }
+        }
+
+        if (!vigiangMatches.getBackendMatches().isEmpty()) {
+            resultTxt += "# backend:\n";
+            resultTxt += "```\n";
+            resultTxt = getFileContentsMd(vigiangMatches.getBackendMatches(), resultTxt);
+            resultTxt += "```\n";
+        }
+
+        String newFileContent = resultTxt;
+        Path allConfigurationsPath = Paths.get(versionPath + "\\" + output + ".md");
+
+        var initialFileContent = "";
+        if (Files.exists(allConfigurationsPath)) {
+            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + allConfigurationsPath);
+            Files.writeString(allConfigurationsPath, newFileContent);
+        }
+    }
+
+    private static String getFileContentsTxt(List<FileMatch> matches, String resultTxt) {
+        List<String> sortedMatches = matches.stream()
+                .map(FileMatch::getMatch)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
 
         for (String match : sortedMatches) {
             resultTxt += "  " + match + "\n";
@@ -132,17 +209,44 @@ public class UpdateProjectsByVersion {
         return resultTxt;
     }
 
-    private static List<String> getMatches(List<String> fileContents, List<Pattern> patterns) {
-        Set<String> matchesSet = new LinkedHashSet<>();
+    private static String getFileContentsMd(List<FileMatch> matches, String resultTxt) {
+        Map<String, List<FileMatch>> grouped = matches.stream()
+                .collect(Collectors.groupingBy(fm -> fm.getRelativeDir() == null ? "" : fm.getRelativeDir()));
 
-        for (String fileContent : fileContents) {
-            String input = fileContent.trim();
+        List<String> dirs = new ArrayList<>(grouped.keySet());
+        dirs.sort(String::compareTo);
+
+        for (String dir : dirs) {
+            resultTxt += dir + ":\n";
+
+            List<FileMatch> sortedUnique = grouped.get(dir).stream()
+                    .collect(Collectors.collectingAndThen(
+                            Collectors.toMap(FileMatch::getMatch, fm -> fm, (a, b) -> a, LinkedHashMap::new),
+                            m -> m.values().stream()
+                                    .sorted(Comparator.comparing(FileMatch::getMatch))
+                                    .collect(Collectors.toList())
+                    ));
+
+            for (FileMatch fm : sortedUnique) {
+                resultTxt += "  " + fm.getMatch() + "\n";
+            }
+            resultTxt += "\n";
+        }
+        return resultTxt;
+    }
+
+    private static List<FileMatch> getMatches(List<FileContent> fileContents, List<Pattern> patterns) {
+        Set<FileMatch> matchesSet = new LinkedHashSet<>();
+
+        for (FileContent fileContent : fileContents) {
+            String input = fileContent.getContent().trim();
 
             for (Pattern pattern : patterns) {
                 Matcher matcher = pattern.matcher(input);
 
                 while (matcher.find()) {
-                    matchesSet.add(matcher.group(1));
+                    var match = new FileMatch(fileContent.getRelativeDir(), matcher.group(1));
+                    matchesSet.add(match);
                 }
             }
         }
@@ -167,19 +271,21 @@ public class UpdateProjectsByVersion {
         }
     }
 
-    private static List<String> getFileContentsByExtensions(Path dirPath, List<String> extensions, List<String> ignoreDirs) {
-        List<String> fileContents = List.of();
+    private static List<FileContent> getFileContentsByExtensions(Path dirPath, List<String> extensions, List<String> ignoreDirs) {
+        List<FileContent> fileContents = List.of();
         try (var stream = Files.walk(dirPath)) {
             fileContents = stream
                     .filter(p -> Files.isRegularFile(p) &&
                             extensions.stream().anyMatch(ext -> p.toString().endsWith(ext)) &&
                             ignoreDirs.stream().noneMatch(dir -> p.toString().contains("\\" + dir + "\\")))
                     .map(p -> {
+                        Path parent = p.getParent();
+                        Path relativeDir = (parent == null) ? Paths.get("") : dirPath.relativize(parent);
                         try {
-                            return Files.readString(p);
+                            return new FileContent(relativeDir.toString(), Files.readString(p));
                         } catch (Exception e) {
                             e.printStackTrace();
-                            return "";
+                            return null;
                         }
                     })
                     .collect(Collectors.toList());
@@ -194,6 +300,28 @@ public class UpdateProjectsByVersion {
 @AllArgsConstructor
 @Getter
 class VigiangFileContents {
-    private final List<String> backendFileContents;
-    private final List<String> frontendFileContents;
+    private final List<FileContent> backendFileContents;
+    private final List<FileContent> frontendFileContents;
+}
+
+@AllArgsConstructor
+@Getter
+class VigiangMatches {
+    private final List<FileMatch> backendMatches;
+    private final List<FileMatch> frontendMatches;
+}
+
+@AllArgsConstructor
+@Getter
+class FileContent {
+    private final String relativeDir;
+    private final String content;
+}
+
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
+class FileMatch {
+    private final String relativeDir;
+    private final String match;
 }
