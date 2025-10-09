@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class EnvironmentService {
 
+    private static final String COGNYTE_PATH_STR = "C:\\work\\COGNYTE1";
     private static final String VIGIANG_PATH_STR = "C:\\work\\COGNYTE1\\VIGIANG";
     private static final String VIGIANG_LABORATORIES_PATH = "C:\\work\\COGNYTE1\\vigiang_labs";
     private static final String VIGIANG_DATABASES_PATH = "C:\\work\\COGNYTE1\\vigiang_dbs";
@@ -51,6 +52,14 @@ public class EnvironmentService {
         if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
         if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
         return null;
+    }
+
+    public static Path getCognytePath() {
+        Path vigiangPath = Paths.get(COGNYTE_PATH_STR);
+        if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
+            throw new IllegalArgumentException("o diretorio do cognyte nao existe ou nao eh um diretorio");
+        }
+        return vigiangPath;
     }
 
     public static Path getVigiaNgPath() {
