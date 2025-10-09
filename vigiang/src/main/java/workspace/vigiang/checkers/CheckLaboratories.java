@@ -91,6 +91,13 @@ public class CheckLaboratories {
         if (!aliasList.isEmpty()) {
             Path bashrcPath = Paths.get(EnvironmentService.getCognytePath() + "\\.bashrc");
             replaceRegion(bashrcPath, "# vigiang_labs begin", "# vigiang_labs end", aliasList);
+            String content = Files.readString(bashrcPath, StandardCharsets.UTF_8);
+
+            Path userBashrcPath = Paths.get("C:\\Users\\jjunior\\.bashrc");
+            if (Files.exists(userBashrcPath)) {
+                Files.writeString(userBashrcPath, content, StandardCharsets.UTF_8);
+                System.out.println("updating file: " + userBashrcPath);
+            }
         }
     }
 
