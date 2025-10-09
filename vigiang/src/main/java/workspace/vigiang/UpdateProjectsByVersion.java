@@ -1,4 +1,4 @@
-package workspace.vigiang.drafts;
+package workspace.vigiang;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
