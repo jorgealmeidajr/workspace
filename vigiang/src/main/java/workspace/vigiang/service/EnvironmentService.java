@@ -20,6 +20,10 @@ public class EnvironmentService {
     private static final String VIGIANG_LABORATORIES_PATH = "C:\\work\\COGNYTE1\\vigiang_labs";
     private static final String VIGIANG_DATABASES_PATH = "C:\\work\\COGNYTE1\\vigiang_dbs";
 
+    public static List<String> getVersions() {
+        return List.of("1.5", "1.7", "2.2");
+    }
+
     public static List<DatabaseCredentials> getVigiangDatabases() throws IOException {
         Path path = Paths.get(VIGIANG_DATABASES_PATH + "\\databases.json");
         String read = Files.readString(path);

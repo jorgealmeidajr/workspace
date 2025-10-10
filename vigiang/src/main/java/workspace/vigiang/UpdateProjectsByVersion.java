@@ -3,6 +3,7 @@ package workspace.vigiang;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +23,7 @@ public class UpdateProjectsByVersion {
     public static void main(String[] args) throws IOException {
         var WORK_DIR = "C:\\work\\vigiang";
 
-        for (String version : List.of("1.5", "1.7", "2.2")) {
+        for (String version : EnvironmentService.getVersions()) {
             validateProjectDirectories(WORK_DIR, version);
             Path backendPath = Paths.get(WORK_DIR + "\\" + version + "\\back-" + version);
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
