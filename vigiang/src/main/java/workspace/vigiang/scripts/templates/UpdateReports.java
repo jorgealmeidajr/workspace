@@ -19,7 +19,7 @@ public class UpdateReports {
         Carrier CARRIER = null;
         DatabaseCredentials.Database DATABASE = null;
 
-        Integer CARRIER_ID = 1; // this id is from database
+        Integer CARRIER_ID = 0; // this id is from database
 
         try {
             Predicate<DatabaseCredentials> databaseCredentialsPredicate = (credentials) ->

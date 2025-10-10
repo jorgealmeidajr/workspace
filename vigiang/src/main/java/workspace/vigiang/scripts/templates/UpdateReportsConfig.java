@@ -1,6 +1,7 @@
 package workspace.vigiang.scripts.templates;
 
 import workspace.vigiang.dao.VigiaNgDAO;
+import workspace.vigiang.model.Carrier;
 import workspace.vigiang.model.Configuration;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.ReportTemplate;
@@ -10,28 +11,38 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class UpdateReportsConfig {
 
     public static void main(String[] args) {
-        String ENVIRONMENT_NAME = "?"; // TODO: this name should be in environments
-        String CARRIER_ID = "0"; // this id is from database
+        // the parameters bellow must match in file databases.json
+        String DATABASE_NAME = "?";
+        Carrier CARRIER = null;
+        DatabaseCredentials.Database DATABASE = null;
+
+        Integer CARRIER_ID = 0; // this id is from database
 
         try {
+            Predicate<DatabaseCredentials> databaseCredentialsPredicate = (credentials) ->
+                    credentials.getName().equals(DATABASE_NAME)
+                            && credentials.getCarrier().equals(CARRIER)
+                            && credentials.getDatabase().equals(DATABASE);
             DatabaseCredentials databaseCredentials = EnvironmentService.getVigiangDatabases().stream()
-                    .filter(credentials -> credentials.getName().equals(ENVIRONMENT_NAME))
+                    .filter(databaseCredentialsPredicate)
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Environment not found: " + ENVIRONMENT_NAME));
+                    .orElseThrow(() -> new IllegalArgumentException("Database credentials not found, check the parameters..."));
             VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
+            String carrierId = String.valueOf(CARRIER_ID);
 
             List<Configuration> configurations = dao.listConfigurationValues(databaseCredentials).stream()
-                    .filter(configuration -> configuration.getCarrierId().equals(CARRIER_ID))
+                    .filter(configuration -> configuration.getCarrierId().equals(carrierId))
                     .filter(configuration -> configuration.getId().toLowerCase().contains("report") && configuration.getId().toLowerCase().contains("id"))
                     .collect(Collectors.toList());
 
             List<ReportTemplate> reportTemplates = dao.listReportTemplates(databaseCredentials).stream()
-                    .filter(reportTemplate -> reportTemplate.getCarrierCode().equals(CARRIER_ID))
+                    .filter(reportTemplate -> reportTemplate.getCarrierCode().equals(carrierId))
                     .collect(Collectors.toList());
 
             Map<String, String> configurationsMap = getConfigurationsMap();

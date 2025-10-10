@@ -432,7 +432,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
-        // TODO: what is this?
+        // TODO: missing implementation...
     }
 
     private byte[] getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
