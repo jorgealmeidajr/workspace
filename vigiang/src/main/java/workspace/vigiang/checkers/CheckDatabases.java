@@ -24,7 +24,6 @@ public class CheckDatabases {
                 updateLocalFeatureFiles(databaseCredentials, dao);
                 updateLocalConfigurationFiles(databaseCredentials, dao);
 
-                updateLocalModuleFiles(databaseCredentials, dao);
                 updateLocalPrivilegeFiles(databaseCredentials, dao);
                 updateLocalProfileFiles(databaseCredentials, dao);
 
@@ -77,20 +76,6 @@ public class CheckDatabases {
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
-    private static void updateLocalModuleFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
-            fileName = "CFG_MODULO";
-            columns = new String[] { "ID_CHAVE", "ID_STATUS", "ID_TIPO" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
-            return;
-        }
-
-        List<String[]> data = dao.listModules(databaseCredentials);
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
-    }
-
     private static void updateLocalPrivilegeFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
@@ -111,10 +96,10 @@ public class CheckDatabases {
         String[] columns = null;
         if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "SEG_PERFIL_PRIVILEGIO";
-            columns = new String[] { "CD_OPERADORA", "NM_PERFIL", "NM_PRIVILEGIO", "CD_MODULO", "NM_MODULO" };
+            columns = new String[] { "CD_OPERADORA", "NM_PERFIL", "NM_PRIVILEGIO" };
         } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "sec.profile_privilege";
-            columns = new String[] { "carrier_id", "profile_name", "privilege_name", "module_id" };
+            columns = new String[] { "carrier_id", "profile_name", "privilege_name" };
         }
 
         List<String[]> data = dao.listProfiles(databaseCredentials);

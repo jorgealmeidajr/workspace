@@ -67,29 +67,6 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException {
-        String sql =
-            "select ID_CHAVE, ID_STATUS, ID_TIPO\n" +
-            "from CFG_MODULO\n" +
-            "order by ID_CHAVE";
-
-        List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while(rs.next()) {
-                String[] row = new String[] {
-                    rs.getString("ID_CHAVE"),
-                    rs.getString("ID_STATUS"),
-                    rs.getString("ID_TIPO"),
-                };
-                data.add(row);
-            }
-        }
-        return data;
-    }
-
-    @Override
     public List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.CD_PRIVILEGIO, t1.ID_PRIVILEGIO, t1.NM_PRIVILEGIO\n" +
@@ -116,11 +93,10 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
-            "select t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO, t2.CD_MODULO, t4.ID_CHAVE as NM_MODULO\n" +
+            "select t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO\n" +
             "from SEG_PERFIL_PRIVILEGIO t1\n" +
             "join SEG_PRIVILEGIO t2 on (t1.CD_PRIVILEGIO = t2.CD_PRIVILEGIO)\n" +
             "join SEG_PERFIL t3 on (t1.CD_PERFIL = t3.CD_PERFIL)\n" +
-            "left join CFG_MODULO t4 on (t2.CD_MODULO = t4.CD_MODULO)\n" +
             "where LOWER(t3.NM_PERFIL) in ('administrador', 'admin', 'autoridades')\n" +
             "order by t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO";
 
@@ -132,9 +108,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                 String[] row = new String[] {
                     rs.getString("CD_OPERADORA"),
                     rs.getString("NM_PERFIL"),
-                    rs.getString("NM_PRIVILEGIO"),
-                    (rs.getString("CD_MODULO") == null) ? "NULL" : rs.getString("CD_MODULO"),
-                    (rs.getString("NM_MODULO") == null) ? "NULL" : rs.getString("NM_MODULO"),
+                    rs.getString("NM_PRIVILEGIO")
                 };
                 data.add(row);
             }
@@ -431,7 +405,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
+    public void updateConfigurationValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
         // TODO: missing implementation...
     }
 

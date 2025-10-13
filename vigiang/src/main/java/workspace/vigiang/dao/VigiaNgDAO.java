@@ -13,8 +13,6 @@ public interface VigiaNgDAO {
 
     List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException;
 
-    List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException;
-
     List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException;
 
     List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException;
@@ -39,7 +37,7 @@ public interface VigiaNgDAO {
 
     void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException;
 
-    void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException;
+    void updateConfigurationValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException;
 
     void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException;
 

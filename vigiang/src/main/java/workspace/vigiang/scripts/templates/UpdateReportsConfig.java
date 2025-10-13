@@ -65,7 +65,7 @@ public class UpdateReportsConfig {
                         System.out.println(configuration.getId() + " -> " + matchingTemplate.getReportId());
 
                         if (!originalValue.equals(newValue)) {
-                            dao.updateConfigurarionValue(databaseCredentials, configuration, newValue);
+                            dao.updateConfigurationValue(databaseCredentials, configuration, newValue);
                             System.out.println("  original value: " + originalValue + " -> new value: " + newValue);
                         }
 

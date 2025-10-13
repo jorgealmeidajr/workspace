@@ -63,11 +63,6 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException {
-        return List.of(); // TODO: it doesnt make sense for vigiang
-    }
-
-    @Override
     public List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
             "select t1.id, t1.privilegeid, t1.\"name\"\n" +
@@ -94,7 +89,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     @Override
     public List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException {
         String sql =
-            "select t3.carrier_id, t3.\"name\" as \"profile_name\", t2.\"name\" as \"privilege_name\", t2.module_id\n" +
+            "select t3.carrier_id, t3.\"name\" as \"profile_name\", t2.\"name\" as \"privilege_name\"\n" +
             "from sec.profile_privilege t1\n" +
             "join sec.privilege t2 on (t1.privilege_id = t2.id)\n" +
             "join sec.profile t3 on (t1.profile_id = t3.id)\n" +
@@ -109,8 +104,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
                 String[] row = new String[] {
                     rs.getString("carrier_id"),
                     rs.getString("profile_name"),
-                    rs.getString("privilege_name"),
-                    (rs.getString("module_id") == null) ? "NULL" : rs.getString("module_id")
+                    rs.getString("privilege_name")
                 };
                 data.add(row);
             }
@@ -390,7 +384,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
+    public void updateConfigurationValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
         String sql =
             "update conf.site set value = ?\n" +
             "where id = ?\n" +
