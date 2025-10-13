@@ -259,7 +259,7 @@ public class UpdateProjectsByVersion {
             String currentId = null;
             for (MappingResult mappingResult : result) {
                 if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
-                    System.out.println("check: " + key + "," + mappingResult.getId() + ", " + mappingResult.getDatabase());
+                    System.out.println("case to check: " + key + ", " + mappingResult.getId() + ", " + mappingResult.getDatabase());
                     continue;
                 }
 
@@ -286,6 +286,7 @@ public class UpdateProjectsByVersion {
             }
             resultTxt += "```\n\n";
         }
+        System.out.println();
 
         String newFileContent = resultTxt;
         Path allConfigurationsPath = Paths.get(versionPath + "\\mappers.md");
@@ -309,6 +310,9 @@ public class UpdateProjectsByVersion {
         result.addAll(getMappings(document, database, namespace, "select"));
         result.addAll(getMappings(document, database, namespace, "insert"));
         result.addAll(getMappings(document, database, namespace, "update"));
+
+        // TODO: get params
+        // TODO: get id result
 
         return result;
     }

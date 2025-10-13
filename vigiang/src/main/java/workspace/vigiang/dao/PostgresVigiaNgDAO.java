@@ -64,7 +64,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public List<String[]> listModules(DatabaseCredentials databaseCredentials) throws SQLException {
-        return List.of();
+        return List.of(); // TODO: it doesnt make sense for vigiang
     }
 
     @Override
@@ -410,12 +410,12 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException {
-
+        // TODO: missing implementation
     }
 
     @Override
     public void associatePrivileges(DatabaseCredentials targetDb, int targetPrivilegeId) throws SQLException {
-
+        // TODO: missing implementation
     }
 
     private String getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {

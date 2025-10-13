@@ -5,6 +5,7 @@ import workspace.vigiang.service.GitLabService;
 
 import java.awt.*;
 
+@Deprecated
 public class CompareGitChanges {
 
     public static void main(String[] args) {
