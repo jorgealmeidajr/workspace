@@ -1,10 +1,10 @@
-package workspace.vigiang;
+package workspace.vigiang.service;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CompareXmlMappingsTest {
+public class MappersServiceTest {
 
     @Test
     public void testExtractFunctionCallOracle() {
@@ -15,7 +15,7 @@ public class CompareXmlMappingsTest {
             "    #{resultSet, jdbcType=CURSOR,  mode=OUT, javaType=java.sql.ResultSet, resultMap=loadUserByUsernameResult}\n" +
             "  )\n" +
             "}";
-        String result = CompareXmlMappings.extractFunctionCall(content);
+        String result = MappersService.extractFunctionCall(content);
         assertEquals("pseg_Usuario.Sp_Consultar_Registro_Login()".toUpperCase(), result);
 
         content =
@@ -29,7 +29,7 @@ public class CompareXmlMappingsTest {
             "    #{resultSet,    jdbcType=CURSOR,  mode=OUT, javaType=java.sql.ResultSet, resultMap=Authentication_singleUserResult}\n" +
             "  )\n" +
             "}";
-        result = CompareXmlMappings.extractFunctionCall(content);
+        result = MappersService.extractFunctionCall(content);
         assertEquals("Srq_Usuario.Sp_Validar()".toUpperCase(), result);
 
         content =
@@ -41,7 +41,7 @@ public class CompareXmlMappingsTest {
             "    #{totpSecret,              jdbcType=VARCHAR, mode=IN}\n" +
             "  )\n" +
             "}";
-        result = CompareXmlMappings.extractFunctionCall(content);
+        result = MappersService.extractFunctionCall(content);
         assertEquals("fn_ng_user2factoraut_ins()".toUpperCase(), result);
     }
 
@@ -54,7 +54,7 @@ public class CompareXmlMappingsTest {
             "    #{ resultSet, jdbcType=OTHER,   mode=OUT, javaType=java.sql.ResultSet, resultMap=loadUserByUsernameResult }\n" +
             "  )\n" +
             "}";
-        String result = CompareXmlMappings.extractFunctionCall(content);
+        String result = MappersService.extractFunctionCall(content);
         assertEquals("sec.f_user_by_login_get()".toUpperCase(), result);
 
         content =
@@ -67,7 +67,7 @@ public class CompareXmlMappingsTest {
             "  #{ message,      jdbcType=VARCHAR, mode=OUT },\n" +
             "  #{ resultSet,    jdbcType=OTHER,   mode=OUT, javaType=java.sql.ResultSet, resultMap=authenticationSingleUserResult }\n" +
             ")";
-        result = CompareXmlMappings.extractFunctionCall(content);
+        result = MappersService.extractFunctionCall(content);
         assertEquals("sec.sp_user_validate()".toUpperCase(), result);
 
         content =
@@ -79,7 +79,7 @@ public class CompareXmlMappingsTest {
             "    #{fields,    jdbcType=VARCHAR, mode=IN}\n" +
             "  )\n" +
             "}";
-        result = CompareXmlMappings.extractFunctionCall(content);
+        result = MappersService.extractFunctionCall(content);
         assertEquals("log.f_log_interception_list()".toUpperCase(), result);
     }
 

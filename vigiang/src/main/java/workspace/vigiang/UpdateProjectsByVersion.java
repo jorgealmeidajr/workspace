@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import workspace.vigiang.service.EnvironmentService;
+import workspace.vigiang.service.MappersService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static workspace.vigiang.service.EnvironmentService.getVigiaNgPath;
+import static workspace.vigiang.service.MappersService.extractFunctionCall;
 
 public class UpdateProjectsByVersion {
 
@@ -305,7 +307,7 @@ public class UpdateProjectsByVersion {
     private static List<MappingResult> getXmlMappings(Document document, String database) {
         var result = new ArrayList<MappingResult>();
 
-        final String namespace = getNamespace(document);
+        final String namespace = MappersService.getNamespace(document);
 
         result.addAll(getMappings(document, database, namespace, "select"));
         result.addAll(getMappings(document, database, namespace, "insert"));
@@ -337,29 +339,6 @@ public class UpdateProjectsByVersion {
             }
         }
         return resultList;
-    }
-
-    private static String getNamespace(Document document) {
-        String namespace = "";
-        Node node = document.getElementsByTagName("mapper").item(0);
-        NamedNodeMap attributes = node.getAttributes();
-        for (int a = 0; a < attributes.getLength(); a++) {
-            Node attribute = attributes.item(a);
-            if ("namespace".equals(attribute.getNodeName())) namespace = attribute.getNodeValue();
-        }
-        return namespace;
-    }
-
-    private static String extractFunctionCall(String content) {
-        String result = "";
-        content = content.trim();
-
-        Pattern r = Pattern.compile("call\\s+(\\w+.\\w+)");
-        Matcher m = r.matcher(content);
-        if (m.find()) {
-            result = m.group(1);
-        }
-        return result.toUpperCase() + "()";
     }
 
     private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
