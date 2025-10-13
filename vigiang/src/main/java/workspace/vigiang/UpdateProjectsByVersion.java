@@ -242,23 +242,46 @@ public class UpdateProjectsByVersion {
 
         Map<String, List<MappingResult>> byNamespace = listWithoutDuplicates.stream()
                 .collect(Collectors.groupingBy(MappingResult::getNamespace));
+        List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
+        Collections.sort(byNamespaceKeys);
 
-        List<String> keys = new ArrayList<>(byNamespace.keySet());
-        Collections.sort(keys);
+        Map<String, List<MappingResult>> byId = listWithoutDuplicates.stream()
+                .collect(Collectors.groupingBy(MappingResult::getId));
 
         String resultTxt = "";
-        for (String key : keys) {
+        for (String key : byNamespaceKeys) {
             List<MappingResult> result = byNamespace.get(key);
             result.sort(Comparator.comparing(MappingResult::getId)
                     .thenComparing(MappingResult::getDatabase));
 
             resultTxt += "# " + key + ":\n";
             resultTxt += "```\n";
+            String currentId = null;
             for (MappingResult mappingResult : result) {
                 if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
                     System.out.println("check: " + key + "," + mappingResult.getId() + ", " + mappingResult.getDatabase());
-                } else {
-                    resultTxt += mappingResult.getId() + " > " + mappingResult.getDatabase() + " > " + mappingResult.getFunctionCall() + "\n";
+                    continue;
+                }
+
+                if (currentId == null || !currentId.equals(mappingResult.getId())) {
+                    currentId = mappingResult.getId();
+                    resultTxt += currentId + "():\n";
+
+                    var byIdList = byId.get(currentId);
+                    var oracleCall = byIdList.stream().filter(r -> "oracle".equals(r.getDatabase())).findFirst().orElse(null);
+                    var postgresCall = byIdList.stream().filter(r -> "postgres".equals(r.getDatabase())).findFirst().orElse(null);
+
+                    if (oracleCall != null) {
+                        resultTxt += "  oracle: " + oracleCall.getFunctionCall() + "\n";
+                    } else {
+                        resultTxt += "  oracle: _UNDEFINED_\n";
+                    }
+
+                    if (postgresCall != null) {
+                        resultTxt += "  postgres: " + postgresCall.getFunctionCall() + "\n";
+                    } else {
+                        resultTxt += "  postgres: _UNDEFINED_\n";
+                    }
                 }
             }
             resultTxt += "```\n\n";
