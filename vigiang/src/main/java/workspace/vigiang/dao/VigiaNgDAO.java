@@ -41,6 +41,10 @@ public interface VigiaNgDAO {
 
     void updateConfigurarionValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException;
 
+    void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException;
+
+    void associatePrivileges(DatabaseCredentials targetDb, int targetPrivilegeId) throws SQLException;
+
     default Connection getConnection(DatabaseCredentials databaseCredentials) throws SQLException {
         return DriverManager.getConnection(
                 databaseCredentials.getDatabaseUrl(),

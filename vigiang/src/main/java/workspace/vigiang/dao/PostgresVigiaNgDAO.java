@@ -408,6 +408,16 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
         }
     }
 
+    @Override
+    public void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException {
+
+    }
+
+    @Override
+    public void associatePrivileges(DatabaseCredentials targetDb, int targetPrivilegeId) throws SQLException {
+
+    }
+
     private String getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select file from conf.report\n" +

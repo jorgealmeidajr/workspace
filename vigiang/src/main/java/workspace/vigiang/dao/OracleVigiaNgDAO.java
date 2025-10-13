@@ -435,6 +435,71 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         // TODO: missing implementation...
     }
 
+    @Override
+    public void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException {
+        var maxSql = "select max(CD_PRIVILEGIO) + 1 as CD_PRIVILEGIO from SEG_PRIVILEGIO";
+        Integer nextPrivilegeId = null;
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(maxSql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    nextPrivilegeId = rs.getInt("CD_PRIVILEGIO");
+                }
+            }
+        }
+
+        var insertSql =
+            "INSERT INTO SEG_PRIVILEGIO (CD_PRIVILEGIO, ID_PRIVILEGIO, NM_PRIVILEGIO, SN_CONCESSAO_ADMIN, CD_MODULO) " +
+            "VALUES (?, ?, ?, 'N', null)";
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(insertSql)) {
+            for (int i = 0; i < privilegeIds.size(); i++) {
+                String privilegeId = privilegeIds.get(i);
+                Integer privilegeCode = nextPrivilegeId;
+                stmt.setInt(1, privilegeCode);
+                nextPrivilegeId++;
+
+                stmt.setString(2, privilegeId);
+                stmt.setString(3, privilegeId);
+//                int updated = stmt.executeUpdate();
+                System.out.println("Insert SEG_PRIVILEGIO: privilegeCode=" + privilegeCode + ", privilegeId=" + privilegeId);
+            }
+        }
+    }
+
+    @Override
+    public void associatePrivileges(DatabaseCredentials databaseCredentials, int targetPrivilegeId) throws SQLException {
+        var sql =
+            "select CD_PRIVILEGIO, ID_PRIVILEGIO\n" +
+            "from SEG_PRIVILEGIO\n" +
+            "where CD_PRIVILEGIO not in (select CD_PRIVILEGIO from SEG_PERFIL_PRIVILEGIO where CD_PERFIL in (?))\n" +
+            "order by CD_PRIVILEGIO desc";
+        var privilegeIds = new ArrayList<Integer>();
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, targetPrivilegeId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    privilegeIds.add(rs.getInt("CD_PRIVILEGIO"));
+                }
+            }
+        }
+
+        var insert = "INSERT INTO SEG_PERFIL_PRIVILEGIO (CD_PERFIL, CD_PRIVILEGIO) VALUES (?, ?)";
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(insert)) {
+            for (int i = 0; i < privilegeIds.size(); i++) {
+                Integer privilegeId = privilegeIds.get(i);
+
+                stmt.setInt(1, targetPrivilegeId);
+                stmt.setInt(2, privilegeId);
+                int updated = stmt.executeUpdate();
+                System.out.println("Insert SEG_PERFIL_PRIVILEGIO: CD_PERFIL=" + targetPrivilegeId + ", CD_PRIVILEGIO=" + privilegeId);
+            }
+        }
+    }
+
     private byte[] getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select DC_RELATORIO from CFG_RELATORIO\n" +
