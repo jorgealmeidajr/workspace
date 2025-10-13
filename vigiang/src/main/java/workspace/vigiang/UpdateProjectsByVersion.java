@@ -3,9 +3,19 @@ package workspace.vigiang;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import workspace.vigiang.service.EnvironmentService;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,7 +30,7 @@ public class UpdateProjectsByVersion {
 
     static final List<VigiangMatches> MATCHES = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         var WORK_DIR = "C:\\work\\vigiang";
 
         for (String version : EnvironmentService.getVersions()) {
@@ -33,12 +43,22 @@ public class UpdateProjectsByVersion {
             var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of("node_modules", "json-server", "tests"));
             VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
 
-            updateConfigurations(versionPath, vigiangFileContents);
-            updateFeatures(versionPath, vigiangFileContents);
-            updatePrivileges(versionPath, vigiangFileContents);
-            updateEnvironment(versionPath, vigiangFileContents);
+            try {
+                updateConfigurations(versionPath, vigiangFileContents);
+                updateFeatures(versionPath, vigiangFileContents);
+                updatePrivileges(versionPath, vigiangFileContents);
+                updateEnvironment(versionPath, vigiangFileContents);
 
-            updateVersionMd(versionPath, version);
+                backendFileContents = getFileContentsByExtensions(backendPath, List.of("xml"), List.of("commons", "target")).stream()
+                    .filter(f -> f.getRelativeDir().contains("\\repository\\"))
+                    .collect(Collectors.toList());
+                updateMappers(versionPath, backendFileContents);
+
+                updateVersionMd(versionPath, version);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             MATCHES.clear();
         }
     }
@@ -199,6 +219,122 @@ public class UpdateProjectsByVersion {
         }
     }
 
+    private static void updateMappers(Path versionPath, List<FileContent> backendFileContents) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        var resultList = new ArrayList<MappingResult>();
+        for (FileContent backendFileContent : backendFileContents) {
+            Document document = builder.parse(new InputSource(new StringReader(backendFileContent.getContent())));
+
+            String database = null;
+            if (backendFileContent.getRelativeDir().endsWith("\\oracle")) {
+                database = "oracle";
+            } else if (backendFileContent.getRelativeDir().endsWith("\\postgres")) {
+                database = "postgres";
+            }
+
+            resultList.addAll(getXmlMappings(document, database));
+        }
+
+        Set<MappingResult> uniqueSet = new HashSet<>(resultList);
+        List<MappingResult> listWithoutDuplicates = new ArrayList<>(uniqueSet);
+
+        Map<String, List<MappingResult>> byNamespace = listWithoutDuplicates.stream()
+                .collect(Collectors.groupingBy(MappingResult::getNamespace));
+
+        List<String> keys = new ArrayList<>(byNamespace.keySet());
+        Collections.sort(keys);
+
+        String resultTxt = "";
+        for (String key : keys) {
+            List<MappingResult> result = byNamespace.get(key);
+            result.sort(Comparator.comparing(MappingResult::getId)
+                    .thenComparing(MappingResult::getDatabase));
+
+            resultTxt += "# " + key + ":\n";
+            resultTxt += "```\n";
+            for (MappingResult mappingResult : result) {
+                if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
+                    System.out.println("check: " + key + "," + mappingResult.getId() + ", " + mappingResult.getDatabase());
+                } else {
+                    resultTxt += mappingResult.getId() + " > " + mappingResult.getDatabase() + " > " + mappingResult.getFunctionCall() + "\n";
+                }
+            }
+            resultTxt += "```\n\n";
+        }
+
+        String newFileContent = resultTxt;
+        Path allConfigurationsPath = Paths.get(versionPath + "\\mappers.md");
+
+        var initialFileContent = "";
+        if (Files.exists(allConfigurationsPath)) {
+            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + allConfigurationsPath);
+            Files.writeString(allConfigurationsPath, newFileContent);
+        }
+    }
+
+    private static List<MappingResult> getXmlMappings(Document document, String database) {
+        var result = new ArrayList<MappingResult>();
+
+        final String namespace = getNamespace(document);
+
+        result.addAll(getMappings(document, database, namespace, "select"));
+        result.addAll(getMappings(document, database, namespace, "insert"));
+        result.addAll(getMappings(document, database, namespace, "update"));
+
+        return result;
+    }
+
+    private static List<MappingResult> getMappings(Document document, String database, String namespace, String tagName) {
+        NodeList nodeList = document.getElementsByTagName(tagName);
+
+        var resultList = new ArrayList<MappingResult>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            String content = node.getTextContent();
+            String functionCall = extractFunctionCall(content);
+
+            NamedNodeMap attributes = node.getAttributes();
+            String id = "";
+            for (int a = 0; a < attributes.getLength(); a++) {
+                Node attribute = attributes.item(a);
+                if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
+
+                var temp = new MappingResult(namespace, id, database, functionCall);
+                resultList.add(temp);
+            }
+        }
+        return resultList;
+    }
+
+    private static String getNamespace(Document document) {
+        String namespace = "";
+        Node node = document.getElementsByTagName("mapper").item(0);
+        NamedNodeMap attributes = node.getAttributes();
+        for (int a = 0; a < attributes.getLength(); a++) {
+            Node attribute = attributes.item(a);
+            if ("namespace".equals(attribute.getNodeName())) namespace = attribute.getNodeValue();
+        }
+        return namespace;
+    }
+
+    private static String extractFunctionCall(String content) {
+        String result = "";
+        content = content.trim();
+
+        Pattern r = Pattern.compile("call\\s+(\\w+.\\w+)");
+        Matcher m = r.matcher(content);
+        if (m.find()) {
+            result = m.group(1);
+        }
+        return result.toUpperCase() + "()";
+    }
+
     private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
         String resultTxt = "";
 
@@ -334,7 +470,7 @@ public class UpdateProjectsByVersion {
                         Path parent = p.getParent();
                         Path relativeDir = (parent == null) ? Paths.get("") : dirPath.relativize(parent);
                         try {
-                            return new FileContent(relativeDir.toString(), Files.readString(p));
+                            return new FileContent(relativeDir.toString(), p.getFileName().toString(), Files.readString(p));
                         } catch (Exception e) {
                             e.printStackTrace();
                             return null;
@@ -372,6 +508,7 @@ enum VigiangMatchType {
 @Getter
 class FileContent {
     private final String relativeDir;
+    private final String name;
     private final String content;
 }
 
@@ -381,4 +518,24 @@ class FileContent {
 class FileMatch {
     private final String relativeDir;
     private final String match;
+}
+
+@AllArgsConstructor
+@Getter
+@EqualsAndHashCode
+class MappingResult {
+    private final String namespace;
+    private final String id;
+    private final String database;
+    private final String functionCall;
+
+    @Override
+    public String toString() {
+        return "MappingResult{" +
+                "namespace='" + namespace + '\'' +
+                ", id='" + id + '\'' +
+                ", database='" + database + '\'' +
+                ", functionCall='" + functionCall + '\'' +
+                '}';
+    }
 }

@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Deprecated
 public class CompareXmlMappings {
 
     public static void main(String[] args) {

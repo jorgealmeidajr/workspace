@@ -462,7 +462,8 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
                 stmt.setString(2, privilegeId);
                 stmt.setString(3, privilegeId);
 //                int updated = stmt.executeUpdate();
-                System.out.println("Insert SEG_PRIVILEGIO: privilegeCode=" + privilegeCode + ", privilegeId=" + privilegeId);
+//                System.out.println("Insert SEG_PRIVILEGIO: privilegeCode=" + privilegeCode + ", privilegeId=" + privilegeId);
+//                System.out.println(privilegeId);
             }
         }
     }
