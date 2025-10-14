@@ -43,7 +43,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<Configuration> listConfigurationValues() throws SQLException {
         String sql =
             "select id, carrier_id, parameter_id, parameter_description, value\n" +
             "from conf.site\n" +

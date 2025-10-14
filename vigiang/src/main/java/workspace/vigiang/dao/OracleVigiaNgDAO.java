@@ -47,7 +47,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<Configuration> listConfigurationValues() throws SQLException {
         String sql =
             "select CD_PARAMETRO, CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
