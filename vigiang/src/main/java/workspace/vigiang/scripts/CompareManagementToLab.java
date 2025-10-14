@@ -107,7 +107,7 @@ class VigiaNgData {
         this.featuresMap = features.stream()
                 .collect(Collectors.toMap(Feature::getId, Function.identity()));
 
-        List<Configuration> configurations = vigiaNgDAO.listConfigurationValues(databaseCredentials).stream()
+        List<Configuration> configurations = vigiaNgDAO.listConfigurationValues().stream()
                 .sorted(Comparator.comparing(Configuration::getCode).reversed())
                 .collect(Collectors.toList());
         this.configurationsIds = configurations.stream()

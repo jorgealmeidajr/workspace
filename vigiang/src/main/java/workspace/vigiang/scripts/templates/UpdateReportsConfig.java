@@ -36,7 +36,7 @@ public class UpdateReportsConfig {
             VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
             String carrierId = String.valueOf(CARRIER_ID);
 
-            List<Configuration> configurations = dao.listConfigurationValues(databaseCredentials).stream()
+            List<Configuration> configurations = dao.listConfigurationValues().stream()
                     .filter(configuration -> configuration.getCarrierId().equals(carrierId))
                     .filter(configuration -> configuration.getId().toLowerCase().contains("report") && configuration.getId().toLowerCase().contains("id"))
                     .collect(Collectors.toList());

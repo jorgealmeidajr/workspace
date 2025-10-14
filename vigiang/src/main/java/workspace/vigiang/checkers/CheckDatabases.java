@@ -70,7 +70,7 @@ public class CheckDatabases {
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value" };
         }
 
-        List<String[]> data = dao.listConfigurationValues(databaseCredentials).stream()
+        List<String[]> data = dao.listConfigurationValues().stream()
                 .map(Configuration::toArray)
                 .collect(Collectors.toList());
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
@@ -87,7 +87,7 @@ public class CheckDatabases {
             columns = new String[] { "id", "privilegeid", "name" };
         }
 
-        List<String[]> data = dao.listPrivileges(databaseCredentials);
+        List<String[]> data = dao.listPrivileges();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 

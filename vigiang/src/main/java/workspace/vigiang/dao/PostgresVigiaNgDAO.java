@@ -43,7 +43,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<Configuration> listConfigurationValues() throws SQLException {
         String sql =
             "select id, carrier_id, parameter_id, parameter_description, value\n" +
             "from conf.site\n" +
@@ -69,7 +69,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listPrivileges() throws SQLException {
         String sql =
             "select t1.id, t1.privilegeid, t1.\"name\"\n" +
             "from sec.privilege t1\n" +

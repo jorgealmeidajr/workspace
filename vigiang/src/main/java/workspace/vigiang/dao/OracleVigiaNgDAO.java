@@ -47,7 +47,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<Configuration> listConfigurationValues() throws SQLException {
         String sql =
             "select CD_PARAMETRO, CD_OPERADORA, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO\n" +
             "from CFG_NG_SITE\n" +
@@ -73,7 +73,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listPrivileges(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listPrivileges() throws SQLException {
         String sql =
             "select t1.CD_PRIVILEGIO, t1.ID_PRIVILEGIO, t1.NM_PRIVILEGIO\n" +
             "from SEG_PRIVILEGIO t1\n" +

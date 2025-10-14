@@ -1,7 +1,6 @@
 package workspace.vigiang.scripts;
 
 import workspace.vigiang.dao.VigiaNgDAO;
-import workspace.vigiang.model.Carrier;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -9,7 +8,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CopyData {
@@ -27,7 +25,7 @@ public class CopyData {
             VigiaNgDAO sourceDao = EnvironmentService.getVigiaNgDAO(sourceDb);
             VigiaNgDAO targetDao = EnvironmentService.getVigiaNgDAO(targetDb);
 
-            copyPrivileges(sourceDao, sourceDb, targetDao, targetDb);
+            copyPrivileges(sourceDao, targetDao, targetDb);
 
             targetDao.associatePrivileges(targetDb, TARGET_PROFILE_ID);
         } catch (Exception e) {
@@ -35,10 +33,10 @@ public class CopyData {
         }
     }
 
-    private static void copyPrivileges(VigiaNgDAO sourceDao, DatabaseCredentials sourceDb, VigiaNgDAO targetDao, DatabaseCredentials targetDb) throws SQLException {
-        List<String> sourcePrivileges = sourceDao.listPrivileges(sourceDb).stream()
+    private static void copyPrivileges(VigiaNgDAO sourceDao, VigiaNgDAO targetDao, DatabaseCredentials targetDb) throws SQLException {
+        List<String> sourcePrivileges = sourceDao.listPrivileges().stream()
                 .map(p -> p[1]).collect(Collectors.toList());
-        List<String> targetPrivileges = targetDao.listPrivileges(targetDb).stream()
+        List<String> targetPrivileges = targetDao.listPrivileges().stream()
                 .map(p -> p[1]).collect(Collectors.toList());
         List<String> missingPrivileges = new ArrayList<>();
 
