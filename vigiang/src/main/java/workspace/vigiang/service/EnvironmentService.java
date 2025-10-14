@@ -47,8 +47,8 @@ public class EnvironmentService {
     }
 
     public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentials databaseCredentials) {
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleVigiaNgDAO();
-        if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresVigiaNgDAO();
+        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleVigiaNgDAO(databaseCredentials);
+        if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresVigiaNgDAO(databaseCredentials);
         return null;
     }
 

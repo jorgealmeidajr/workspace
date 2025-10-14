@@ -17,18 +17,12 @@ public class CopyData {
     public static void main(String[] args) {
         // the parameters bellow must match in file databases.json
         String SOURCE_DATABASE_NAME = "?";
-        Carrier SOURCE_CARRIER = null;
-        DatabaseCredentials.Database SOURCE_DATABASE = null;
-
         String TARGET_DATABASE_NAME = "?";
-        Carrier TARGET_CARRIER = null;
-        DatabaseCredentials.Database TARGET_DATABASE = null;
-
         Integer TARGET_PROFILE_ID = 0; // this id is from database
 
         try {
-            DatabaseCredentials sourceDb = getDatabaseCredentials(SOURCE_DATABASE_NAME, SOURCE_CARRIER, SOURCE_DATABASE);
-            DatabaseCredentials targetDb = getDatabaseCredentials(TARGET_DATABASE_NAME, TARGET_CARRIER, TARGET_DATABASE);
+            DatabaseCredentials sourceDb = getDatabaseCredentials(SOURCE_DATABASE_NAME);
+            DatabaseCredentials targetDb = getDatabaseCredentials(TARGET_DATABASE_NAME);
 
             VigiaNgDAO sourceDao = EnvironmentService.getVigiaNgDAO(sourceDb);
             VigiaNgDAO targetDao = EnvironmentService.getVigiaNgDAO(targetDb);
@@ -58,16 +52,11 @@ public class CopyData {
         targetDao.insertPrivileges(targetDb, missingPrivileges);
     }
 
-    private static DatabaseCredentials getDatabaseCredentials(String databaseName, Carrier carrier, DatabaseCredentials.Database database) throws IOException {
-        Predicate<DatabaseCredentials> databaseCredentialsPredicate = (credentials) ->
-                credentials.getName().equals(databaseName)
-                        && credentials.getCarrier().equals(carrier)
-                        && credentials.getDatabase().equals(database);
-
+    private static DatabaseCredentials getDatabaseCredentials(String databaseName) throws IOException {
         return EnvironmentService.getVigiangDatabases().stream()
-                .filter(databaseCredentialsPredicate)
+                .filter((credentials) -> credentials.getName().equals(databaseName))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Database credentials not found, check the parameters..."));
+                .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
 
         //return EnvironmentService.getVigiaNgDAO(databaseCredentials); // TODO
     }

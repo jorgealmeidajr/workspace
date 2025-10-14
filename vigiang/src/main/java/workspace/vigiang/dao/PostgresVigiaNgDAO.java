@@ -9,8 +9,14 @@ import java.util.List;
 
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
+    private final DatabaseCredentials databaseCredentials;
+
+    public PostgresVigiaNgDAO(DatabaseCredentials databaseCredentials) {
+        this.databaseCredentials = databaseCredentials;
+    }
+
     @Override
-    public List<Feature> listFeatures(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<Feature> listFeatures() throws SQLException {
         String sql =
             "select id, feature, status, description\n" +
             "from conf.feature\n" +

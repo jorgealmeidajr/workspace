@@ -98,7 +98,7 @@ class VigiaNgData {
         DatabaseCredentials databaseCredentials = getEnvironmentByName(vigiaNgLabName);
         VigiaNgDAO vigiaNgDAO = EnvironmentService.getVigiaNgDAO(databaseCredentials);
 
-        List<Feature> features = vigiaNgDAO.listFeatures(databaseCredentials).stream()
+        List<Feature> features = vigiaNgDAO.listFeatures().stream()
                 .sorted(Comparator.comparing(Feature::getCode).reversed())
                 .collect(Collectors.toList());
         this.featuresIds = features.stream()

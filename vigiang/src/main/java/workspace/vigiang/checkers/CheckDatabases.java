@@ -53,7 +53,7 @@ public class CheckDatabases {
             columns = new String[] { "feature", "status", "description" };
         }
 
-        List<String[]> data = dao.listFeatures(databaseCredentials).stream()
+        List<String[]> data = dao.listFeatures().stream()
                 .map(Feature::toArray)
                 .collect(Collectors.toList());
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);

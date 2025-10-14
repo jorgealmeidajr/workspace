@@ -13,8 +13,14 @@ import java.util.List;
 
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
+    private final DatabaseCredentials databaseCredentials;
+
+    public OracleVigiaNgDAO(DatabaseCredentials databaseCredentials) {
+        this.databaseCredentials = databaseCredentials;
+    }
+
     @Override
-    public List<Feature> listFeatures(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<Feature> listFeatures() throws SQLException {
         String sql =
             "select CD_FEATURE, ID_FEATURE, ID_STATUS, ID_DESCRICAO\n" +
             "from CFG_NG_FEATURE\n" +

@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface VigiaNgDAO {
 
-    List<Feature> listFeatures(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<Feature> listFeatures() throws SQLException;
 
     List<Configuration> listConfigurationValues(DatabaseCredentials databaseCredentials) throws SQLException;
 
