@@ -2,6 +2,9 @@ package workspace.vigiang.dao;
 
 import workspace.vigiang.model.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -326,14 +329,31 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
                     rs.getString("ds_regex"),
                     rs.getString("api_key_maps"),
                     rs.getString("token"),
-                    "", "" // TODO: convert bytea to string
-//                    rs.getBinaryStream("im_logo"),
-//                    rs.getBinaryStream("im_logo_footer")
+                    convertLogoToString(rs.getBinaryStream("im_logo")),
+                    convertLogoToString(rs.getBinaryStream("im_logo_footer"))
                 };
                 data.add(row);
             }
         }
         return data;
+    }
+
+    private static String convertLogoToString(InputStream logoInput) {
+        String logoStr = "";
+        if (logoInput != null) {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = logoInput.read(buffer)) != -1) {
+                    baos.write(buffer, 0, len);
+                }
+                logoStr = baos.toString(java.nio.charset.StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return logoStr;
     }
 
     @Override

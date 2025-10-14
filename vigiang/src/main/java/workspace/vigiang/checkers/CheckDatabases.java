@@ -8,6 +8,9 @@ import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -193,22 +196,44 @@ public class CheckDatabases {
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
                 "ID_SMTP_HOST", "ID_SMTP_USER", "ID_SMPT_PASSWORD", "ID_SMPT_ACCOUNT", "ID_SMTP_PORT",
-                "DE_COMENTARIO", "SN_MULTIOPERADORA", "ID_REGEX", "DS_LOCAL_IMAGENS",  "DS_REGEX", "ID_API_KEY_MAPS", "SN_TOKEN",
-                "IM_LOGO", "IM_LOGO_FOOTER"
+                "DE_COMENTARIO", "SN_MULTIOPERADORA", "ID_REGEX", "DS_LOCAL_IMAGENS",  "DS_REGEX", "ID_API_KEY_MAPS", "SN_TOKEN"
             };
         } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.carrier";
             columns = new String[] {
                 "id", "name",
                 "smtp_host", "smtp_user", "smpt_password", "smpt_account", "smtp_port",
-                "comments", "muti_carrier", "regex", "local_images", "ds_regex", "api_key_maps", "token",
-                "im_logo", "im_logo_footer"
+                "comments", "muti_carrier", "regex", "local_images", "ds_regex", "api_key_maps", "token"
             };
         }
 
-        // TODO: write logo in a separated file
         List<String[]> data = dao.listCarriers();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+
+        writeLogos(databaseCredentials, data);
+    }
+
+    private static void writeLogos(DatabaseCredentials databaseCredentials, List<String[]> data) throws IOException {
+        Path databaseDataPath = EnvironmentService.getDatabasePath(databaseCredentials);
+        Path logosPath = Paths.get(databaseDataPath + "\\logos");
+
+        if (Files.exists(logosPath) && Files.isDirectory(logosPath)) {
+            try (var filesStream = Files.list(logosPath)) {
+                filesStream.forEach(file -> {
+                    try {
+                        Files.deleteIfExists(file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        } else {
+            Files.createDirectories(logosPath);
+        }
+
+        for (String[] carrier : data) {
+            FileService.writeLogo(logosPath, carrier);
+        }
     }
 
     private static void updateLocalZonesFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {

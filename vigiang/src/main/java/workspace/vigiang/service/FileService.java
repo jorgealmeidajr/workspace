@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileService {
 
@@ -72,6 +74,32 @@ public class FileService {
         paddedString.append(padStr.repeat(padLength));
 
         return paddedString.toString();
+    }
+
+    public static void writeLogo(Path logosPath, String[] carrier) throws IOException {
+        int carrierId = Integer.parseInt(carrier[0]);
+        String carrierCode = String.format("%02d", carrierId);
+        String carrierName = Arrays.stream(carrier[1].trim().split("\\s+"))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(" "));
+        carrierName = carrierName.trim().toUpperCase().replaceAll("\\s+", "_");
+        String logoName = carrierCode + "-" + carrierName;
+
+        String logo = carrier[14];
+        if (logo == null || logo.trim().isEmpty()) return;
+
+        if (isSvgXml(logo)) {
+            Path logoPath = Paths.get(logosPath + "\\" + logoName + ".svg");
+            Files.writeString(logoPath, logo, StandardCharsets.UTF_8);
+        } else {
+            System.out.println("Logo is not in SVG format=" + logo);
+        }
+    }
+
+    private static boolean isSvgXml(String logo) {
+        if (logo == null) return false;
+        String trimmedLogo = logo.trim().toLowerCase();
+        return trimmedLogo.contains("<svg") && trimmedLogo.contains("</svg>");
     }
 
 }
