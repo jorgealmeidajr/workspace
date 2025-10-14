@@ -102,7 +102,7 @@ public class CheckDatabases {
             columns = new String[] { "carrier_id", "profile_name", "privilege_name" };
         }
 
-        List<String[]> data = dao.listProfiles(databaseCredentials);
+        List<String[]> data = dao.listProfiles();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
@@ -117,7 +117,7 @@ public class CheckDatabases {
             columns = new String[] { "module", "label", "value" };
         }
 
-        List<String[]> data = dao.listFilterQueries(databaseCredentials);
+        List<String[]> data = dao.listFilterQueries();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
@@ -141,7 +141,7 @@ public class CheckDatabases {
         }
 
         try {
-            List<String[]> data = dao.listZoneInterceptions(databaseCredentials);
+            List<String[]> data = dao.listZoneInterceptions();
             FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -160,7 +160,7 @@ public class CheckDatabases {
         }
 
         try {
-            List<String[]> data = dao.listValidationRules(databaseCredentials);
+            List<String[]> data = dao.listValidationRules();
             FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -178,7 +178,7 @@ public class CheckDatabases {
         }
 
         try {
-            List<String[]> data = dao.listQdsValidationRules(databaseCredentials);
+            List<String[]> data = dao.listQdsValidationRules();
             FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -207,7 +207,7 @@ public class CheckDatabases {
         }
 
         // TODO: write logo in a separated file
-        List<String[]> data = dao.listCarriers(databaseCredentials);
+        List<String[]> data = dao.listCarriers();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 
@@ -228,7 +228,7 @@ public class CheckDatabases {
             };
         }
 
-        List<String[]> data = dao.listZones(databaseCredentials);
+        List<String[]> data = dao.listZones();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 

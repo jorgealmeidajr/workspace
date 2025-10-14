@@ -41,7 +41,7 @@ public class UpdateReportsConfig {
                     .filter(configuration -> configuration.getId().toLowerCase().contains("report") && configuration.getId().toLowerCase().contains("id"))
                     .collect(Collectors.toList());
 
-            List<ReportTemplate> reportTemplates = dao.listReportTemplates(databaseCredentials).stream()
+            List<ReportTemplate> reportTemplates = dao.listReportTemplates().stream()
                     .filter(reportTemplate -> reportTemplate.getCarrierCode().equals(carrierId))
                     .collect(Collectors.toList());
 
@@ -65,7 +65,7 @@ public class UpdateReportsConfig {
                         System.out.println(configuration.getId() + " -> " + matchingTemplate.getReportId());
 
                         if (!originalValue.equals(newValue)) {
-                            dao.updateConfigurationValue(databaseCredentials, configuration, newValue);
+                            dao.updateConfigurationValue(configuration, newValue);
                             System.out.println("  original value: " + originalValue + " -> new value: " + newValue);
                         }
 

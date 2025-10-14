@@ -97,7 +97,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listProfiles() throws SQLException {
         String sql =
             "select t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO\n" +
             "from SEG_PERFIL_PRIVILEGIO t1\n" +
@@ -123,7 +123,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listFilterQueries(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listFilterQueries() throws SQLException {
         String sql =
             "select * from CFG_NG_FILTERQUERY\n" +
             "order by MODULE, LABEL";
@@ -145,7 +145,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZoneInterceptions(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listZoneInterceptions() throws SQLException {
         String sql =
             "select\n" +
             "  t4.CD_OPERADORA, t4.NM_OPERADORA,\n" +
@@ -178,7 +178,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listValidationRules() throws SQLException {
         String sql =
             "select t1.CD_OPERADORA, t2.NM_OPERADORA, t1.MODULO, t1.VALID_RULES\n" +
             "from CFG_NG_VALIDATRULES t1\n" +
@@ -203,7 +203,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listQdsValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listQdsValidationRules() throws SQLException {
         String sql =
             "select ID_TIPO_NUMERO_QDS, NM_CHAVE, TP_CONSULTA, SN_VOUCHER_DATE, VALID_RULES\n" +
             "from CFG_TIPO_NUMERO_QDS\n" +
@@ -228,7 +228,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<EmailTemplate> listEmailTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<EmailTemplate> listEmailTemplates() throws SQLException {
         String sql =
             "select t1.CD_OPERADORA, ID_TIPO_SERVICO, DE_ASSUNTO, DE_NOME, DE_NOME_ARQUIVO, DE_REMETENTE, DE_DESTINATARIO, DE_TEXTO, t2.NM_OPERADORA\n" +
             "from CFG_EMAIL_SERVICOS t1\n" +
@@ -257,7 +257,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<ReportTemplate> listReportTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<ReportTemplate> listReportTemplates() throws SQLException {
         String sql =
             "select CD_RELATORIO, ID_RELATORIO, TP_RELATORIO, t1.CD_OPERADORA, t2.NM_OPERADORA, DC_RELATORIO\n" +
             "from CFG_RELATORIO t1\n" +
@@ -290,7 +290,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listConfigurationReports(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listConfigurationReports() throws SQLException {
         String sql =
             "select cfg.CD_OPERADORA, cfg.ID_PARAMETRO, cfg.DE_PARAMETRO, cfg.VL_PARAMETRO, rel.CD_RELATORIO, rel.ID_RELATORIO\n" +
             "from CFG_NG_SITE cfg\n" +
@@ -318,7 +318,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listCarriers(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listCarriers() throws SQLException {
         String sql =
             "select\n" +
             "  CD_OPERADORA, NM_OPERADORA,\n" +
@@ -359,7 +359,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZones(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listZones() throws SQLException {
         String sql =
             "select\n" +
             "  t2.CD_OPERADORA, t2.NM_OPERADORA,\n" +
@@ -389,7 +389,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+    public void updateTemplateReport(String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
         byte[] originalContent = getTemplateReportContent(databaseCredentials, carrierId, reportId, reportName);
         if (Arrays.equals(originalContent, fileBytes)) return;
 
@@ -411,12 +411,12 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateConfigurationValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
+    public void updateConfigurationValue(Configuration configuration, String newValue) throws SQLException {
         // TODO: missing implementation...
     }
 
     @Override
-    public void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException {
+    public void insertPrivileges(List<String> privilegeIds) throws SQLException {
         var maxSql = "select max(CD_PRIVILEGIO) + 1 as CD_PRIVILEGIO from SEG_PRIVILEGIO";
         Integer nextPrivilegeId = null;
         try (Connection conn = getConnection(databaseCredentials);
@@ -449,7 +449,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void associatePrivileges(DatabaseCredentials databaseCredentials, int targetPrivilegeId) throws SQLException {
+    public void associatePrivileges(int targetPrivilegeId) throws SQLException {
         var sql =
             "select CD_PRIVILEGIO, ID_PRIVILEGIO\n" +
             "from SEG_PRIVILEGIO\n" +

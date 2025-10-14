@@ -93,7 +93,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listProfiles() throws SQLException {
         String sql =
             "select t3.carrier_id, t3.\"name\" as \"profile_name\", t2.\"name\" as \"privilege_name\"\n" +
             "from sec.profile_privilege t1\n" +
@@ -119,7 +119,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listFilterQueries(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listFilterQueries() throws SQLException {
         String sql =
             "select module, label, value\n" +
             "from conf.filterquery\n" +
@@ -142,7 +142,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZoneInterceptions(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listZoneInterceptions() throws SQLException {
         String sql =
             "select\n" +
             "  t4.id as \"carrier_id\", t4.\"name\" as \"carrier_name\",\n" +
@@ -175,7 +175,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listValidationRules() throws SQLException {
         String sql =
             "select t1.carrier_id, t2.\"name\" as \"carrier_name\", t1.\"module\", t1.valid_rules\n" +
             "from conf.validatrules t1\n" +
@@ -200,12 +200,12 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listQdsValidationRules(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listQdsValidationRules() throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<EmailTemplate> listEmailTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<EmailTemplate> listEmailTemplates() throws SQLException {
         String sql =
             "select carrier_id, service_type, email_subject, service_name, attach_name, email_to, email_from, email_body, t2.\"name\" as \"carrier_name\"\n" +
             "from conf.service_email t1\n" +
@@ -234,7 +234,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<ReportTemplate> listReportTemplates(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<ReportTemplate> listReportTemplates() throws SQLException {
         String sql =
             "select t1.id, report_id, report_type, carrier_id, t2.\"name\" as \"carrier_name\", file\n" +
             "from conf.report t1\n" +
@@ -267,7 +267,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listConfigurationReports(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listConfigurationReports() throws SQLException {
         String sql =
             "select cfg.carrier_id, cfg.parameter_id, cfg.parameter_description, cfg.value, rel.id as id, rel.report_id\n" +
             "from conf.site cfg\n" +
@@ -295,7 +295,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listCarriers(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listCarriers() throws SQLException {
         String sql =
             "select\n" +
             "  id, \"name\",\n" +
@@ -337,7 +337,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public List<String[]> listZones(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String[]> listZones() throws SQLException {
         String sql =
             "select\n" +
             "  t2.id as \"carrier_id\", t2.\"name\" as \"carrier_name\",\n" +
@@ -367,7 +367,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
+    public void updateTemplateReport(String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
         String originalContent = getTemplateReportContent(databaseCredentials, carrierId, reportId, reportName);
         String base64Content = Base64.getEncoder().encodeToString(fileBytes);
         if (originalContent.equals(base64Content)) return;
@@ -390,7 +390,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void updateConfigurationValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException {
+    public void updateConfigurationValue(Configuration configuration, String newValue) throws SQLException {
         String sql =
             "update conf.site set value = ?\n" +
             "where id = ?\n" +
@@ -409,12 +409,12 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
-    public void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException {
+    public void insertPrivileges(List<String> privilegeIds) throws SQLException {
         // TODO: missing implementation
     }
 
     @Override
-    public void associatePrivileges(DatabaseCredentials targetDb, int targetPrivilegeId) throws SQLException {
+    public void associatePrivileges(int targetPrivilegeId) throws SQLException {
         // TODO: missing implementation
     }
 

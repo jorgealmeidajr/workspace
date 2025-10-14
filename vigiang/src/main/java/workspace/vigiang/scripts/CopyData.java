@@ -25,15 +25,15 @@ public class CopyData {
             VigiaNgDAO sourceDao = EnvironmentService.getVigiaNgDAO(sourceDb);
             VigiaNgDAO targetDao = EnvironmentService.getVigiaNgDAO(targetDb);
 
-            copyPrivileges(sourceDao, targetDao, targetDb);
+            copyPrivileges(sourceDao, targetDao);
 
-            targetDao.associatePrivileges(targetDb, TARGET_PROFILE_ID);
+            targetDao.associatePrivileges(TARGET_PROFILE_ID);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void copyPrivileges(VigiaNgDAO sourceDao, VigiaNgDAO targetDao, DatabaseCredentials targetDb) throws SQLException {
+    private static void copyPrivileges(VigiaNgDAO sourceDao, VigiaNgDAO targetDao) throws SQLException {
         List<String> sourcePrivileges = sourceDao.listPrivileges().stream()
                 .map(p -> p[1]).collect(Collectors.toList());
         List<String> targetPrivileges = targetDao.listPrivileges().stream()
@@ -47,7 +47,7 @@ public class CopyData {
         }
 
         missingPrivileges.sort(String::compareTo);
-        targetDao.insertPrivileges(targetDb, missingPrivileges);
+        targetDao.insertPrivileges(missingPrivileges);
     }
 
     private static DatabaseCredentials getDatabaseCredentials(String databaseName) throws IOException {

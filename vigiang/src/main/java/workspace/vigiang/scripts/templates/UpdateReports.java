@@ -47,7 +47,7 @@ public class UpdateReports {
                     String reportName = fullFileName.substring(firstUnderscore + 1, lastDot);
 
                     byte[] fileBytes = Files.readAllBytes(entry);
-                    dao.updateTemplateReport(databaseCredentials, String.valueOf(CARRIER_ID), reportId, reportName, fileBytes);
+                    dao.updateTemplateReport(String.valueOf(CARRIER_ID), reportId, reportName, fileBytes);
                 }
             }
 

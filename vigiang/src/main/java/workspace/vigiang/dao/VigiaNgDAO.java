@@ -15,33 +15,33 @@ public interface VigiaNgDAO {
 
     List<String[]> listPrivileges() throws SQLException;
 
-    List<String[]> listProfiles(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listProfiles() throws SQLException;
 
-    List<String[]> listFilterQueries(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listFilterQueries() throws SQLException;
 
-    List<String[]> listZoneInterceptions(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listZoneInterceptions() throws SQLException;
 
-    List<String[]> listValidationRules(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listValidationRules() throws SQLException;
 
-    List<String[]> listQdsValidationRules(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listQdsValidationRules() throws SQLException;
 
-    List<EmailTemplate> listEmailTemplates(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<EmailTemplate> listEmailTemplates() throws SQLException;
 
-    List<ReportTemplate> listReportTemplates(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<ReportTemplate> listReportTemplates() throws SQLException;
 
-    List<String[]> listConfigurationReports(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listConfigurationReports() throws SQLException;
 
-    List<String[]> listCarriers(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listCarriers() throws SQLException;
 
-    List<String[]> listZones(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<String[]> listZones() throws SQLException;
 
-    void updateTemplateReport(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException;
+    void updateTemplateReport(String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException;
 
-    void updateConfigurationValue(DatabaseCredentials databaseCredentials, Configuration configuration, String newValue) throws SQLException;
+    void updateConfigurationValue(Configuration configuration, String newValue) throws SQLException;
 
-    void insertPrivileges(DatabaseCredentials databaseCredentials, List<String> privilegeIds) throws SQLException;
+    void insertPrivileges(List<String> privilegeIds) throws SQLException;
 
-    void associatePrivileges(DatabaseCredentials targetDb, int targetPrivilegeId) throws SQLException;
+    void associatePrivileges(int targetPrivilegeId) throws SQLException;
 
     default Connection getConnection(DatabaseCredentials databaseCredentials) throws SQLException {
         return DriverManager.getConnection(

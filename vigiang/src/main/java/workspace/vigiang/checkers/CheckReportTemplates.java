@@ -24,7 +24,7 @@ public class CheckReportTemplates {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
                 System.out.println(databaseCredentials.getName() + ":");
 
-                List<ReportTemplate> reportTemplates = dao.listReportTemplates(databaseCredentials);
+                List<ReportTemplate> reportTemplates = dao.listReportTemplates();
                 updateLocalReportFiles(databaseCredentials, reportTemplates);
                 updateLocalReportTemplates(databaseCredentials, reportTemplates);
 
@@ -118,7 +118,7 @@ public class CheckReportTemplates {
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id" };
         }
 
-        List<String[]> data = dao.listConfigurationReports(databaseCredentials);
+        List<String[]> data = dao.listConfigurationReports();
         FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
     }
 

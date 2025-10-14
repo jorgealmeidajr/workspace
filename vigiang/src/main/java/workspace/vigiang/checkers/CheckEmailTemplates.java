@@ -23,7 +23,7 @@ public class CheckEmailTemplates {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
                 System.out.println(databaseCredentials.getName() + ":");
 
-                List<EmailTemplate> emailTemplates = dao.listEmailTemplates(databaseCredentials);
+                List<EmailTemplate> emailTemplates = dao.listEmailTemplates();
                 updateLocalEmailTemplatesFiles(databaseCredentials, emailTemplates);
                 updateEmailTemplates(databaseCredentials, emailTemplates);
 
