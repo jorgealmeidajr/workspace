@@ -4,11 +4,12 @@ import workspace.vigiang.dao.VigiaNgDAO;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.service.EnvironmentService;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static workspace.vigiang.service.EnvironmentService.getDatabaseCredentials;
 
 public class CopyData {
 
@@ -48,15 +49,6 @@ public class CopyData {
 
         missingPrivileges.sort(String::compareTo);
         targetDao.insertPrivileges(missingPrivileges);
-    }
-
-    private static DatabaseCredentials getDatabaseCredentials(String databaseName) throws IOException {
-        return EnvironmentService.getVigiangDatabases().stream()
-                .filter((credentials) -> credentials.getName().equals(databaseName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
-
-        //return EnvironmentService.getVigiaNgDAO(databaseCredentials); // TODO
     }
 
 }

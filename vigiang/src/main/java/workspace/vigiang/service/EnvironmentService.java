@@ -161,4 +161,11 @@ public class EnvironmentService {
         return reportTemplatesPath;
     }
 
+    public static DatabaseCredentials getDatabaseCredentials(String databaseName) throws IOException {
+        return EnvironmentService.getVigiangDatabases().stream()
+                .filter((credentials) -> credentials.getName().equals(databaseName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
+    }
+
 }

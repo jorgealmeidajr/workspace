@@ -14,17 +14,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Deprecated
 public class CompareManagementToLab {
 
     public static void main(String[] args) {
-        // TODO: this will not work anymore
-        String carrierManagementName = "CLARO";
-        String vigiaNgLabName = "CLARO_ORACLE_DEV";
+        String carrierManagementName = "CLARO?"; // should be the carrier name in management system
+        String databaseName = "CLARO?"; // should be the name in databases.json
 
         try {
             ManagementData managementData = new ManagementData(carrierManagementName);
-            VigiaNgData vigiaNgData = new VigiaNgData(vigiaNgLabName);
+            VigiaNgData vigiaNgData = new VigiaNgData(databaseName);
 
             checkNewFeaturesToManagement(managementData, vigiaNgData);
             checkNewConfigurationsToManagement(managementData, vigiaNgData);
@@ -94,8 +92,8 @@ class VigiaNgData {
     private final List<String> configurationsIds;
     private final Map<String, Configuration> configurationsMap;
 
-    VigiaNgData(String vigiaNgLabName) throws Exception {
-        DatabaseCredentials databaseCredentials = getEnvironmentByName(vigiaNgLabName);
+    VigiaNgData(String databaseName) throws Exception {
+        DatabaseCredentials databaseCredentials = EnvironmentService.getDatabaseCredentials(databaseName);
         VigiaNgDAO vigiaNgDAO = EnvironmentService.getVigiaNgDAO(databaseCredentials);
 
         List<Feature> features = vigiaNgDAO.listFeatures().stream()
@@ -115,12 +113,5 @@ class VigiaNgData {
                 .collect(Collectors.toList());
         this.configurationsMap = configurations.stream()
                 .collect(Collectors.toMap(Configuration::getId, Function.identity()));
-    }
-
-    private static DatabaseCredentials getEnvironmentByName(String vigiaNgLabName) throws IOException {
-        return EnvironmentService.getVigiangDatabases().stream()
-                .filter((databaseCredentials) -> databaseCredentials.getName().toString().equalsIgnoreCase(vigiaNgLabName))
-                .findFirst()
-                .orElseThrow();
     }
 }
