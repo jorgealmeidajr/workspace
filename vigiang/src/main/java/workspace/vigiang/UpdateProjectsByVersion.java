@@ -55,8 +55,6 @@ public class UpdateProjectsByVersion {
                     .filter(f -> f.getRelativeDir().contains("\\repository\\"))
                     .collect(Collectors.toList());
                 updateMappers(versionPath, backendFileContents);
-
-                updateVersionMd(versionPath, version);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -67,19 +65,25 @@ public class UpdateProjectsByVersion {
 
     private static void updateConfigurations(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
-            Pattern.compile("\\.getConfiguration\\(['\"]([^'\"]+)['\"]")
+            Pattern.compile("\\.getConfiguration\\(['\"]([^'\"]+)['\"]"),
+            Pattern.compile("\"(cnfg.*)\"")
         );
-        // TODO: report config is missing
-        // TODO: check scheduler config
 
         List<Pattern> frontendPatterns = List.of(
             Pattern.compile("getConfiguration\\(['\"]([^'\"]+)['\"]")
         );
 
-        var vigiangMatches = new VigiangMatches(
-            getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of()),
-            getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of()),
-            VigiangMatchType.CONFIGURATION);
+        List<FileMatch> frontendMatches = getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of());
+
+        List<FileMatch> backendMatches = getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of());
+        backendMatches = backendMatches.stream()
+                .map(m -> {
+                    var matchStr = m.getMatch().replaceAll(",", "");
+                    return new FileMatch(m.getRelativeDir(), matchStr);
+                })
+                .collect(Collectors.toList());
+
+        var vigiangMatches = new VigiangMatches(backendMatches, frontendMatches, VigiangMatchType.CONFIGURATION);
         MATCHES.add(vigiangMatches);
 
         updateTxt(versionPath, vigiangMatches, "configurations");
@@ -143,39 +147,6 @@ public class UpdateProjectsByVersion {
 
         updateTxt(versionPath, vigiangMatches, "environment");
         updateMd(versionPath, vigiangMatches, "environment");
-    }
-
-    // TODO: missing implementation
-    private static void updateVersionMd(Path versionPath, String version) throws IOException {
-        String resultTxt = "";
-
-        resultTxt += "# webviewer:\n";
-        resultTxt += "```\n";
-
-        resultTxt += "```\n\n";
-
-        resultTxt += "# workflow:\n";
-        resultTxt += "```\n";
-
-        resultTxt += "```\n\n";
-
-        resultTxt += "# backend:\n";
-        resultTxt += "```\n";
-
-        resultTxt += "```\n";
-
-        String newFileContent = resultTxt;
-        Path allConfigurationsPath = Paths.get(versionPath + "\\version-" + version + ".md");
-
-        var initialFileContent = "";
-        if (Files.exists(allConfigurationsPath)) {
-            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + allConfigurationsPath);
-            Files.writeString(allConfigurationsPath, newFileContent);
-        }
     }
 
     private static void updateTxt(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
