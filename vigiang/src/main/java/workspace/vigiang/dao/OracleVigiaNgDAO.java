@@ -412,7 +412,21 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateConfigurationValue(Configuration configuration, String newValue) throws SQLException {
-        // TODO: missing implementation...
+        String sql =
+            "update CFG_NG_SITE set VL_PARAMETRO = ?\n" +
+            "where CD_PARAMETRO = ?\n" +
+            "  and ID_PARAMETRO = ?\n" +
+            "  and CD_OPERADORA = ?";
+
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newValue);
+            stmt.setInt(2, configuration.getCode());
+            stmt.setString(3, configuration.getId());
+            stmt.setInt(4, Integer.parseInt(configuration.getCarrierId()));
+            int updated = stmt.executeUpdate();
+            System.out.println("Updated CFG_NG_SITE, rows=" + updated);
+        }
     }
 
     @Override

@@ -1,7 +1,6 @@
 package workspace.vigiang.scripts.templates;
 
 import workspace.vigiang.dao.VigiaNgDAO;
-import workspace.vigiang.model.Carrier;
 import workspace.vigiang.model.Configuration;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.ReportTemplate;
@@ -11,28 +10,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class UpdateReportsConfig {
 
     public static void main(String[] args) {
-        // the parameters bellow must match in file databases.json
-        String DATABASE_NAME = "?";
-        Carrier CARRIER = null;
-        DatabaseCredentials.Database DATABASE = null;
-
-        Integer CARRIER_ID = 0; // this id is from database
+        String DATABASE_NAME = "ENTEL?"; // the name must match in file databases.json
+        Integer CARRIER_ID = -1;         // this id is from the database
 
         try {
-            Predicate<DatabaseCredentials> databaseCredentialsPredicate = (credentials) ->
-                    credentials.getName().equals(DATABASE_NAME)
-                            && credentials.getCarrier().equals(CARRIER)
-                            && credentials.getDatabase().equals(DATABASE);
-            DatabaseCredentials databaseCredentials = EnvironmentService.getVigiangDatabases().stream()
-                    .filter(databaseCredentialsPredicate)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Database credentials not found, check the parameters..."));
+            DatabaseCredentials databaseCredentials = EnvironmentService.getDatabaseCredentials(DATABASE_NAME);
             VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
             String carrierId = String.valueOf(CARRIER_ID);
 
