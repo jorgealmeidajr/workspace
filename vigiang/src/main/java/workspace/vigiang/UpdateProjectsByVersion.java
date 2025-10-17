@@ -9,6 +9,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import workspace.vigiang.model.MappingResult;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.MappersService;
 
@@ -26,8 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static workspace.vigiang.service.EnvironmentService.getVigiaNgPath;
-import static workspace.vigiang.service.MappersService.extractFunctionParams;
-import static workspace.vigiang.service.MappersService.extractFunctionCall;
 
 public class UpdateProjectsByVersion {
 
@@ -214,82 +213,8 @@ public class UpdateProjectsByVersion {
         Set<MappingResult> uniqueSet = new HashSet<>(resultList);
         List<MappingResult> listWithoutDuplicates = new ArrayList<>(uniqueSet);
 
-        Map<String, List<MappingResult>> byNamespace = listWithoutDuplicates.stream()
-                .collect(Collectors.groupingBy(MappingResult::getNamespace));
-        List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
-        Collections.sort(byNamespaceKeys);
-
-        Map<String, List<MappingResult>> byId = listWithoutDuplicates.stream()
-                .collect(Collectors.groupingBy(MappingResult::getId));
-
-        String resultTxt = "";
-        for (String key : byNamespaceKeys) {
-            List<MappingResult> result = byNamespace.get(key);
-            result.sort(Comparator.comparing(MappingResult::getId)
-                    .thenComparing(MappingResult::getDatabase));
-
-            resultTxt += "# " + key + ":\n";
-            resultTxt += "```\n";
-            String currentId = null;
-            for (MappingResult mappingResult : result) {
-                if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
-                    System.out.println("case to check: " + key + ", " + mappingResult.getId() + ", " + mappingResult.getDatabase());
-                    continue;
-                }
-
-                if (currentId == null || !currentId.equals(mappingResult.getId())) {
-                    currentId = mappingResult.getId();
-                    resultTxt += currentId + "():\n";
-
-                    var byIdList = byId.get(currentId);
-                    var oracleCall = byIdList.stream().filter(r -> "oracle".equals(r.getDatabase())).findFirst().orElse(null);
-                    var postgresCall = byIdList.stream().filter(r -> "postgres".equals(r.getDatabase())).findFirst().orElse(null);
-
-                    if (oracleCall != null) {
-                        resultTxt += "  oracle: " + oracleCall.getFunctionCall() + "\n";
-                        if (!mappingResult.getFunctionParams().isEmpty()) {
-                            resultTxt += "    params:\n";
-                            for (String param : mappingResult.getFunctionParams()) {
-                                resultTxt += "      - " + param + "\n";
-                            }
-                            resultTxt += "\n";
-                        }
-                    } else {
-                        resultTxt += "  oracle: _UNDEFINED_\n";
-                        resultTxt += "\n";
-                    }
-
-                    if (postgresCall != null) {
-                        resultTxt += "  postgres: " + postgresCall.getFunctionCall() + "\n";
-                        if (!mappingResult.getFunctionParams().isEmpty()) {
-                            resultTxt += "    params:\n";
-                            for (String param : mappingResult.getFunctionParams()) {
-                                resultTxt += "      - " + param + "\n";
-                            }
-                            resultTxt += "\n";
-                        }
-                    } else {
-                        resultTxt += "  postgres: _UNDEFINED_\n";
-                        resultTxt += "\n";
-                    }
-                }
-            }
-            resultTxt += "```\n\n";
-        }
-        System.out.println();
-
-        String newFileContent = resultTxt;
-        Path allConfigurationsPath = Paths.get(versionPath + "\\mappers.md");
-
-        var initialFileContent = "";
-        if (Files.exists(allConfigurationsPath)) {
-            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + allConfigurationsPath);
-            Files.writeString(allConfigurationsPath, newFileContent);
-        }
+        MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
+        MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
     }
 
     private static List<MappingResult> getXmlMappings(Document document, String database) {
@@ -314,8 +239,8 @@ public class UpdateProjectsByVersion {
             Node node = nodeList.item(i);
             String content = node.getTextContent();
 
-            String functionCall = extractFunctionCall(content);
-            List<String> functionParams = extractFunctionParams(content);
+            String functionCall = MappersService.extractFunctionCall(content);
+            List<String> functionParams = MappersService.extractFunctionParams(content);
 
             NamedNodeMap attributes = node.getAttributes();
             String id = "";
@@ -513,25 +438,4 @@ class FileContent {
 class FileMatch {
     private final String relativeDir;
     private final String match;
-}
-
-@AllArgsConstructor
-@Getter
-@EqualsAndHashCode
-class MappingResult {
-    private final String namespace;
-    private final String id;
-    private final String database;
-    private final String functionCall;
-    private final List<String> functionParams;
-
-    @Override
-    public String toString() {
-        return "MappingResult{" +
-                "namespace='" + namespace + '\'' +
-                ", id='" + id + '\'' +
-                ", database='" + database + '\'' +
-                ", functionCall='" + functionCall + '\'' +
-                '}';
-    }
 }
