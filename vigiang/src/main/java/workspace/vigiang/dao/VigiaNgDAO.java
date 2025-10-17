@@ -39,6 +39,8 @@ public interface VigiaNgDAO {
 
     void updateConfigurationValue(Configuration configuration, String newValue) throws SQLException;
 
+    void updateTemplateEmail(String carrierId, String templateEmailName, byte[] fileBytes) throws SQLException;
+
     void insertPrivileges(List<String> privilegeIds) throws SQLException;
 
     void associatePrivileges(int targetPrivilegeId) throws SQLException;

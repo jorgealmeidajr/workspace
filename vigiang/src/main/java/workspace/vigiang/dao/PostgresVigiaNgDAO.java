@@ -429,6 +429,11 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
+    public void updateTemplateEmail(String carrierId, String templateEmailName, byte[] fileBytes) throws SQLException {
+        // TODO: missing implementation...
+    }
+
+    @Override
     public void insertPrivileges(List<String> privilegeIds) throws SQLException {
         // TODO: missing implementation
     }

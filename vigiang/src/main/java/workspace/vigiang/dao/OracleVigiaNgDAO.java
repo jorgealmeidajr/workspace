@@ -416,6 +416,63 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
+    public void updateTemplateEmail(String carrierId, String templateEmailName, byte[] fileBytes) throws SQLException {
+        byte[] originalContent = getTemplateEmailContent(databaseCredentials, carrierId, templateEmailName);
+        if (Arrays.equals(originalContent, fileBytes)) return;
+
+        String update =
+            "update CFG_EMAIL_SERVICOS\n" +
+            "  set DE_TEXTO = ?\n" +
+            "where CD_OPERADORA = ?\n" +
+            "  and ID_TIPO_SERVICO = ?";
+
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(update)) {
+            stmt.setString(1, new String(fileBytes, StandardCharsets.UTF_8));
+            stmt.setInt(2, Integer.parseInt(carrierId));
+            stmt.setString(3, templateEmailName);
+            int updated = stmt.executeUpdate();
+            System.out.println("Updated CFG_EMAIL_SERVICOS: carrierId=" + carrierId + ", templateEmailName=" + templateEmailName + ", rows=" + updated);
+        }
+    }
+
+    private byte[] getTemplateEmailContent(DatabaseCredentials databaseCredentials, String carrierId, String templateEmailName) throws SQLException {
+        String sql =
+            "select DE_TEXTO from CFG_EMAIL_SERVICOS\n" +
+            "where CD_OPERADORA = ?\n" +
+            "  and ID_TIPO_SERVICO = ?";
+
+        try (Connection conn = getConnection(databaseCredentials);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, Integer.parseInt(carrierId));
+            stmt.setString(2, templateEmailName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Clob clob = rs.getClob("DE_TEXTO");
+                    if (clob != null) {
+                        try {
+                            try (Reader reader = clob.getCharacterStream()) {
+                                StringBuilder sb = new StringBuilder();
+                                char[] buffer = new char[1024];
+                                int len;
+                                while ((len = reader.read(buffer)) != -1) {
+                                    sb.append(buffer, 0, len);
+                                }
+                                return sb.toString().getBytes(StandardCharsets.UTF_8);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        return new byte[0];
+                    }
+                }
+            }
+        }
+        return new byte[0];
+    }
+
+    @Override
     public void insertPrivileges(List<String> privilegeIds) throws SQLException {
         var maxSql = "select max(CD_PRIVILEGIO) + 1 as CD_PRIVILEGIO from SEG_PRIVILEGIO";
         Integer nextPrivilegeId = null;
