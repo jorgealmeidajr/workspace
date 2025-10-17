@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +20,16 @@ public class MappersService {
             result = m.group(1);
         }
         return result.toUpperCase() + "()";
+    }
+
+    public static List<String> extractFunctionParams(String content) {
+        var result = new java.util.ArrayList<String>();
+        Pattern r = Pattern.compile("#\\{\\s*(\\w+)[^}]*mode=IN[^}]*\\}");
+        Matcher m = r.matcher(content);
+        while (m.find()) {
+            result.add(m.group(1));
+        }
+        return result;
     }
 
     public static String getNamespace(Document document) {

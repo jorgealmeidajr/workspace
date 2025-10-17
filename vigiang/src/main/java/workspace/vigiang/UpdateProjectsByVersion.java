@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static workspace.vigiang.service.EnvironmentService.getVigiaNgPath;
+import static workspace.vigiang.service.MappersService.extractFunctionParams;
 import static workspace.vigiang.service.MappersService.extractFunctionCall;
 
 public class UpdateProjectsByVersion {
@@ -246,14 +247,30 @@ public class UpdateProjectsByVersion {
 
                     if (oracleCall != null) {
                         resultTxt += "  oracle: " + oracleCall.getFunctionCall() + "\n";
+                        if (!mappingResult.getFunctionParams().isEmpty()) {
+                            resultTxt += "    params:\n";
+                            for (String param : mappingResult.getFunctionParams()) {
+                                resultTxt += "      - " + param + "\n";
+                            }
+                            resultTxt += "\n";
+                        }
                     } else {
                         resultTxt += "  oracle: _UNDEFINED_\n";
+                        resultTxt += "\n";
                     }
 
                     if (postgresCall != null) {
                         resultTxt += "  postgres: " + postgresCall.getFunctionCall() + "\n";
+                        if (!mappingResult.getFunctionParams().isEmpty()) {
+                            resultTxt += "    params:\n";
+                            for (String param : mappingResult.getFunctionParams()) {
+                                resultTxt += "      - " + param + "\n";
+                            }
+                            resultTxt += "\n";
+                        }
                     } else {
                         resultTxt += "  postgres: _UNDEFINED_\n";
+                        resultTxt += "\n";
                     }
                 }
             }
@@ -284,7 +301,6 @@ public class UpdateProjectsByVersion {
         result.addAll(getMappings(document, database, namespace, "insert"));
         result.addAll(getMappings(document, database, namespace, "update"));
 
-        // TODO: get params
         // TODO: get id result
 
         return result;
@@ -297,7 +313,9 @@ public class UpdateProjectsByVersion {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             String content = node.getTextContent();
+
             String functionCall = extractFunctionCall(content);
+            List<String> functionParams = extractFunctionParams(content);
 
             NamedNodeMap attributes = node.getAttributes();
             String id = "";
@@ -305,7 +323,7 @@ public class UpdateProjectsByVersion {
                 Node attribute = attributes.item(a);
                 if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
 
-                var temp = new MappingResult(namespace, id, database, functionCall);
+                var temp = new MappingResult(namespace, id, database, functionCall, functionParams);
                 resultList.add(temp);
             }
         }
@@ -505,6 +523,7 @@ class MappingResult {
     private final String id;
     private final String database;
     private final String functionCall;
+    private final List<String> functionParams;
 
     @Override
     public String toString() {
