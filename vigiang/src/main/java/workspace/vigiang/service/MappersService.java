@@ -49,8 +49,70 @@ public class MappersService {
         return namespace;
     }
 
-    public static void writeMappersTxt(Path versionPath, List<MappingResult> listWithoutDuplicates) {
+    public static void writeMappersTxt(Path versionPath, List<MappingResult> listWithoutDuplicates) throws IOException {
+        Map<String, List<MappingResult>> byNamespace = listWithoutDuplicates.stream()
+                .collect(Collectors.groupingBy(MappingResult::getNamespace));
+        List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
+        Collections.sort(byNamespaceKeys);
 
+        String resultTxt = "";
+        for (String namespace : byNamespaceKeys) {
+            List<MappingResult> result = byNamespace.get(namespace);
+            result.sort(Comparator.comparing(MappingResult::getId)
+                    .thenComparing(MappingResult::getDatabase));
+
+            Map<String, List<MappingResult>> byId = listWithoutDuplicates.stream()
+                    .collect(Collectors.groupingBy(MappingResult::getId));
+
+            resultTxt += namespace + ":\n";
+
+            String currentId = null;
+            for (MappingResult mappingResult : result) {
+                if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
+                    System.out.println("case to check: " + namespace + ", " + mappingResult.getId() + ", " + mappingResult.getDatabase());
+                    continue;
+                }
+
+                if (currentId == null || !currentId.equals(mappingResult.getId())) {
+                    currentId = mappingResult.getId();
+                    resultTxt += "  " + currentId + "():\n";
+
+                    var byIdList = byId.get(currentId);
+                    var oracleCall = byIdList.stream().filter(r -> "oracle".equals(r.getDatabase())).findFirst().orElse(null);
+                    var postgresCall = byIdList.stream().filter(r -> "postgres".equals(r.getDatabase())).findFirst().orElse(null);
+
+                    if (oracleCall != null) {
+                        resultTxt += "    oracle: " + oracleCall.getFunctionCall() + "\n";
+                    } else {
+                        resultTxt += "    oracle: _UNDEFINED_\n";
+                    }
+
+                    if (postgresCall != null) {
+                        resultTxt += "    postgres: " + postgresCall.getFunctionCall() + "\n";
+                    } else {
+                        resultTxt += "    postgres: _UNDEFINED_\n";
+                    }
+                }
+            }
+            resultTxt += "\n";
+        }
+
+        writeContentToFile(resultTxt, versionPath, "\\mappers.txt");
+    }
+
+    private static void writeContentToFile(String newFileContent, Path filePath, String fileName) throws IOException {
+        newFileContent = newFileContent.trim() + "\n";
+        Path mappersMdPath = Paths.get(filePath + fileName);
+
+        var initialFileContent = "";
+        if (Files.exists(mappersMdPath)) {
+            initialFileContent = new String(Files.readAllBytes(mappersMdPath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + mappersMdPath);
+            Files.writeString(mappersMdPath, newFileContent);
+        }
     }
 
     public static void writeMappersMd(Path versionPath, List<MappingResult> listWithoutDuplicates) throws IOException {
@@ -118,18 +180,7 @@ public class MappersService {
         }
         System.out.println();
 
-        String newFileContent = resultMd;
-        Path mappersMdPath = Paths.get(versionPath + "\\mappers.md");
-
-        var initialFileContent = "";
-        if (Files.exists(mappersMdPath)) {
-            initialFileContent = new String(Files.readAllBytes(mappersMdPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + mappersMdPath);
-            Files.writeString(mappersMdPath, newFileContent);
-        }
+        writeContentToFile(resultMd, versionPath, "\\mappers.md");
     }
 
 }
