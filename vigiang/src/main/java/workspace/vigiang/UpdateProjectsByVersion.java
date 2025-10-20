@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import workspace.vigiang.model.XmlCallMapping;
@@ -207,7 +204,7 @@ public class UpdateProjectsByVersion {
                 database = "postgres";
             }
 
-            resultList.addAll(getXmlMappings(document, database));
+            resultList.addAll(MappersService.getXmlMappings(document, database));
         }
 
         Set<XmlCallMapping> uniqueSet = new HashSet<>(resultList);
@@ -215,45 +212,6 @@ public class UpdateProjectsByVersion {
 
         MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
         MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
-    }
-
-    private static List<XmlCallMapping> getXmlMappings(Document document, String database) {
-        var result = new ArrayList<XmlCallMapping>();
-
-        final String namespace = MappersService.getNamespace(document);
-
-        result.addAll(getMappings(document, database, namespace, "select"));
-        result.addAll(getMappings(document, database, namespace, "insert"));
-        result.addAll(getMappings(document, database, namespace, "update"));
-
-        // TODO: handle resultMaps
-        var resultMaps = MappersService.getResultMaps(document, database, namespace);
-
-        return result;
-    }
-
-    private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName) {
-        NodeList nodeList = document.getElementsByTagName(tagName);
-
-        var resultList = new ArrayList<XmlCallMapping>();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            String content = node.getTextContent();
-
-            String functionCall = MappersService.extractFunctionCall(content);
-            List<String> functionParams = MappersService.extractFunctionParams(content);
-
-            NamedNodeMap attributes = node.getAttributes();
-            String id = "";
-            for (int a = 0; a < attributes.getLength(); a++) {
-                Node attribute = attributes.item(a);
-                if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
-
-                var temp = new XmlCallMapping(namespace, id, database, functionCall, functionParams);
-                resultList.add(temp);
-            }
-        }
-        return resultList;
     }
 
     private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {

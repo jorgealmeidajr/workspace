@@ -226,4 +226,43 @@ public class MappersService {
         }
     }
 
+    public static List<XmlCallMapping> getXmlMappings(Document document, String database) {
+        var result = new ArrayList<XmlCallMapping>();
+
+        final String namespace = getNamespace(document);
+
+        result.addAll(getMappings(document, database, namespace, "select"));
+        result.addAll(getMappings(document, database, namespace, "insert"));
+        result.addAll(getMappings(document, database, namespace, "update"));
+
+        // TODO: handle resultMaps
+        var resultMaps = getResultMaps(document, database, namespace);
+
+        return result;
+    }
+
+    private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName) {
+        NodeList nodeList = document.getElementsByTagName(tagName);
+
+        var resultList = new ArrayList<XmlCallMapping>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            String content = node.getTextContent();
+
+            String functionCall = extractFunctionCall(content);
+            List<String> functionParams = extractFunctionParams(content);
+
+            NamedNodeMap attributes = node.getAttributes();
+            String id = "";
+            for (int a = 0; a < attributes.getLength(); a++) {
+                Node attribute = attributes.item(a);
+                if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
+
+                var temp = new XmlCallMapping(namespace, id, database, functionCall, functionParams);
+                resultList.add(temp);
+            }
+        }
+        return resultList;
+    }
+
 }
