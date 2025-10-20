@@ -3,7 +3,9 @@ package workspace.vigiang.service;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import workspace.vigiang.model.MappingResult;
+import workspace.vigiang.model.XmlResultMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -181,6 +183,47 @@ public class MappersService {
         System.out.println();
 
         writeContentToFile(resultMd, versionPath, "\\mappers.md");
+    }
+
+    public static List<XmlResultMap> getResultMaps(Document document, String database, String namespace) {
+        var result = new ArrayList<XmlResultMap>();
+
+        NodeList nodeList1 = document.getElementsByTagName("resultMap");
+        for (int i = 0; i < nodeList1.getLength(); i++) {
+            Node node1 = nodeList1.item(i);
+
+            NamedNodeMap attributes = node1.getAttributes();
+            String id = "";
+            for (int a = 0; a < attributes.getLength(); a++) {
+                Node attribute = attributes.item(a);
+                if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
+            }
+
+            var xmlResults = new ArrayList<XmlResultMap.XmlResult>();
+            var xmlResultMap = new XmlResultMap(namespace, id, database, xmlResults);
+            result.add(xmlResultMap);
+
+            getXmlResults(node1, xmlResults);
+        }
+        return result;
+    }
+
+    private static void getXmlResults(Node node1, List<XmlResultMap.XmlResult> xmlResults) {
+        NodeList nodeList2 = node1.getChildNodes();
+        for (int j = 0; j < nodeList2.getLength(); j++) {
+            Node node2 = nodeList2.item(j);
+            if (node2.getNodeType() == Node.ELEMENT_NODE && "result".equals(node2.getNodeName())) {
+                NamedNodeMap attributes2 = node2.getAttributes();
+                String property = "";
+                String column = "";
+                for (int a = 0; a < attributes2.getLength(); a++) {
+                    Node attribute = attributes2.item(a);
+                    if ("property".equals(attribute.getNodeName())) property = attribute.getNodeValue();
+                    if ("column".equals(attribute.getNodeName())) column = attribute.getNodeValue();
+                }
+                xmlResults.add(new XmlResultMap.XmlResult(property, column));
+            }
+        }
     }
 
 }

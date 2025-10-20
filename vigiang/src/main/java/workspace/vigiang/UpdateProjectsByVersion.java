@@ -226,7 +226,7 @@ public class UpdateProjectsByVersion {
         result.addAll(getMappings(document, database, namespace, "insert"));
         result.addAll(getMappings(document, database, namespace, "update"));
 
-        // TODO: get id result
+        var resultMaps = MappersService.getResultMaps(document, database, namespace);
 
         return result;
     }
