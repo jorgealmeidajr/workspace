@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
-public class MappingResult {
+public class XmlCallMapping {
 
     private final String namespace;
     private final String id;
@@ -19,7 +19,7 @@ public class MappingResult {
 
     @Override
     public String toString() {
-        return "MappingResult{" +
+        return "XmlCallMapping{" +
                 "namespace='" + namespace + '\'' +
                 ", id='" + id + '\'' +
                 ", database='" + database + '\'' +

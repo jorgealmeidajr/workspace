@@ -4,7 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import workspace.vigiang.model.MappingResult;
+import workspace.vigiang.model.XmlCallMapping;
 import workspace.vigiang.model.XmlResultMap;
 
 import java.io.IOException;
@@ -51,32 +51,32 @@ public class MappersService {
         return namespace;
     }
 
-    public static void writeMappersTxt(Path versionPath, List<MappingResult> listWithoutDuplicates) throws IOException {
-        Map<String, List<MappingResult>> byNamespace = listWithoutDuplicates.stream()
-                .collect(Collectors.groupingBy(MappingResult::getNamespace));
+    public static void writeMappersTxt(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
+        Map<String, List<XmlCallMapping>> byNamespace = listWithoutDuplicates.stream()
+                .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
         List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
         Collections.sort(byNamespaceKeys);
 
         String resultTxt = "";
         for (String namespace : byNamespaceKeys) {
-            List<MappingResult> result = byNamespace.get(namespace);
-            result.sort(Comparator.comparing(MappingResult::getId)
-                    .thenComparing(MappingResult::getDatabase));
+            List<XmlCallMapping> result = byNamespace.get(namespace);
+            result.sort(Comparator.comparing(XmlCallMapping::getId)
+                    .thenComparing(XmlCallMapping::getDatabase));
 
-            Map<String, List<MappingResult>> byId = listWithoutDuplicates.stream()
-                    .collect(Collectors.groupingBy(MappingResult::getId));
+            Map<String, List<XmlCallMapping>> byId = listWithoutDuplicates.stream()
+                    .collect(Collectors.groupingBy(XmlCallMapping::getId));
 
             resultTxt += namespace + ":\n";
 
             String currentId = null;
-            for (MappingResult mappingResult : result) {
-                if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
-                    System.out.println("case to check: " + namespace + ", " + mappingResult.getId() + ", " + mappingResult.getDatabase());
+            for (XmlCallMapping xmlCallMapping : result) {
+                if ("()".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
+                    System.out.println("case to check: " + namespace + ", " + xmlCallMapping.getId() + ", " + xmlCallMapping.getDatabase());
                     continue;
                 }
 
-                if (currentId == null || !currentId.equals(mappingResult.getId())) {
-                    currentId = mappingResult.getId();
+                if (currentId == null || !currentId.equals(xmlCallMapping.getId())) {
+                    currentId = xmlCallMapping.getId();
                     resultTxt += "  " + currentId + "():\n";
 
                     var byIdList = byId.get(currentId);
@@ -117,32 +117,32 @@ public class MappersService {
         }
     }
 
-    public static void writeMappersMd(Path versionPath, List<MappingResult> listWithoutDuplicates) throws IOException {
-        Map<String, List<MappingResult>> byNamespace = listWithoutDuplicates.stream()
-                .collect(Collectors.groupingBy(MappingResult::getNamespace));
+    public static void writeMappersMd(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
+        Map<String, List<XmlCallMapping>> byNamespace = listWithoutDuplicates.stream()
+                .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
         List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
         Collections.sort(byNamespaceKeys);
 
-        Map<String, List<MappingResult>> byId = listWithoutDuplicates.stream()
-                .collect(Collectors.groupingBy(MappingResult::getId));
+        Map<String, List<XmlCallMapping>> byId = listWithoutDuplicates.stream()
+                .collect(Collectors.groupingBy(XmlCallMapping::getId));
 
         String resultMd = "";
         for (String key : byNamespaceKeys) {
-            List<MappingResult> result = byNamespace.get(key);
-            result.sort(Comparator.comparing(MappingResult::getId)
-                    .thenComparing(MappingResult::getDatabase));
+            List<XmlCallMapping> result = byNamespace.get(key);
+            result.sort(Comparator.comparing(XmlCallMapping::getId)
+                    .thenComparing(XmlCallMapping::getDatabase));
 
             resultMd += "# " + key + ":\n";
             resultMd += "```\n";
             String currentId = null;
-            for (MappingResult mappingResult : result) {
-                if ("()".equals(mappingResult.getFunctionCall()) || "".equals(mappingResult.getId().trim())) {
-                    System.out.println("case to check: " + key + ", " + mappingResult.getId() + ", " + mappingResult.getDatabase());
+            for (XmlCallMapping xmlCallMapping : result) {
+                if ("()".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
+                    System.out.println("case to check: " + key + ", " + xmlCallMapping.getId() + ", " + xmlCallMapping.getDatabase());
                     continue;
                 }
 
-                if (currentId == null || !currentId.equals(mappingResult.getId())) {
-                    currentId = mappingResult.getId();
+                if (currentId == null || !currentId.equals(xmlCallMapping.getId())) {
+                    currentId = xmlCallMapping.getId();
                     resultMd += currentId + "():\n";
 
                     var byIdList = byId.get(currentId);
@@ -151,9 +151,9 @@ public class MappersService {
 
                     if (oracleCall != null) {
                         resultMd += "  oracle: " + oracleCall.getFunctionCall() + "\n";
-                        if (!mappingResult.getFunctionParams().isEmpty()) {
+                        if (!xmlCallMapping.getFunctionParams().isEmpty()) {
                             resultMd += "    params:\n";
-                            for (String param : mappingResult.getFunctionParams()) {
+                            for (String param : xmlCallMapping.getFunctionParams()) {
                                 resultMd += "      - " + param + "\n";
                             }
                             resultMd += "\n";
@@ -165,9 +165,9 @@ public class MappersService {
 
                     if (postgresCall != null) {
                         resultMd += "  postgres: " + postgresCall.getFunctionCall() + "\n";
-                        if (!mappingResult.getFunctionParams().isEmpty()) {
+                        if (!xmlCallMapping.getFunctionParams().isEmpty()) {
                             resultMd += "    params:\n";
-                            for (String param : mappingResult.getFunctionParams()) {
+                            for (String param : xmlCallMapping.getFunctionParams()) {
                                 resultMd += "      - " + param + "\n";
                             }
                             resultMd += "\n";

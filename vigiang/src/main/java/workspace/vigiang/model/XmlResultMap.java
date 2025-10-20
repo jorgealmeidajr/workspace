@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @EqualsAndHashCode
 public class XmlResultMap {
+
     private final String namespace;
     private final String id;
     private final String database;
@@ -22,5 +23,5 @@ public class XmlResultMap {
         private final String property;
         private final String column;
     }
-}
 
+}

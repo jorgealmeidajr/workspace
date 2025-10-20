@@ -9,7 +9,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import workspace.vigiang.model.MappingResult;
+import workspace.vigiang.model.XmlCallMapping;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.MappersService;
 
@@ -196,7 +196,7 @@ public class UpdateProjectsByVersion {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        var resultList = new ArrayList<MappingResult>();
+        var resultList = new ArrayList<XmlCallMapping>();
         for (FileContent backendFileContent : backendFileContents) {
             Document document = builder.parse(new InputSource(new StringReader(backendFileContent.getContent())));
 
@@ -210,15 +210,15 @@ public class UpdateProjectsByVersion {
             resultList.addAll(getXmlMappings(document, database));
         }
 
-        Set<MappingResult> uniqueSet = new HashSet<>(resultList);
-        List<MappingResult> listWithoutDuplicates = new ArrayList<>(uniqueSet);
+        Set<XmlCallMapping> uniqueSet = new HashSet<>(resultList);
+        List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet);
 
         MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
         MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
     }
 
-    private static List<MappingResult> getXmlMappings(Document document, String database) {
-        var result = new ArrayList<MappingResult>();
+    private static List<XmlCallMapping> getXmlMappings(Document document, String database) {
+        var result = new ArrayList<XmlCallMapping>();
 
         final String namespace = MappersService.getNamespace(document);
 
@@ -226,15 +226,16 @@ public class UpdateProjectsByVersion {
         result.addAll(getMappings(document, database, namespace, "insert"));
         result.addAll(getMappings(document, database, namespace, "update"));
 
+        // TODO: handle resultMaps
         var resultMaps = MappersService.getResultMaps(document, database, namespace);
 
         return result;
     }
 
-    private static List<MappingResult> getMappings(Document document, String database, String namespace, String tagName) {
+    private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName) {
         NodeList nodeList = document.getElementsByTagName(tagName);
 
-        var resultList = new ArrayList<MappingResult>();
+        var resultList = new ArrayList<XmlCallMapping>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             String content = node.getTextContent();
@@ -248,7 +249,7 @@ public class UpdateProjectsByVersion {
                 Node attribute = attributes.item(a);
                 if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
 
-                var temp = new MappingResult(namespace, id, database, functionCall, functionParams);
+                var temp = new XmlCallMapping(namespace, id, database, functionCall, functionParams);
                 resultList.add(temp);
             }
         }
