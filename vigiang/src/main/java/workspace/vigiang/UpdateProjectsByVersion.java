@@ -3,18 +3,12 @@ package workspace.vigiang;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import workspace.vigiang.model.XmlCallMapping;
+import workspace.vigiang.model.XmlMyBatisMapping;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.MappersService;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -189,29 +183,34 @@ public class UpdateProjectsByVersion {
         }
     }
 
-    private static void updateMappers(Path versionPath, List<FileContent> backendFileContents) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
+    private static void updateMappers(Path versionPath, List<FileContent> backendFileContents) {
+        try {
+            var mappings = new ArrayList<XmlMyBatisMapping>();
+            for (FileContent backendFileContent : backendFileContents) {
+                String database = null;
+                if (backendFileContent.getRelativeDir().endsWith("\\oracle")) {
+                    database = "oracle";
+                } else if (backendFileContent.getRelativeDir().endsWith("\\postgres")) {
+                    database = "postgres";
+                }
 
-        var resultList = new ArrayList<XmlCallMapping>();
-        for (FileContent backendFileContent : backendFileContents) {
-            Document document = builder.parse(new InputSource(new StringReader(backendFileContent.getContent())));
-
-            String database = null;
-            if (backendFileContent.getRelativeDir().endsWith("\\oracle")) {
-                database = "oracle";
-            } else if (backendFileContent.getRelativeDir().endsWith("\\postgres")) {
-                database = "postgres";
+                var mapping = MappersService.getXmlMappings(backendFileContent.getContent(), database);
+                mappings.add(mapping);
             }
 
-            resultList.addAll(MappersService.getXmlMappings(document, database));
+            var allCalls = new ArrayList<XmlCallMapping>();
+            for (XmlMyBatisMapping mapping : mappings) {
+                allCalls.addAll(mapping.getAllCalls());
+            }
+
+            Set<XmlCallMapping> uniqueSet = new HashSet<>(allCalls);
+            List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet);
+
+            MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
+            MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        Set<XmlCallMapping> uniqueSet = new HashSet<>(resultList);
-        List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet);
-
-        MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
-        MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
     }
 
     private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {

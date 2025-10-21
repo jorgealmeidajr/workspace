@@ -4,10 +4,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import workspace.vigiang.model.XmlCallMapping;
+import workspace.vigiang.model.XmlMyBatisMapping;
 import workspace.vigiang.model.XmlResultMap;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -226,19 +233,19 @@ public class MappersService {
         }
     }
 
-    public static List<XmlCallMapping> getXmlMappings(Document document, String database) {
-        var result = new ArrayList<XmlCallMapping>();
+    public static XmlMyBatisMapping getXmlMappings(String content, String database) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new InputSource(new StringReader(content)));
 
         final String namespace = getNamespace(document);
 
-        result.addAll(getMappings(document, database, namespace, "select"));
-        result.addAll(getMappings(document, database, namespace, "insert"));
-        result.addAll(getMappings(document, database, namespace, "update"));
-
-        // TODO: handle resultMaps
+        List<XmlCallMapping> selects = getMappings(document, database, namespace, "select");
+        List<XmlCallMapping> inserts = getMappings(document, database, namespace, "insert");
+        List<XmlCallMapping> updates = getMappings(document, database, namespace, "update");
         var resultMaps = getResultMaps(document, database, namespace);
 
-        return result;
+        return new XmlMyBatisMapping(namespace, database, selects, inserts, updates, resultMaps);
     }
 
     private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName) {
