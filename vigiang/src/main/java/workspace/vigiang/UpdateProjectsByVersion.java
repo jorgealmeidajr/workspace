@@ -1,9 +1,9 @@
 package workspace.vigiang;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import workspace.vigiang.model.XmlCallMapping;
+import workspace.vigiang.model.FileContent;
+import workspace.vigiang.model.FileMatch;
 import workspace.vigiang.model.XmlMyBatisMapping;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.MappersService;
@@ -17,7 +17,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static workspace.vigiang.service.EnvironmentService.getVigiaNgPath;
 
 public class UpdateProjectsByVersion {
 
@@ -30,7 +29,7 @@ public class UpdateProjectsByVersion {
             validateProjectDirectories(WORK_DIR, version);
             Path backendPath = Paths.get(WORK_DIR + "\\" + version + "\\back-" + version);
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
-            Path versionPath = Paths.get(getVigiaNgPath() + "\\versions\\" + version);
+            Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
             var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons", "target"));
             var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of("node_modules", "json-server", "tests"));
@@ -198,16 +197,7 @@ public class UpdateProjectsByVersion {
                 mappings.add(mapping);
             }
 
-            var allCalls = new ArrayList<XmlCallMapping>();
-            for (XmlMyBatisMapping mapping : mappings) {
-                allCalls.addAll(mapping.getAllCalls());
-            }
-
-            Set<XmlCallMapping> uniqueSet = new HashSet<>(allCalls);
-            List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet);
-
-            MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
-            MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
+            MappersService.writeMappers(versionPath, mappings);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -331,7 +321,7 @@ public class UpdateProjectsByVersion {
             throw new IllegalArgumentException("o diretorio frontendPath nao existe ou nao eh um diretorio");
         }
 
-        Path versionPath = Paths.get(getVigiaNgPath() + "\\versions\\" + version);
+        Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
         if (!Files.exists(versionPath) || !Files.isDirectory(versionPath)) {
             throw new IllegalArgumentException("o diretorio versionPath nao existe ou nao eh um diretorio");
         }
@@ -380,20 +370,4 @@ class VigiangMatches {
 
 enum VigiangMatchType {
     CONFIGURATION, FEATURE, PRIVILEGE, ENVIRONMENT
-}
-
-@AllArgsConstructor
-@Getter
-class FileContent {
-    private final String relativeDir;
-    private final String name;
-    private final String content;
-}
-
-@AllArgsConstructor
-@Getter
-@EqualsAndHashCode
-class FileMatch {
-    private final String relativeDir;
-    private final String match;
 }

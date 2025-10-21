@@ -21,7 +21,7 @@ public class EnvironmentService {
     private static final String VIGIANG_DATABASES_PATH = "C:\\work\\COGNYTE1\\vigiang_dbs";
 
     public static List<String> getVersions() {
-        return List.of("1.5", "1.7", "2.2");
+        return List.of("1.5", "1.7", "2.1", "2.2");
     }
 
     public static List<DatabaseCredentials> getVigiangDatabases() throws IOException {
