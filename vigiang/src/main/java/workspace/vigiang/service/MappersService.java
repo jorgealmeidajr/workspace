@@ -58,7 +58,20 @@ public class MappersService {
         return namespace;
     }
 
-    public static void writeMappersTxt(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
+    public static void writeMappers(Path versionPath, ArrayList<XmlMyBatisMapping> mappings) throws IOException {
+        var allCalls = new ArrayList<XmlCallMapping>();
+        for (XmlMyBatisMapping mapping : mappings) {
+            allCalls.addAll(mapping.getAllCalls());
+        }
+
+        Set<XmlCallMapping> uniqueSet = new HashSet<>(allCalls);
+        List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet); // TODO: ?
+
+        writeMappersTxt(versionPath, listWithoutDuplicates);
+        writeMappersMd(versionPath, listWithoutDuplicates);
+    }
+
+    private static void writeMappersTxt(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
         Map<String, List<XmlCallMapping>> byNamespace = listWithoutDuplicates.stream()
                 .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
         List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
@@ -124,7 +137,7 @@ public class MappersService {
         }
     }
 
-    public static void writeMappersMd(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
+    private static void writeMappersMd(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
         Map<String, List<XmlCallMapping>> byNamespace = listWithoutDuplicates.stream()
                 .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
         List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
@@ -243,7 +256,7 @@ public class MappersService {
         List<XmlCallMapping> selects = getMappings(document, database, namespace, "select");
         List<XmlCallMapping> inserts = getMappings(document, database, namespace, "insert");
         List<XmlCallMapping> updates = getMappings(document, database, namespace, "update");
-        var resultMaps = getResultMaps(document, database, namespace);
+        var resultMaps = getResultMaps(document, database, namespace); // TODO: handle it
 
         return new XmlMyBatisMapping(namespace, database, selects, inserts, updates, resultMaps);
     }

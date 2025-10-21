@@ -3,7 +3,6 @@ package workspace.vigiang;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import workspace.vigiang.model.XmlCallMapping;
 import workspace.vigiang.model.XmlMyBatisMapping;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.MappersService;
@@ -198,16 +197,7 @@ public class UpdateProjectsByVersion {
                 mappings.add(mapping);
             }
 
-            var allCalls = new ArrayList<XmlCallMapping>();
-            for (XmlMyBatisMapping mapping : mappings) {
-                allCalls.addAll(mapping.getAllCalls());
-            }
-
-            Set<XmlCallMapping> uniqueSet = new HashSet<>(allCalls);
-            List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet);
-
-            MappersService.writeMappersTxt(versionPath, listWithoutDuplicates);
-            MappersService.writeMappersMd(versionPath, listWithoutDuplicates);
+            MappersService.writeMappers(versionPath, mappings);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
