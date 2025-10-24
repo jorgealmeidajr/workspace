@@ -1,4 +1,4 @@
-package workspace.vigiang.checkers;
+package workspace.vigiang;
 
 import workspace.vigiang.dao.DbSchemaDAO;
 import workspace.vigiang.model.DbObjectDefinition;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class CheckSchemas {
+public class UpdateSchemas {
 
     public static void main(String[] args) {
         System.out.println("\n## START checking all database schemas\n");
