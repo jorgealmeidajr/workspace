@@ -13,27 +13,29 @@ import java.util.concurrent.TimeUnit;
 
 public class OracleSchemaDAO implements DbSchemaDAO {
 
+    static final int ROWS = 10;
+
     @Override
     public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "TABLE");
     }
 
     @Override
     public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'");;
+        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'", ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "VIEW");
     }
 
     @Override
     public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'");
+        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'", ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
     }
 
     @Override
     public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')");
+        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "INDEX");
     }
 
@@ -44,11 +46,11 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')");
+        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')", ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "PACKAGE_BODY");
     }
 
-    private List<String> listOracleObjects(DatabaseCredentials databaseCredentials, String objectType, String where) throws SQLException {
+    private List<String> listOracleObjects(DatabaseCredentials databaseCredentials, String objectType, String where, Integer rows) throws SQLException {
         String sql =
             "select ao.owner, ao.object_name\n" +
             "from all_objects ao\n" +
@@ -56,6 +58,10 @@ public class OracleSchemaDAO implements DbSchemaDAO {
             "  and ao.object_type = '" + objectType + "'\n" +
             where + "\n" +
             "order by ao.owner, ao.object_name";
+
+        if (rows != null) {
+            sql += "\nfetch first " + rows + " rows only";
+        }
 
         List<String> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);

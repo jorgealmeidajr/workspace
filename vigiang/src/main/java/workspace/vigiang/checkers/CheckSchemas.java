@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-@Deprecated
 public class CheckSchemas {
 
     public static void main(String[] args) {
@@ -56,11 +55,11 @@ public class CheckSchemas {
         SchemaResult result = future.get();
         DatabaseCredentials databaseCredentials = result.getDatabaseCredentials();
         Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(databaseCredentials);
-
         System.out.println(databaseCredentials.getName() + ":");
-        updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
+
+//        updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
         updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
-        updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
+//        updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
         updateLocalSchemaFiles(databaseSchemaPath, "functions", result.getFunctions());
 
         if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
@@ -77,13 +76,13 @@ public class CheckSchemas {
     private static void updateLocalSchemaFiles(Path databaseSchemaPath, String fileName, List<DbObjectDefinition> data) throws IOException {
         var finalLines = new ArrayList<String>();
         for (DbObjectDefinition row : data) {
-            String line = "## " + row.getName() + "\n```\n" + row.getDefinition().trim() + "\n```\n";
-            finalLines.add(line);
+            String rowDefinitionStr = getRowDefinitionStr(row);
+            finalLines.add(rowDefinitionStr);
         }
 
         var newFileContent = String.join(System.lineSeparator(), finalLines);
 
-        Path finalFilePath = Paths.get(databaseSchemaPath + "\\" + fileName + ".md");
+        Path finalFilePath = Paths.get(databaseSchemaPath + "\\" + fileName + ".sql");
 
         var initialFileContent = "";
         if (Files.exists(finalFilePath)) {
@@ -94,6 +93,21 @@ public class CheckSchemas {
             System.out.println("updating file: " + finalFilePath);
             Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
         }
+    }
+
+    private static String getRowDefinitionStr(DbObjectDefinition row) {
+        String name = row.getName();
+        int dotIndex = name.indexOf(".");
+        String nameAfterDot = dotIndex >= 0 ? name.substring(dotIndex + 1) : name;
+
+        String rowDefinitionStr = "-- " + "#".repeat(120) + "\n";
+        rowDefinitionStr += "-- " + nameAfterDot + "\n";
+        rowDefinitionStr += row.getDefinition().trim();
+        if (!rowDefinitionStr.trim().endsWith(";")) {
+            rowDefinitionStr += ";";
+        }
+        rowDefinitionStr += "\n\n";
+        return rowDefinitionStr;
     }
 
     private static Callable<SchemaResult> getCallableTask(DatabaseCredentials databaseCredentials) {

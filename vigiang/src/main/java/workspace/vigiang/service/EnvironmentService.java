@@ -15,10 +15,11 @@ import java.util.stream.Collectors;
 
 public class EnvironmentService {
 
-    private static final String COGNYTE_PATH_STR = "C:\\work\\COGNYTE1";
-    private static final String VIGIANG_PATH_STR = "C:\\work\\COGNYTE1\\VIGIANG";
-    private static final String VIGIANG_LABORATORIES_PATH = "C:\\work\\COGNYTE1\\vigiang_labs";
-    private static final String VIGIANG_DATABASES_PATH = "C:\\work\\COGNYTE1\\vigiang_dbs";
+    private static final String WORK_PATH_STR = "C:\\work";
+    private static final String COGNYTE_PATH_STR = WORK_PATH_STR + "\\COGNYTE1";
+    private static final String VIGIANG_PATH_STR = COGNYTE_PATH_STR + "\\VIGIANG";
+    private static final String VIGIANG_LABORATORIES_PATH = COGNYTE_PATH_STR + "\\vigiang_labs";
+    private static final String VIGIANG_DATABASES_PATH = COGNYTE_PATH_STR + "\\vigiang_dbs";
 
     public static List<String> getVersions() {
         return List.of("1.5", "1.7", "2.1", "2.2");
@@ -82,16 +83,6 @@ public class EnvironmentService {
         return vigiangPath;
     }
 
-    public static Path getEnvironmentPath(DatabaseCredentials databaseCredentials) throws IOException {
-        Path vigiangPath = getVigiaNgPath();
-
-        Path environmentPath = Paths.get(vigiangPath + "\\laboratories\\" + databaseCredentials.getName());
-        if (!Files.exists(environmentPath)) {
-            Files.createDirectories(environmentPath);
-        }
-        return environmentPath;
-    }
-
     public static Path getLaboratoryPath(Laboratory laboratory) throws IOException {
         Path vigiaNgLaboratoriesPath = getVigiaNgLaboratoriesPath();
 
@@ -120,10 +111,8 @@ public class EnvironmentService {
     }
 
     public static Path getDatabaseSchemaPath(DatabaseCredentials databaseCredentials) throws IOException {
-        Path environmentPath = EnvironmentService.getEnvironmentPath(databaseCredentials);
-        String database = databaseCredentials.getDatabase().toString().toLowerCase();
-
-        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "_schema");
+        Path environmentPath = getDatabasePath(databaseCredentials);
+        Path databaseDataPath = Paths.get(environmentPath + "\\schema");
         if (!Files.exists(databaseDataPath)) {
             Files.createDirectories(databaseDataPath);
         }
@@ -162,7 +151,7 @@ public class EnvironmentService {
     }
 
     public static DatabaseCredentials getDatabaseCredentials(String databaseName) throws IOException {
-        return EnvironmentService.getVigiangDatabases().stream()
+        return getVigiangDatabases().stream()
                 .filter((credentials) -> credentials.getName().equals(databaseName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
