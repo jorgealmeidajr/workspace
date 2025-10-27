@@ -58,11 +58,10 @@ public class MappersService {
         return namespace;
     }
 
-    public static void writeMappers(Path versionPath, ArrayList<XmlMyBatisMapping> mappings) throws IOException {
-        var allCalls = new ArrayList<XmlCallMapping>();
-        for (XmlMyBatisMapping mapping : mappings) {
-            allCalls.addAll(mapping.getAllCalls());
-        }
+    public static void writeMappers(Path versionPath, List<XmlMyBatisMapping> mappings) throws IOException {
+        List<XmlCallMapping> allCalls = mappings.stream()
+                .flatMap(mapping -> mapping.getAllCalls().stream())
+                .collect(Collectors.toList());
 
         Set<XmlCallMapping> uniqueSet = new HashSet<>(allCalls);
         List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet); // TODO: ?

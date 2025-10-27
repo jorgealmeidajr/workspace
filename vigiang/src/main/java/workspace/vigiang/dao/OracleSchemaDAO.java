@@ -23,13 +23,13 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'", ROWS);
+        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'", null);
         return listObjectDefinitions(databaseCredentials, objects, "VIEW");
     }
 
     @Override
     public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'", ROWS);
+        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'", null);
         return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
     }
 
@@ -46,7 +46,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')", ROWS);
+        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')", null);
         return listObjectDefinitions(databaseCredentials, objects, "PACKAGE_BODY");
     }
 
