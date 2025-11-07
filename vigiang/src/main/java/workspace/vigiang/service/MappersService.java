@@ -67,7 +67,11 @@ public class MappersService {
         List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet); // TODO: ?
 
         writeMappersTxt(versionPath, listWithoutDuplicates);
-        writeMappersMd(versionPath, listWithoutDuplicates);
+
+        var allResultMaps = mappings.stream()
+                .flatMap(mapping -> mapping.getResultMaps().stream())
+                .collect(Collectors.toList());
+        writeMappersMd(versionPath, listWithoutDuplicates, allResultMaps);
     }
 
     private static void writeMappersTxt(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
@@ -136,7 +140,7 @@ public class MappersService {
         }
     }
 
-    private static void writeMappersMd(Path versionPath, List<XmlCallMapping> listWithoutDuplicates) throws IOException {
+    private static void writeMappersMd(Path versionPath, List<XmlCallMapping> listWithoutDuplicates, List<XmlResultMap> allResultMaps) throws IOException {
         Map<String, List<XmlCallMapping>> byNamespace = listWithoutDuplicates.stream()
                 .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
         List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
@@ -144,6 +148,9 @@ public class MappersService {
 
         Map<String, List<XmlCallMapping>> byId = listWithoutDuplicates.stream()
                 .collect(Collectors.groupingBy(XmlCallMapping::getId));
+
+        var resultsByNamespace = allResultMaps.stream()
+                .collect(Collectors.groupingBy(XmlResultMap::getNamespace));
 
         String resultMd = "";
         for (String key : byNamespaceKeys) {
@@ -197,6 +204,22 @@ public class MappersService {
                     }
                 }
             }
+
+            List<XmlResultMap> resultMapsForNamespace = resultsByNamespace.get(key);
+
+            if (resultMapsForNamespace != null) {
+                resultMapsForNamespace.sort(Comparator.comparing(XmlResultMap::getId, Comparator.nullsLast(String::compareTo)));
+                resultMd += "result_maps:\n".toUpperCase();
+
+                for (XmlResultMap xmlResultMap : resultMapsForNamespace) {
+                    resultMd += "  " + xmlResultMap.getDatabase() + ": " + xmlResultMap.getId() + "\n";
+                    for (XmlResultMap.XmlResult xmlResult : xmlResultMap.getResults()) {
+                        resultMd += "    - property: " + xmlResult.getProperty() + ", column: " + xmlResult.getColumn() + "\n";
+                    }
+                    resultMd += "\n";
+                }
+            }
+
             resultMd += "```\n\n";
         }
         System.out.println();
@@ -255,7 +278,7 @@ public class MappersService {
         List<XmlCallMapping> selects = getMappings(document, database, namespace, "select");
         List<XmlCallMapping> inserts = getMappings(document, database, namespace, "insert");
         List<XmlCallMapping> updates = getMappings(document, database, namespace, "update");
-        var resultMaps = getResultMaps(document, database, namespace); // TODO: handle it
+        var resultMaps = getResultMaps(document, database, namespace);
 
         return new XmlMyBatisMapping(namespace, database, selects, inserts, updates, resultMaps);
     }
