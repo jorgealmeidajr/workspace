@@ -1,6 +1,9 @@
 package workspace.vigiang.checkers;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import workspace.vigiang.model.Laboratory;
+import workspace.vigiang.model.SshExecutor;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -9,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class CheckLaboratories {
@@ -19,6 +23,7 @@ public class CheckLaboratories {
             Path laboratoriesPath = EnvironmentService.getVigiaNgLaboratoriesPath();
             updateSh(laboratoriesPath);
             updateMd(laboratoriesPath);
+            updateLaboratoriesStateMd();
             updateBashrc();
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,6 +85,61 @@ public class CheckLaboratories {
         }
     }
 
+    private static void updateLaboratoriesStateMd() throws Exception {
+        for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
+            List<ResultMdItem> items = new ArrayList<>();
+
+            executeCommand("cat /etc/hosts", laboratory, items);
+            executeCommand("cat /etc/hostname", laboratory, items);
+            executeCommand("nproc", laboratory, items);
+            executeCommand("cat /etc/os-release", laboratory, items);
+            executeCommand("docker --version", laboratory, items);
+            executeCommand("cat /etc/docker/daemon.json", laboratory, items);
+
+            items.sort(Comparator.comparing(ResultMdItem::getTitle));
+
+            String result = "";
+            for (ResultMdItem item : items) {
+                result += "# " + item.getTitle() + "\n";
+                result += "```\n";
+                result += item.getContent().trim() + "\n";
+                result += "```\n\n";
+            }
+
+            result = result.trim() + "\n";
+
+            // TODO: this logic repeats many times - refactor it
+            Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratory);
+            Path resultPath = Paths.get(laboratoryPath + "\\laboratory.md");
+
+            var initialFileContent = "";
+            if (Files.exists(resultPath)) {
+                initialFileContent = new String(Files.readAllBytes(resultPath));
+
+                if (!initialFileContent.equals(result)) {
+                    System.out.println("updating file: " + resultPath);
+                    Files.writeString(resultPath, result, StandardCharsets.UTF_8);
+                }
+
+            } else {
+                System.out.println("creating file: " + resultPath);
+                Files.writeString(resultPath, result, StandardCharsets.UTF_8);
+            }
+        }
+    }
+
+    private static void executeCommand(String command, Laboratory laboratory, List<ResultMdItem> items) throws Exception {
+        String sshResponse = SshExecutor.execute(
+                laboratory.getSshUsername(),
+                laboratory.getSshPassword(),
+                laboratory.getSshHost(),
+                laboratory.getSshPort(),
+                command);
+
+        var item = new ResultMdItem(command, sshResponse);
+        items.add(item);
+    }
+
     private static void updateBashrc() throws IOException {
         List<String> aliasList = new ArrayList<>();
 
@@ -131,4 +191,11 @@ public class CheckLaboratories {
         Files.write(file, out, StandardCharsets.UTF_8);
     }
 
+}
+
+@AllArgsConstructor
+@Getter
+class ResultMdItem {
+    private final String title;
+    private final String content;
 }
