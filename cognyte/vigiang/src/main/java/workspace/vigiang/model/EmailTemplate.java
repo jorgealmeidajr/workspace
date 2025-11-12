@@ -1,5 +1,7 @@
 package workspace.vigiang.model;
 
+import workspace.commons.utils.ObjectUtils;
+
 public class EmailTemplate {
 
     private final String carrierId;

@@ -1,4 +1,4 @@
-package workspace.vigiang.model;
+package workspace.commons.utils;
 
 public class ObjectUtils {
 

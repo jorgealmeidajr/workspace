@@ -1,5 +1,7 @@
 package workspace.vigiang.model;
 
+import workspace.commons.utils.ObjectUtils;
+
 import java.util.Objects;
 
 public class ReportTemplate {
