@@ -1,4 +1,4 @@
-package workspace.vigiang.model;
+package workspace.commons.service;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;

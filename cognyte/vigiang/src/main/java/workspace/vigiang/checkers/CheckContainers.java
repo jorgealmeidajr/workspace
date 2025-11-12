@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
+import workspace.commons.service.SshExecutor;
 import workspace.vigiang.model.Laboratory;
-import workspace.vigiang.model.SshExecutor;
 import workspace.vigiang.service.ContainersService;
 import workspace.vigiang.service.DockerComposeService;
 import workspace.vigiang.service.EnvironmentService;

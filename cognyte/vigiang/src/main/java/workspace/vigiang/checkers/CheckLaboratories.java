@@ -2,8 +2,8 @@ package workspace.vigiang.checkers;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import workspace.commons.service.SshExecutor;
 import workspace.vigiang.model.Laboratory;
-import workspace.vigiang.model.SshExecutor;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
