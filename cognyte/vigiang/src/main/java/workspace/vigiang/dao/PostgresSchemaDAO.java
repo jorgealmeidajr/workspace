@@ -1,8 +1,7 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.DbObjectDefinition;
 import workspace.vigiang.model.DatabaseCredentials;
-import workspace.vigiang.model.TablePrinter;
+import workspace.vigiang.model.DbObjectDefinition;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -37,6 +36,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
         return result;
     }
 
+    @Deprecated
     private static String getTableDefinition(Connection conn, String tableSchema, String tableName) throws SQLException {
         String result = "";
         String sql =
@@ -49,9 +49,6 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             "  and table_name = '" + tableName + "'\n" +
             "order by table_schema, table_name, ordinal_position";
 
-        String[] headers = new String[] {
-            "column_name", "column_default", "is_nullable", "data_type", "character_maximum_length",
-        };
         List<String[]> data = new ArrayList<>();
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -66,17 +63,6 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
                 data.add(row);
             }
         }
-
-        int[] widths = TablePrinter.calculateColumnWidths(headers, data);
-
-        result += TablePrinter.printHorizontalLine(widths) + "\n";
-        result += TablePrinter.printRow(headers, widths) + "\n";
-        result += TablePrinter.printHorizontalLine(widths) + "\n";
-
-        for (String[] row : data) {
-            result += TablePrinter.printRow(row, widths) + "\n";
-        }
-        result += TablePrinter.printHorizontalLine(widths);
 
         return result;
     }
