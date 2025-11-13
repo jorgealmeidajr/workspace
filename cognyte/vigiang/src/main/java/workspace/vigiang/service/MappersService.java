@@ -6,9 +6,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import workspace.vigiang.model.XmlCallMapping;
-import workspace.vigiang.model.XmlMyBatisMapping;
-import workspace.vigiang.model.XmlResultMap;
+import workspace.commons.model.XmlCallMapping;
+import workspace.commons.model.XmlMyBatisMapping;
+import workspace.commons.model.XmlResultMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
