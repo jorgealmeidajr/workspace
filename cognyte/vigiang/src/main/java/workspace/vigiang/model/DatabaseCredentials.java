@@ -11,14 +11,10 @@ public class DatabaseCredentials {
 
     private String name;
     private Carrier carrier;
-    private DatabaseCredentials.Database database;
+    private Database database;
     private String databaseUsername;
     private String databasePassword;
     private String databaseUrl;
     private boolean active;
-
-    public enum Database {
-        ORACLE, POSTGRES
-    }
 
 }

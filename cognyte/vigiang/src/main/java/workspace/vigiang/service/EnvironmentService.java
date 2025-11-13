@@ -3,6 +3,7 @@ package workspace.vigiang.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.vigiang.dao.*;
+import workspace.vigiang.model.Database;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.Laboratory;
 
@@ -48,14 +49,14 @@ public class EnvironmentService {
     }
 
     public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentials databaseCredentials) {
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleVigiaNgDAO(databaseCredentials);
-        if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresVigiaNgDAO(databaseCredentials);
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleVigiaNgDAO(databaseCredentials);
+        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresVigiaNgDAO(databaseCredentials);
         return null;
     }
 
     public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentials databaseCredentials) {
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
-        if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
+        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
         return null;
     }
 

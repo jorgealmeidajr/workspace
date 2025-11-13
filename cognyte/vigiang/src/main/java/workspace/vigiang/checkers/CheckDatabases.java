@@ -1,6 +1,7 @@
 package workspace.vigiang.checkers;
 
 import workspace.vigiang.model.Configuration;
+import workspace.vigiang.model.Database;
 import workspace.vigiang.model.Feature;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
@@ -48,10 +49,10 @@ public class CheckDatabases {
     private static void updateLocalFeatureFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_FEATURE";
             columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.feature";
             columns = new String[] { "feature", "status", "description" };
         }
@@ -65,10 +66,10 @@ public class CheckDatabases {
     private static void updateLocalConfigurationFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_SITE";
             columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.site";
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value" };
         }
@@ -82,10 +83,10 @@ public class CheckDatabases {
     private static void updateLocalPrivilegeFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "SEG_PRIVILEGIO";
             columns = new String[] { "CD_PRIVILEGIO", "ID_PRIVILEGIO", "NM_PRIVILEGIO" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "sec.privilege";
             columns = new String[] { "id", "privilegeid", "name" };
         }
@@ -97,10 +98,10 @@ public class CheckDatabases {
     private static void updateLocalProfileFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "SEG_PERFIL_PRIVILEGIO";
             columns = new String[] { "CD_OPERADORA", "NM_PERFIL", "NM_PRIVILEGIO" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "sec.profile_privilege";
             columns = new String[] { "carrier_id", "profile_name", "privilege_name" };
         }
@@ -112,10 +113,10 @@ public class CheckDatabases {
     private static void updateLocalFilterQueryFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_FILTERQUERY";
             columns = new String[] { "MODULE", "LABEL", "VALUE" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.filterquery";
             columns = new String[] { "module", "label", "value" };
         }
@@ -127,14 +128,14 @@ public class CheckDatabases {
     private static void updateLocalZoneInterceptionFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_TP_ZONA_TP_VL_ITC";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
                 "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO",
                 "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS"
             };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.tp_zone_tp_vl_itc";
             columns = new String[] {
                 "carrier_id", "carrier_name",
@@ -154,10 +155,10 @@ public class CheckDatabases {
     private static void updateLocalValidationRuleFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_NG_VALIDATRULES";
             columns = new String[] { "CD_OPERADORA", "NM_OPERADORA", "MODULO", "VALID_RULES" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.validatrules";
             columns = new String[] { "carrier_id", "carrier_name", "module", "valid_rules" };
         }
@@ -173,10 +174,10 @@ public class CheckDatabases {
     private static void updateLocalQdsValidationRuleFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_TIPO_NUMERO_QDS";
             columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             return;
         }
 
@@ -191,14 +192,14 @@ public class CheckDatabases {
     private static void updateLocalCarriersFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_OPERADORA";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
                 "ID_SMTP_HOST", "ID_SMTP_USER", "ID_SMPT_PASSWORD", "ID_SMPT_ACCOUNT", "ID_SMTP_PORT",
                 "DE_COMENTARIO", "SN_MULTIOPERADORA", "ID_REGEX", "DS_LOCAL_IMAGENS",  "DS_REGEX", "ID_API_KEY_MAPS", "SN_TOKEN"
             };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.carrier";
             columns = new String[] {
                 "id", "name",
@@ -239,13 +240,13 @@ public class CheckDatabases {
     private static void updateLocalZonesFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_ZONA_MONIT";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA",
                 "CD_ZONA_MONIT", "NM_ZONA_MONIT", "DE_COMENTARIOS"//, "IN_ATIVO"
             };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.zone_monit";
             columns = new String[] {
                 "carrier_id", "carrier_name",

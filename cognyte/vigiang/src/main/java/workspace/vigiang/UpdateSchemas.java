@@ -1,6 +1,7 @@
 package workspace.vigiang;
 
 import workspace.vigiang.dao.DbSchemaDAO;
+import workspace.vigiang.model.Database;
 import workspace.vigiang.model.DbObjectDefinition;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.SchemaResult;
@@ -62,11 +63,11 @@ public class UpdateSchemas {
 //        updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
         updateLocalSchemaFiles(databaseSchemaPath, "functions", result.getFunctions());
 
-        if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             updateLocalSchemaFiles(databaseSchemaPath, "procedures", result.getProcedures());
         }
 
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             updateLocalSchemaFiles(databaseSchemaPath, "packageBodies", result.getPackageBodies());
         }
 

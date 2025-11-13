@@ -1,5 +1,6 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.model.Database;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.DatabaseCredentials;
@@ -41,11 +42,11 @@ public class CheckReportTemplates {
     private static void updateLocalReportFiles(DatabaseCredentials databaseCredentials, List<ReportTemplate> reportTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_RELATORIO";
             columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA", "NM_OPERADORA" };
 
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.report";
             columns = new String[] { "id", "report_id", "report_type", "carrier_id", "carrier_name" };
         }
@@ -109,11 +110,11 @@ public class CheckReportTemplates {
     private static void updateLocalConfigReportFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_SITE_RELATORIO";
             columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
 
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.site_report";
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id" };
         }

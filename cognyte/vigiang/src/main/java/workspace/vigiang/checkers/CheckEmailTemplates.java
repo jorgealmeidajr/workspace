@@ -1,5 +1,6 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.model.Database;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.EmailTemplate;
@@ -38,12 +39,12 @@ public class CheckEmailTemplates {
     private static void updateLocalEmailTemplatesFiles(DatabaseCredentials databaseCredentials, List<EmailTemplate> emailTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
-        if (DatabaseCredentials.Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
             fileName = "CFG_EMAIL_SERVICOS";
             columns = new String[] {
                 "CD_OPERADORA", "NM_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO"
             };
-        } else if (DatabaseCredentials.Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
             fileName = "conf.service_email";
             columns = new String[] {
                 "carrier_id", "carrier_name", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to"
