@@ -1,9 +1,9 @@
 package workspace.vigiang.checkers;
 
+import workspace.commons.service.DockerComposeService;
 import workspace.commons.service.SshExecutor;
 import workspace.vigiang.model.Laboratory;
 import workspace.vigiang.service.ContainersService;
-import workspace.vigiang.service.DockerComposeService;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;

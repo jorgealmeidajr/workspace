@@ -1,4 +1,4 @@
-package workspace.vigiang.service;
+package workspace.commons.service;
 
 import org.yaml.snakeyaml.Yaml;
 
