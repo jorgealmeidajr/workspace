@@ -1,4 +1,4 @@
-package workspace.vigiang.service;
+package workspace.commons.service;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -38,7 +38,7 @@ public class MappersService {
     }
 
     public static List<String> extractFunctionParams(String content) {
-        var result = new java.util.ArrayList<String>();
+        var result = new ArrayList<String>();
         Pattern r = Pattern.compile("#\\{\\s*(\\w+)[^}]*mode=IN[^}]*\\}");
         Matcher m = r.matcher(content);
         while (m.find()) {
