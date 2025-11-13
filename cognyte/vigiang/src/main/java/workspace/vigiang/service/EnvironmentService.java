@@ -2,8 +2,8 @@ package workspace.vigiang.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import workspace.commons.model.Database;
 import workspace.vigiang.dao.*;
-import workspace.vigiang.model.Database;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.Laboratory;
 

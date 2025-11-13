@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
+import workspace.commons.model.Database;
 import workspace.vigiang.model.Configuration;
-import workspace.vigiang.model.Database;
 import workspace.vigiang.model.Feature;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;

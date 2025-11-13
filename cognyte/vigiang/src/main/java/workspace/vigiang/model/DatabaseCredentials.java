@@ -3,6 +3,7 @@ package workspace.vigiang.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import workspace.commons.model.Database;
 
 @NoArgsConstructor
 @Getter

@@ -1,6 +1,6 @@
 package workspace.vigiang.checkers;
 
-import workspace.vigiang.model.Database;
+import workspace.commons.model.Database;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.EmailTemplate;

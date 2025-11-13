@@ -1,6 +1,6 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.DbObjectDefinition;
+import workspace.commons.model.DbObjectDefinition;
 import workspace.vigiang.model.DatabaseCredentials;
 
 import java.sql.Connection;
@@ -93,7 +93,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
                 }
 
                 try {
-                    TimeUnit.MILLISECONDS.sleep(250);
+                    TimeUnit.MILLISECONDS.sleep(50);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                 }

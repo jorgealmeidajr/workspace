@@ -1,8 +1,8 @@
 package workspace.vigiang;
 
+import workspace.commons.model.Database;
+import workspace.commons.model.DbObjectDefinition;
 import workspace.vigiang.dao.DbSchemaDAO;
-import workspace.vigiang.model.Database;
-import workspace.vigiang.model.DbObjectDefinition;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.SchemaResult;
 import workspace.vigiang.service.EnvironmentService;
@@ -21,15 +21,15 @@ public class UpdateSchemas {
     public static void main(String[] args) {
         System.out.println("\n## START checking all database schemas\n");
         try {
-            execute();
+            List<DatabaseCredentials> databasesCredentials = EnvironmentService.getVigiangDatabases();
+            execute(databasesCredentials);
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("## END checking all database schemas.");
     }
 
-    private static void execute() throws IOException, ExecutionException {
-        List<DatabaseCredentials> databasesCredentials = EnvironmentService.getVigiangDatabases();
+    private static void execute(List<DatabaseCredentials> databasesCredentials) throws IOException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(databasesCredentials.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 
@@ -49,6 +49,10 @@ public class UpdateSchemas {
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
+        } finally {
+            if (!executorService.isShutdown()) {
+                executorService.shutdown();
+            }
         }
     }
 
@@ -115,9 +119,10 @@ public class UpdateSchemas {
         return () -> {
             DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
-            // TODO: oracle, tables must be simplify
-            // TODO: postgres, tables should be in create sql
+            // TODO: oracle, create tables statements must be simplify
+            // TODO: postgres, create tables statements should be in create sql format
             List<DbObjectDefinition> tables = dao.listTables(databaseCredentials);
+
             List<DbObjectDefinition> views = dao.listViews(databaseCredentials);
             List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentials);
             List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentials);

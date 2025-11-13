@@ -1,4 +1,4 @@
-package workspace.vigiang.model;
+package workspace.commons.model;
 
 public enum Database {
     ORACLE, POSTGRES

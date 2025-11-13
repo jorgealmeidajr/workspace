@@ -1,6 +1,6 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.DbObjectDefinition;
+import workspace.commons.model.DbObjectDefinition;
 import workspace.vigiang.model.DatabaseCredentials;
 
 import java.sql.Connection;

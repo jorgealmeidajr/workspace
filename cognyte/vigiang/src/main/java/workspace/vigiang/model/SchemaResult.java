@@ -2,6 +2,7 @@ package workspace.vigiang.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import workspace.commons.model.DbObjectDefinition;
 
 import java.util.List;
 

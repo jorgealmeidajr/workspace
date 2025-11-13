@@ -1,4 +1,4 @@
-package workspace.vigiang.model;
+package workspace.commons.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
