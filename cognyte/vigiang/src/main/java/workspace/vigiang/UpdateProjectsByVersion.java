@@ -2,10 +2,10 @@ package workspace.vigiang;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import workspace.commons.model.FileContent;
+import workspace.commons.model.FileMatch;
 import workspace.commons.model.XmlMyBatisMapping;
 import workspace.commons.service.MappersService;
-import workspace.vigiang.model.FileContent;
-import workspace.vigiang.model.FileMatch;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
