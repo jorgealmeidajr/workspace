@@ -45,11 +45,11 @@ public interface VigiaNgDAO {
 
     void associatePrivileges(int targetPrivilegeId) throws SQLException;
 
-    default Connection getConnection(DatabaseCredentials databaseCredentials) throws SQLException {
+    default Connection getConnection(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
         return DriverManager.getConnection(
-                databaseCredentials.getDatabaseUrl(),
-                databaseCredentials.getDatabaseUsername(),
-                databaseCredentials.getDatabasePassword());
+                databaseCredentialsVigiaNG.getDatabaseUrl(),
+                databaseCredentialsVigiaNG.getDatabaseUsername(),
+                databaseCredentialsVigiaNG.getDatabasePassword());
     }
 
 }

@@ -1,7 +1,7 @@
 package workspace.vigiang.dao;
 
 import workspace.commons.model.DbObjectDefinition;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,23 +11,23 @@ import java.util.List;
 public interface DbSchemaDAO {
 
     @Deprecated
-    List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listTables(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException;
 
-    List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listViews(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException;
 
-    List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listFunctions(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException;
 
-    List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listIndexes(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException;
 
-    List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listProcedures(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException;
 
-    List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listPackageBodies(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException;
 
-    default Connection getConnection(DatabaseCredentials databaseCredentials) throws SQLException {
+    default Connection getConnection(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
         return DriverManager.getConnection(
-                databaseCredentials.getDatabaseUrl(),
-                databaseCredentials.getDatabaseUsername(),
-                databaseCredentials.getDatabasePassword());
+                databaseCredentialsVigiaNG.getDatabaseUrl(),
+                databaseCredentialsVigiaNG.getDatabaseUsername(),
+                databaseCredentialsVigiaNG.getDatabasePassword());
     }
 
 }

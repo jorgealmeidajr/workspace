@@ -12,10 +12,10 @@ import java.util.List;
 
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
-    private final DatabaseCredentials databaseCredentials;
+    private final DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG;
 
-    public PostgresVigiaNgDAO(DatabaseCredentials databaseCredentials) {
-        this.databaseCredentials = databaseCredentials;
+    public PostgresVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
+        this.databaseCredentialsVigiaNG = databaseCredentialsVigiaNG;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by feature";
 
         List<Feature> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -53,7 +53,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by carrier_id, parameter_id";
 
         List<Configuration> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -79,7 +79,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t1.id desc";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -106,7 +106,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t3.carrier_id, t3.\"name\", t2.\"name\"";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -129,7 +129,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by module, label";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -158,7 +158,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t4.id, t3.\"name\", t2.\"name\"";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -186,7 +186,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t1.carrier_id, t1.\"module\"";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -216,7 +216,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by carrier_id, service_type";
 
         List<EmailTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -245,7 +245,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by carrier_id, report_id";
 
         List<ReportTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -279,7 +279,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by cfg.carrier_id, cfg.parameter_id";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -310,7 +310,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by id";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -368,7 +368,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "order by t1.carrier_id, t1.id";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -388,7 +388,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateTemplateReport(String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
-        String originalContent = getTemplateReportContent(databaseCredentials, carrierId, reportId, reportName);
+        String originalContent = getTemplateReportContent(databaseCredentialsVigiaNG, carrierId, reportId, reportName);
         String base64Content = Base64.getEncoder().encodeToString(fileBytes);
         if (originalContent.equals(base64Content)) return;
 
@@ -398,7 +398,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "  and id = ?\n" +
             "  and report_id = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, base64Content);
             stmt.setInt(2, Integer.parseInt(carrierId));
@@ -417,7 +417,7 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
             "  and parameter_id = ?\n" +
             "  and carrier_id = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newValue);
             stmt.setInt(2, configuration.getCode());
@@ -443,14 +443,14 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
         // TODO: missing implementation
     }
 
-    private String getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
+    private String getTemplateReportContent(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select file from conf.report\n" +
             "where carrier_id = ?\n" +
             "  and id = ?\n" +
             "  and report_id = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, Integer.parseInt(carrierId));
             stmt.setInt(2, Integer.parseInt(reportId));

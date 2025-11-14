@@ -3,7 +3,7 @@ package workspace.vigiang.checkers;
 import workspace.commons.model.Database;
 import workspace.commons.service.FileService;
 import workspace.vigiang.service.EnvironmentService;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.ReportTemplate;
 import workspace.vigiang.dao.VigiaNgDAO;
 
@@ -21,15 +21,15 @@ public class CheckReportTemplates {
     public static void main(String[] args) {
         System.out.println("## START checking all report templates\n");
         try {
-            for (DatabaseCredentials databaseCredentials : EnvironmentService.getVigiangDatabases()) {
-                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
-                System.out.println(databaseCredentials.getName() + ":");
+            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getVigiangDatabases()) {
+                VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
+                System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 
                 List<ReportTemplate> reportTemplates = dao.listReportTemplates();
-                updateLocalReportFiles(databaseCredentials, reportTemplates);
-                updateLocalReportTemplates(databaseCredentials, reportTemplates);
+                updateLocalReportFiles(databaseCredentialsVigiaNG, reportTemplates);
+                updateLocalReportTemplates(databaseCredentialsVigiaNG, reportTemplates);
 
-                updateLocalConfigReportFiles(databaseCredentials, dao);
+                updateLocalConfigReportFiles(databaseCredentialsVigiaNG, dao);
 
                 System.out.println();
             }
@@ -39,14 +39,14 @@ public class CheckReportTemplates {
         System.out.println("## END checking all report templates.");
     }
 
-    private static void updateLocalReportFiles(DatabaseCredentials databaseCredentials, List<ReportTemplate> reportTemplates) throws IOException {
+    private static void updateLocalReportFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<ReportTemplate> reportTemplates) throws IOException {
         String fileName = null;
         String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
             fileName = "CFG_RELATORIO";
             columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA", "NM_OPERADORA" };
 
-        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
             fileName = "conf.report";
             columns = new String[] { "id", "report_id", "report_type", "carrier_id", "carrier_name" };
         }
@@ -55,12 +55,12 @@ public class CheckReportTemplates {
                 .map(ReportTemplate::toArray)
                 .collect(Collectors.toList());
 
-        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
-        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
     }
 
-    private static void updateLocalReportTemplates(DatabaseCredentials databaseCredentials, List<ReportTemplate> reportTemplates) throws IOException {
-        Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(databaseCredentials);
+    private static void updateLocalReportTemplates(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<ReportTemplate> reportTemplates) throws IOException {
+        Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(databaseCredentialsVigiaNG);
 
         for (ReportTemplate reportTemplate : reportTemplates) {
             try {
@@ -108,21 +108,21 @@ public class CheckReportTemplates {
         }
     }
 
-    private static void updateLocalConfigReportFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
+    private static void updateLocalConfigReportFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws IOException, SQLException {
         String fileName = null;
         String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
             fileName = "CFG_SITE_RELATORIO";
             columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
 
-        } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
             fileName = "conf.site_report";
             columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id" };
         }
 
         List<String[]> data = dao.listConfigurationReports();
-        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
-        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
     }
 
 }

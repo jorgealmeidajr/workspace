@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class SchemaResult {
-    private final DatabaseCredentials databaseCredentials;
+    private final DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG;
     private final List<DbObjectDefinition> tables;
     private final List<DbObjectDefinition> views;
     private final List<DbObjectDefinition> functions;

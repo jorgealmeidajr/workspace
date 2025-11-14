@@ -1,7 +1,7 @@
 package workspace.vigiang.scripts;
 
 import workspace.vigiang.dao.VigiaNgDAO;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.sql.SQLException;
@@ -20,8 +20,8 @@ public class CopyData {
         Integer TARGET_PROFILE_ID = 0; // this id is from database
 
         try {
-            DatabaseCredentials sourceDb = getDatabaseCredentials(SOURCE_DATABASE_NAME);
-            DatabaseCredentials targetDb = getDatabaseCredentials(TARGET_DATABASE_NAME);
+            DatabaseCredentialsVigiaNG sourceDb = getDatabaseCredentials(SOURCE_DATABASE_NAME);
+            DatabaseCredentialsVigiaNG targetDb = getDatabaseCredentials(TARGET_DATABASE_NAME);
 
             VigiaNgDAO sourceDao = EnvironmentService.getVigiaNgDAO(sourceDb);
             VigiaNgDAO targetDao = EnvironmentService.getVigiaNgDAO(targetDb);

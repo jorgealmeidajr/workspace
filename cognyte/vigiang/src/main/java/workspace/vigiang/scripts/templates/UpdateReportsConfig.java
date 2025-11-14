@@ -2,7 +2,7 @@ package workspace.vigiang.scripts.templates;
 
 import workspace.vigiang.dao.VigiaNgDAO;
 import workspace.vigiang.model.Configuration;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.ReportTemplate;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -19,8 +19,8 @@ public class UpdateReportsConfig {
         Integer CARRIER_ID = -1;         // this id is from the database
 
         try {
-            DatabaseCredentials databaseCredentials = EnvironmentService.getDatabaseCredentials(DATABASE_NAME);
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
+            DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG = EnvironmentService.getDatabaseCredentials(DATABASE_NAME);
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
             String carrierId = String.valueOf(CARRIER_ID);
 
             List<Configuration> configurations = dao.listConfigurationValues().stream()

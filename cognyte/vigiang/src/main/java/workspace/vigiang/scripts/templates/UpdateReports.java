@@ -1,7 +1,7 @@
 package workspace.vigiang.scripts.templates;
 
 import workspace.vigiang.dao.VigiaNgDAO;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.nio.file.DirectoryStream;
@@ -16,10 +16,10 @@ public class UpdateReports {
         Integer CARRIER_ID = -1;         // this id is from the database
 
         try {
-            DatabaseCredentials databaseCredentials = EnvironmentService.getDatabaseCredentials(DATABASE_NAME);
-            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentials);
+            DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG = EnvironmentService.getDatabaseCredentials(DATABASE_NAME);
+            VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
 
-            Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(databaseCredentials);
+            Path reportTemplatesPath = EnvironmentService.getReportTemplatesPath(databaseCredentialsVigiaNG);
             String carrierCode = String.format("%02d", CARRIER_ID);
             Path carrierReportTemplatesPath = Paths.get(reportTemplatesPath + "\\" + carrierCode);
 

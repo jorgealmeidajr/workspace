@@ -3,7 +3,7 @@ package workspace.vigiang;
 import workspace.commons.model.Database;
 import workspace.commons.model.DbObjectDefinition;
 import workspace.vigiang.dao.DbSchemaDAO;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.SchemaResult;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -21,7 +21,7 @@ public class UpdateSchemas {
     public static void main(String[] args) {
         System.out.println("\n## START checking all database schemas\n");
         try {
-            List<DatabaseCredentials> databasesCredentials = EnvironmentService.getVigiangDatabases();
+            List<DatabaseCredentialsVigiaNG> databasesCredentials = EnvironmentService.getVigiangDatabases();
             execute(databasesCredentials);
         } catch (Exception e) {
             e.printStackTrace();
@@ -29,12 +29,12 @@ public class UpdateSchemas {
         System.out.println("## END checking all database schemas.");
     }
 
-    private static void execute(List<DatabaseCredentials> databasesCredentials) throws IOException, ExecutionException {
+    private static void execute(List<DatabaseCredentialsVigiaNG> databasesCredentials) throws IOException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(databasesCredentials.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 
-        for (DatabaseCredentials databaseCredentials : databasesCredentials) {
-            Callable<SchemaResult> callableTask = getCallableTask(databaseCredentials);
+        for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : databasesCredentials) {
+            Callable<SchemaResult> callableTask = getCallableTask(databaseCredentialsVigiaNG);
             callableTasks.add(callableTask);
         }
 
@@ -58,20 +58,20 @@ public class UpdateSchemas {
 
     private static void handleResult(Future<SchemaResult> future) throws InterruptedException, ExecutionException, IOException {
         SchemaResult result = future.get();
-        DatabaseCredentials databaseCredentials = result.getDatabaseCredentials();
-        Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(databaseCredentials);
-        System.out.println(databaseCredentials.getName() + ":");
+        DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG = result.getDatabaseCredentialsVigiaNG();
+        Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(databaseCredentialsVigiaNG);
+        System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 
 //        updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
         updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
 //        updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
         updateLocalSchemaFiles(databaseSchemaPath, "functions", result.getFunctions());
 
-        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
+        if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
             updateLocalSchemaFiles(databaseSchemaPath, "procedures", result.getProcedures());
         }
 
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
+        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
             updateLocalSchemaFiles(databaseSchemaPath, "packageBodies", result.getPackageBodies());
         }
 
@@ -115,21 +115,21 @@ public class UpdateSchemas {
         return rowDefinitionStr;
     }
 
-    private static Callable<SchemaResult> getCallableTask(DatabaseCredentials databaseCredentials) {
+    private static Callable<SchemaResult> getCallableTask(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
         return () -> {
-            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentials);
+            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentialsVigiaNG);
 
             // TODO: oracle, create tables statements must be simplify
             // TODO: postgres, create tables statements should be in create sql format
-            List<DbObjectDefinition> tables = dao.listTables(databaseCredentials);
+            List<DbObjectDefinition> tables = dao.listTables(databaseCredentialsVigiaNG);
 
-            List<DbObjectDefinition> views = dao.listViews(databaseCredentials);
-            List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentials);
-            List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentials);
-            List<DbObjectDefinition> procedures = dao.listProcedures(databaseCredentials);
-            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(databaseCredentials);
+            List<DbObjectDefinition> views = dao.listViews(databaseCredentialsVigiaNG);
+            List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentialsVigiaNG);
+            List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentialsVigiaNG);
+            List<DbObjectDefinition> procedures = dao.listProcedures(databaseCredentialsVigiaNG);
+            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(databaseCredentialsVigiaNG);
 
-            return new SchemaResult(databaseCredentials, tables, views, functions, indexes, procedures, packageBodies);
+            return new SchemaResult(databaseCredentialsVigiaNG, tables, views, functions, indexes, procedures, packageBodies);
         };
     }
 

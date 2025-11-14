@@ -20,8 +20,8 @@ public class VigiaNgData {
     private final Map<String, Configuration> configurationsMap;
 
     public VigiaNgData(String databaseName) throws Exception {
-        DatabaseCredentials databaseCredentials = EnvironmentService.getDatabaseCredentials(databaseName);
-        VigiaNgDAO vigiaNgDAO = EnvironmentService.getVigiaNgDAO(databaseCredentials);
+        DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG = EnvironmentService.getDatabaseCredentials(databaseName);
+        VigiaNgDAO vigiaNgDAO = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
 
         List<Feature> features = vigiaNgDAO.listFeatures().stream()
                 .sorted(Comparator.comparing(Feature::getCode).reversed())

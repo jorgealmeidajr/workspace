@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.model.Database;
 import workspace.vigiang.dao.*;
-import workspace.vigiang.model.DatabaseCredentials;
+import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.Laboratory;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class EnvironmentService {
         return List.of("1.5", "1.7", "2.1", "2.2");
     }
 
-    public static List<DatabaseCredentials> getVigiangDatabases() throws IOException {
+    public static List<DatabaseCredentialsVigiaNG> getVigiangDatabases() throws IOException {
         try (InputStream read = EnvironmentService.class.getResourceAsStream("/databases.json")) {
             if (read == null) {
                 throw new IllegalStateException("Resource `/databases.json` not found on classpath");
@@ -36,11 +36,11 @@ public class EnvironmentService {
         }
     }
 
-    private static List<DatabaseCredentials> getDatabaseCredentials(InputStream read) throws IOException {
+    private static List<DatabaseCredentialsVigiaNG> getDatabaseCredentials(InputStream read) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        List<DatabaseCredentials> databaseCredentials = mapper.readValue(read, new TypeReference<>(){});
-        return databaseCredentials.stream()
-                .filter(DatabaseCredentials::isActive)
+        List<DatabaseCredentialsVigiaNG> databaseCredentialVigiaNGS = mapper.readValue(read, new TypeReference<>(){});
+        return databaseCredentialVigiaNGS.stream()
+                .filter(DatabaseCredentialsVigiaNG::isActive)
                 .collect(Collectors.toList());
     }
 
@@ -61,15 +61,15 @@ public class EnvironmentService {
                 .collect(Collectors.toList());
     }
 
-    public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentials databaseCredentials) {
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleVigiaNgDAO(databaseCredentials);
-        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresVigiaNgDAO(databaseCredentials);
+    public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
+        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) return new OracleVigiaNgDAO(databaseCredentialsVigiaNG);
+        if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) return new PostgresVigiaNgDAO(databaseCredentialsVigiaNG);
         return null;
     }
 
-    public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentials databaseCredentials) {
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
-        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
+    public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
+        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) return new OracleSchemaDAO();
+        if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) return new PostgresSchemaDAO();
         return null;
     }
 
@@ -113,19 +113,19 @@ public class EnvironmentService {
         return laboratoryPath;
     }
 
-    public static Path getDatabaseDataPath(DatabaseCredentials databaseCredentials) throws IOException {
+    public static Path getDatabaseDataPath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
         Path environmentPath = Paths.get(VIGIANG_DATABASES_PATH);
-        String database = databaseCredentials.getDatabase().toString();
+        String database = databaseCredentialsVigiaNG.getDatabase().toString();
 
-        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + databaseCredentials.getName() + "\\data");
+        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + databaseCredentialsVigiaNG.getName() + "\\data");
         if (!Files.exists(databaseDataPath)) {
             Files.createDirectories(databaseDataPath);
         }
         return databaseDataPath;
     }
 
-    public static Path getDatabaseSchemaPath(DatabaseCredentials databaseCredentials) throws IOException {
-        Path environmentPath = getDatabasePath(databaseCredentials);
+    public static Path getDatabaseSchemaPath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
+        Path environmentPath = getDatabasePath(databaseCredentialsVigiaNG);
         Path databaseDataPath = Paths.get(environmentPath + "\\schema");
         if (!Files.exists(databaseDataPath)) {
             Files.createDirectories(databaseDataPath);
@@ -133,19 +133,19 @@ public class EnvironmentService {
         return databaseDataPath;
     }
 
-    public static Path getDatabasePath(DatabaseCredentials databaseCredentials) throws IOException {
+    public static Path getDatabasePath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
         Path environmentPath = Paths.get(VIGIANG_DATABASES_PATH);
-        String database = databaseCredentials.getDatabase().toString();
+        String database = databaseCredentialsVigiaNG.getDatabase().toString();
 
-        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + databaseCredentials.getName());
+        Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + databaseCredentialsVigiaNG.getName());
         if (!Files.exists(databaseDataPath)) {
             Files.createDirectories(databaseDataPath);
         }
         return databaseDataPath;
     }
 
-    public static Path getEmailTemplatesPath(DatabaseCredentials databaseCredentials) throws IOException {
-        Path environmentPath = getDatabasePath(databaseCredentials);
+    public static Path getEmailTemplatesPath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
+        Path environmentPath = getDatabasePath(databaseCredentialsVigiaNG);
 
         Path emailTemplatesPath = Paths.get(environmentPath + "\\email_templates");
         if (!Files.exists(emailTemplatesPath)) {
@@ -154,8 +154,8 @@ public class EnvironmentService {
         return emailTemplatesPath;
     }
 
-    public static Path getReportTemplatesPath(DatabaseCredentials databaseCredentials) throws IOException {
-        Path environmentPath = getDatabasePath(databaseCredentials);
+    public static Path getReportTemplatesPath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
+        Path environmentPath = getDatabasePath(databaseCredentialsVigiaNG);
 
         Path reportTemplatesPath = Paths.get(environmentPath + "\\report_templates");
         if (!Files.exists(reportTemplatesPath)) {
@@ -164,7 +164,7 @@ public class EnvironmentService {
         return reportTemplatesPath;
     }
 
-    public static DatabaseCredentials getDatabaseCredentials(String databaseName) throws IOException {
+    public static DatabaseCredentialsVigiaNG getDatabaseCredentials(String databaseName) throws IOException {
         return getVigiangDatabases().stream()
                 .filter((credentials) -> credentials.getName().equals(databaseName))
                 .findFirst()

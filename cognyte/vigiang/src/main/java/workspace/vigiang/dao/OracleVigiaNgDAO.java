@@ -13,10 +13,10 @@ import java.util.List;
 
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
-    private final DatabaseCredentials databaseCredentials;
+    private final DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG;
 
-    public OracleVigiaNgDAO(DatabaseCredentials databaseCredentials) {
-        this.databaseCredentials = databaseCredentials;
+    public OracleVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
+        this.databaseCredentialsVigiaNG = databaseCredentialsVigiaNG;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by ID_FEATURE";
 
         List<Feature> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -54,7 +54,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA, ID_PARAMETRO";
 
         List<Configuration> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -80,7 +80,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t1.CD_PRIVILEGIO desc";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -107,7 +107,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t3.CD_OPERADORA, t3.NM_PERFIL, t2.NM_PRIVILEGIO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -129,7 +129,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by MODULE, LABEL";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -158,7 +158,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t4.CD_OPERADORA, t3.NM_ZONA_MONIT, t2.NM_TIPO_VALOR_INTERCEPTADO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -186,7 +186,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t1.CD_OPERADORA, t1.MODULO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -210,7 +210,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by ID_TIPO_NUMERO_QDS";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -236,7 +236,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA, ID_TIPO_SERVICO";
 
         List<EmailTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -265,7 +265,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA, ID_RELATORIO";
 
         List<ReportTemplate> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -299,7 +299,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by cfg.CD_OPERADORA, cfg.ID_PARAMETRO";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -330,7 +330,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by CD_OPERADORA";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -370,7 +370,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "order by t1.CD_OPERADORA, t1.CD_ZONA_MONIT";
 
         List<String[]> data = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -390,7 +390,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateTemplateReport(String carrierId, String reportId, String reportName, byte[] fileBytes) throws SQLException {
-        byte[] originalContent = getTemplateReportContent(databaseCredentials, carrierId, reportId, reportName);
+        byte[] originalContent = getTemplateReportContent(databaseCredentialsVigiaNG, carrierId, reportId, reportName);
         if (Arrays.equals(originalContent, fileBytes)) return;
 
         String sql =
@@ -399,7 +399,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "  and CD_RELATORIO = ?\n" +
             "  and ID_RELATORIO = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setBytes(1, fileBytes);
             stmt.setInt(2, Integer.parseInt(carrierId));
@@ -418,7 +418,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "  and ID_PARAMETRO = ?\n" +
             "  and CD_OPERADORA = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newValue);
             stmt.setInt(2, configuration.getCode());
@@ -431,7 +431,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     @Override
     public void updateTemplateEmail(String carrierId, String templateEmailName, byte[] fileBytes) throws SQLException {
-        byte[] originalContent = getTemplateEmailContent(databaseCredentials, carrierId, templateEmailName);
+        byte[] originalContent = getTemplateEmailContent(databaseCredentialsVigiaNG, carrierId, templateEmailName);
         if (Arrays.equals(originalContent, fileBytes)) return;
 
         String update =
@@ -440,7 +440,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "where CD_OPERADORA = ?\n" +
             "  and ID_TIPO_SERVICO = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(update)) {
             stmt.setString(1, new String(fileBytes, StandardCharsets.UTF_8));
             stmt.setInt(2, Integer.parseInt(carrierId));
@@ -450,13 +450,13 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         }
     }
 
-    private byte[] getTemplateEmailContent(DatabaseCredentials databaseCredentials, String carrierId, String templateEmailName) throws SQLException {
+    private byte[] getTemplateEmailContent(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, String carrierId, String templateEmailName) throws SQLException {
         String sql =
             "select DE_TEXTO from CFG_EMAIL_SERVICOS\n" +
             "where CD_OPERADORA = ?\n" +
             "  and ID_TIPO_SERVICO = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, Integer.parseInt(carrierId));
             stmt.setString(2, templateEmailName);
@@ -490,7 +490,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     public void insertPrivileges(List<String> privilegeIds) throws SQLException {
         var maxSql = "select max(CD_PRIVILEGIO) + 1 as CD_PRIVILEGIO from SEG_PRIVILEGIO";
         Integer nextPrivilegeId = null;
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(maxSql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -502,7 +502,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         var insertSql =
             "INSERT INTO SEG_PRIVILEGIO (CD_PRIVILEGIO, ID_PRIVILEGIO, NM_PRIVILEGIO, SN_CONCESSAO_ADMIN, CD_MODULO) " +
             "VALUES (?, ?, ?, 'N', null)";
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(insertSql)) {
             for (int i = 0; i < privilegeIds.size(); i++) {
                 String privilegeId = privilegeIds.get(i);
@@ -527,7 +527,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
             "where CD_PRIVILEGIO not in (select CD_PRIVILEGIO from SEG_PERFIL_PRIVILEGIO where CD_PERFIL in (?))\n" +
             "order by CD_PRIVILEGIO desc";
         var privilegeIds = new ArrayList<Integer>();
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, targetPrivilegeId);
 
@@ -539,7 +539,7 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         }
 
         var insert = "INSERT INTO SEG_PERFIL_PRIVILEGIO (CD_PERFIL, CD_PRIVILEGIO) VALUES (?, ?)";
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(insert)) {
             for (int i = 0; i < privilegeIds.size(); i++) {
                 Integer privilegeId = privilegeIds.get(i);
@@ -552,14 +552,14 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
         }
     }
 
-    private byte[] getTemplateReportContent(DatabaseCredentials databaseCredentials, String carrierId, String reportId, String reportName) throws SQLException {
+    private byte[] getTemplateReportContent(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, String carrierId, String reportId, String reportName) throws SQLException {
         String sql =
             "select DC_RELATORIO from CFG_RELATORIO\n" +
             "where CD_OPERADORA = ?\n" +
             "  and CD_RELATORIO = ?\n" +
             "  and ID_RELATORIO = ?";
 
-        try (Connection conn = getConnection(databaseCredentials);
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, Integer.parseInt(carrierId));
             stmt.setInt(2, Integer.parseInt(reportId));
