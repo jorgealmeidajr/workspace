@@ -1,8 +1,8 @@
 package workspace.vigiang.checkers;
 
 import workspace.commons.model.Database;
+import workspace.commons.service.FileService;
 import workspace.vigiang.service.EnvironmentService;
-import workspace.vigiang.service.FileService;
 import workspace.vigiang.model.EmailTemplate;
 import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.dao.VigiaNgDAO;
