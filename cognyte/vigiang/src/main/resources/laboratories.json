@@ -1,0 +1,178 @@
+[
+  {
+    "name": "ALGAR",
+    "alias": "Algar",
+    "sshHost": "10.50.153.117",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "CLARO-01",
+    "carrier": "CLARO",
+    "alias": "Claro01",
+    "sshHost": "10.50.153.101",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "ENTEL",
+    "alias": "Entel",
+    "sshHost": "10.50.153.107",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "LIGGA",
+    "alias": "Ligga",
+    "sshHost": "10.50.153.105",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "MOVISTAR",
+    "alias": "Movistar",
+    "sshHost": "10.50.153.112",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "OI",
+    "alias": "Oi",
+    "sshHost": "10.50.240.148",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "SKY",
+    "alias": "Sky",
+    "sshHost": "10.50.153.110",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "SURF",
+    "alias": "Surf",
+    "sshHost": "10.50.153.106",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "TIM",
+    "carrier": "TIM",
+    "alias": "Tim",
+    "sshHost": "10.50.153.103",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "TIM-HM",
+    "carrier": "TIM",
+    "alias": "TimHm",
+    "sshHost": "10.50.153.104",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": false
+  },
+  {
+    "name": "TRANSATEL",
+    "alias": "Transatel",
+    "sshHost": "10.50.153.113",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "VERO",
+    "alias": "Vero",
+    "sshHost": "10.50.153.114",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "VIVO",
+    "alias": "Vivo",
+    "sshHost": "10.50.153.118",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "VTAL",
+    "alias": "Vtal",
+    "sshHost": "10.50.153.111",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "VULNERABILIDADES",
+    "carrier": "CLARO",
+    "alias": "VulnerabilidadesClaro",
+    "sshHost": "10.50.153.115",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "VULNERABILIDADES-QA",
+    "carrier": "TIM",
+    "alias": "VulnerabilidadesTimQA",
+    "sshHost": "10.50.153.116",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "WOM",
+    "alias": "Wom",
+    "sshHost": "10.50.153.108",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": true
+  },
+  {
+    "name": "WMS1",
+    "alias": "Wms1",
+    "sshHost": "10.50.153.120",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": false
+  },
+  {
+    "name": "WMS2",
+    "alias": "Wms2",
+    "sshHost": "10.50.153.130",
+    "sshUsername": "root",
+    "sshPassword": "jacare1",
+    "sshPort": 22,
+    "active": false
+  }
+]

@@ -55,7 +55,8 @@ public class CheckEmailTemplates {
                 .map(EmailTemplate::toArray)
                 .collect(Collectors.toList());
 
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateEmailTemplates(DatabaseCredentials databaseCredentials, List<EmailTemplate> emailTemplates) {

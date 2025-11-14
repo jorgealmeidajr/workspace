@@ -8,6 +8,7 @@ import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.model.Laboratory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,9 +28,15 @@ public class EnvironmentService {
     }
 
     public static List<DatabaseCredentials> getVigiangDatabases() throws IOException {
-        Path path = Paths.get(VIGIANG_DATABASES_PATH + "\\databases.json");
-        String read = Files.readString(path);
+        try (InputStream read = EnvironmentService.class.getResourceAsStream("/databases.json")) {
+            if (read == null) {
+                throw new IllegalStateException("Resource `/databases.json` not found on classpath");
+            }
+            return getDatabaseCredentials(read);
+        }
+    }
 
+    private static List<DatabaseCredentials> getDatabaseCredentials(InputStream read) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         List<DatabaseCredentials> databaseCredentials = mapper.readValue(read, new TypeReference<>(){});
         return databaseCredentials.stream()
@@ -38,9 +45,15 @@ public class EnvironmentService {
     }
 
     public static List<Laboratory> getVigiangLaboratories() throws IOException {
-        Path path = Paths.get(VIGIANG_LABORATORIES_PATH + "\\laboratories.json");
-        String read = Files.readString(path);
+        try (InputStream read = EnvironmentService.class.getResourceAsStream("/laboratories.json")) {
+            if (read == null) {
+                throw new IllegalStateException("Resource `/laboratories.json` not found on classpath");
+            }
+            return getLaboratories(read);
+        }
+    }
 
+    private static List<Laboratory> getLaboratories(InputStream read) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         List<Laboratory> laboratories = mapper.readValue(read, new TypeReference<>(){});
         return laboratories.stream()

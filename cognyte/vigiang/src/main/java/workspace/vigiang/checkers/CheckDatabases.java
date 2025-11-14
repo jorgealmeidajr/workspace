@@ -9,10 +9,12 @@ import workspace.vigiang.model.DatabaseCredentials;
 import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +62,9 @@ public class CheckDatabases {
         List<String[]> data = dao.listFeatures().stream()
                 .map(Feature::toArray)
                 .collect(Collectors.toList());
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateLocalConfigurationFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws SQLException, IOException {
@@ -77,7 +81,9 @@ public class CheckDatabases {
         List<String[]> data = dao.listConfigurationValues().stream()
                 .map(Configuration::toArray)
                 .collect(Collectors.toList());
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateLocalPrivilegeFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
@@ -92,7 +98,8 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listPrivileges();
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateLocalProfileFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
@@ -107,7 +114,8 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listProfiles();
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateLocalFilterQueryFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) throws IOException, SQLException {
@@ -122,7 +130,8 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listFilterQueries();
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateLocalZoneInterceptionFiles(DatabaseCredentials databaseCredentials, VigiaNgDAO dao) {
@@ -146,7 +155,8 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listZoneInterceptions();
-            FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+            Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+            FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -165,7 +175,8 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listValidationRules();
-            FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+            Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+            FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -183,7 +194,8 @@ public class CheckDatabases {
 
         try {
             List<String[]> data = dao.listQdsValidationRules();
-            FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+            Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+            FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -209,7 +221,8 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listCarriers();
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
 
         writeLogos(databaseCredentials, data);
     }
@@ -233,7 +246,27 @@ public class CheckDatabases {
         }
 
         for (String[] carrier : data) {
-            FileService.writeLogo(logosPath, carrier);
+            writeLogo(logosPath, carrier);
+        }
+    }
+
+    private static void writeLogo(Path logosPath, String[] carrier) throws IOException {
+        int carrierId = Integer.parseInt(carrier[0]);
+        String carrierCode = String.format("%02d", carrierId);
+        String carrierName = Arrays.stream(carrier[1].trim().split("\\s+"))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(" "));
+        carrierName = carrierName.trim().toUpperCase().replaceAll("\\s+", "_");
+        String logoName = carrierCode + "-" + carrierName;
+
+        String logo = carrier[14];
+        if (logo == null || logo.trim().isEmpty()) return;
+
+        if (FileService.isSvgXml(logo)) {
+            Path logoPath = Paths.get(logosPath + "\\" + logoName + ".svg");
+            Files.writeString(logoPath, logo, StandardCharsets.UTF_8);
+        } else {
+            System.out.println("Logo is not in SVG format=" + logo);
         }
     }
 
@@ -255,7 +288,8 @@ public class CheckDatabases {
         }
 
         List<String[]> data = dao.listZones();
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
 }

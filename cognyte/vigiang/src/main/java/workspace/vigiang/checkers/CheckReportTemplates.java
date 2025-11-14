@@ -55,7 +55,8 @@ public class CheckReportTemplates {
                 .map(ReportTemplate::toArray)
                 .collect(Collectors.toList());
 
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
     private static void updateLocalReportTemplates(DatabaseCredentials databaseCredentials, List<ReportTemplate> reportTemplates) throws IOException {
@@ -120,7 +121,8 @@ public class CheckReportTemplates {
         }
 
         List<String[]> data = dao.listConfigurationReports();
-        FileService.updateLocalFiles(databaseCredentials, fileName, columns, data);
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentials);
+        FileService.updateLocalFiles(databaseCredentials.getName(), fileName, columns, data, databaseDataPath);
     }
 
 }
