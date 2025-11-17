@@ -1,5 +1,7 @@
 package workspace.vigiang.dao;
 
+import workspace.commons.dao.DbSchemaDAO;
+import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 
@@ -16,45 +18,45 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     static final int ROWS = 10;
 
     @Override
-    public List<DbObjectDefinition> listTables(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentialsVigiaNG, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
-        return listObjectDefinitions(databaseCredentialsVigiaNG, objects, "TABLE");
+    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
+        return listObjectDefinitions(databaseCredentials, objects, "TABLE");
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentialsVigiaNG, "VIEW", "  and ao.object_name like 'VW_NG_%'", null);
-        return listObjectDefinitions(databaseCredentialsVigiaNG, objects, "VIEW");
+    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'", null);
+        return listObjectDefinitions(databaseCredentials, objects, "VIEW");
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentialsVigiaNG, "FUNCTION", "  and ao.object_name like 'FN_NG_%'", null);
-        return listObjectDefinitions(databaseCredentialsVigiaNG, objects, "FUNCTION");
+    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'", null);
+        return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentialsVigiaNG, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
-        return listObjectDefinitions(databaseCredentialsVigiaNG, objects, "INDEX");
+    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
+        return listObjectDefinitions(databaseCredentials, objects, "INDEX");
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials) throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentialsVigiaNG, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')", null);
-        return listObjectDefinitions(databaseCredentialsVigiaNG, objects, "PACKAGE_BODY");
+    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')", null);
+        return listObjectDefinitions(databaseCredentials, objects, "PACKAGE_BODY");
     }
 
-    private List<String> listOracleObjects(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, String objectType, String where, Integer rows) throws SQLException {
+    private List<String> listOracleObjects(DatabaseCredentials databaseCredentials, String objectType, String where, Integer rows) throws SQLException {
         String sql =
             "select ao.owner, ao.object_name\n" +
             "from all_objects ao\n" +
-            "where ao.owner like 'VIGIANG_" + databaseCredentialsVigiaNG.getCarrier().toString() + "'\n" +
+            "where ao.owner like 'VIGIANG_" + ((DatabaseCredentialsVigiaNG) databaseCredentials).getCarrier().toString() + "'\n" + // TODO:
             "  and ao.object_type = '" + objectType + "'\n" +
             where + "\n" +
             "order by ao.owner, ao.object_name";
@@ -64,7 +66,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         }
 
         List<String> result = new ArrayList<>();
-        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
+        try (Connection conn = getConnection(databaseCredentials);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
@@ -75,10 +77,10 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         return result;
     }
 
-    private List<DbObjectDefinition> listObjectDefinitions(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<String> objects, String objectType) throws SQLException {
+    private List<DbObjectDefinition> listObjectDefinitions(DatabaseCredentials databaseCredentials, List<String> objects, String objectType) throws SQLException {
         List<DbObjectDefinition> result = new ArrayList<>();
 
-        try (Connection conn = getConnection(databaseCredentialsVigiaNG)) {
+        try (Connection conn = getConnection(databaseCredentials)) {
             for (String object : objects) {
                 String objectName = object.substring(object.indexOf(".") + 1);
                 String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";

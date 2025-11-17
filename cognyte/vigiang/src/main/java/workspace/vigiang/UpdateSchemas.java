@@ -1,9 +1,9 @@
 package workspace.vigiang;
 
+import workspace.commons.dao.DbSchemaDAO;
 import workspace.commons.model.Database;
 import workspace.commons.model.DbObjectDefinition;
 import workspace.commons.model.SchemaResult;
-import workspace.vigiang.dao.DbSchemaDAO;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.service.EnvironmentService;
 
