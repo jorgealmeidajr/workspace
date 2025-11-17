@@ -11,6 +11,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static workspace.commons.model.DatabaseCredentials.getConnection;
+
 public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override

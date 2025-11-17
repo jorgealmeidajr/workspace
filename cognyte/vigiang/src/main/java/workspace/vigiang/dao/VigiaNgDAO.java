@@ -1,9 +1,10 @@
 package workspace.vigiang.dao;
 
-import workspace.vigiang.model.*;
+import workspace.vigiang.model.Configuration;
+import workspace.vigiang.model.EmailTemplate;
+import workspace.vigiang.model.Feature;
+import workspace.vigiang.model.ReportTemplate;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -44,12 +45,5 @@ public interface VigiaNgDAO {
     void insertPrivileges(List<String> privilegeIds) throws SQLException;
 
     void associatePrivileges(int targetPrivilegeId) throws SQLException;
-
-    default Connection getConnection(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
-        return DriverManager.getConnection(
-                databaseCredentialsVigiaNG.getUrl(),
-                databaseCredentialsVigiaNG.getUsername(),
-                databaseCredentialsVigiaNG.getPassword());
-    }
 
 }

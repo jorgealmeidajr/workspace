@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import static workspace.commons.model.DatabaseCredentials.getConnection;
+
 public class PostgresVigiaNgDAO implements VigiaNgDAO {
 
     private final DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG;

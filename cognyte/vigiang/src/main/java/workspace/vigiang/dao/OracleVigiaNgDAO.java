@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static workspace.commons.model.DatabaseCredentials.getConnection;
+
 public class OracleVigiaNgDAO implements VigiaNgDAO {
 
     private final DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG;

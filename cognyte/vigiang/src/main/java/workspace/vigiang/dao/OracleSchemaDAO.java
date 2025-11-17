@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static workspace.commons.model.DatabaseCredentials.getConnection;
+
 public class OracleSchemaDAO implements DbSchemaDAO {
 
     static final int ROWS = 10;
