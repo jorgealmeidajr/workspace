@@ -13,9 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static workspace.commons.service.FileService.getFileContentsByExtensions;
+import static workspace.commons.service.FileService.getMatches;
 
 
 public class UpdateProjectsByVersion {
@@ -288,28 +290,6 @@ public class UpdateProjectsByVersion {
         return resultTxt;
     }
 
-    private static List<FileMatch> getMatches(List<FileContent> fileContents, List<Pattern> patterns, List<String> ignore) {
-        Set<FileMatch> matchesSet = new LinkedHashSet<>();
-
-        for (FileContent fileContent : fileContents) {
-            String input = fileContent.getContent().trim();
-
-            for (Pattern pattern : patterns) {
-                Matcher matcher = pattern.matcher(input);
-
-                while (matcher.find()) {
-                    var matchStr = matcher.group(1);
-                    if (ignore.contains(matchStr)) continue;
-
-                    var match = new FileMatch(fileContent.getRelativeDir(), matchStr);
-                    matchesSet.add(match);
-                }
-            }
-        }
-
-        return new ArrayList<>(matchesSet);
-    }
-
     private static void validateProjectDirectories(String workDir, String version) {
         Path backendPath = Paths.get(workDir + "\\" + version + "\\back-" + version);
         if (!Files.exists(backendPath) || !Files.isDirectory(backendPath)) {
@@ -325,30 +305,6 @@ public class UpdateProjectsByVersion {
         if (!Files.exists(versionPath) || !Files.isDirectory(versionPath)) {
             throw new IllegalArgumentException("o diretorio versionPath nao existe ou nao eh um diretorio");
         }
-    }
-
-    private static List<FileContent> getFileContentsByExtensions(Path dirPath, List<String> extensions, List<String> ignoreDirs) {
-        List<FileContent> fileContents = List.of();
-        try (var stream = Files.walk(dirPath)) {
-            fileContents = stream
-                    .filter(p -> Files.isRegularFile(p) &&
-                            extensions.stream().anyMatch(ext -> p.toString().endsWith(ext)) &&
-                            ignoreDirs.stream().noneMatch(dir -> p.toString().contains("\\" + dir + "\\")))
-                    .map(p -> {
-                        Path parent = p.getParent();
-                        Path relativeDir = (parent == null) ? Paths.get("") : dirPath.relativize(parent);
-                        try {
-                            return new FileContent(relativeDir.toString(), p.getFileName().toString(), Files.readString(p));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return fileContents;
     }
 
 }
