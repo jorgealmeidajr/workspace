@@ -47,9 +47,9 @@ public interface VigiaNgDAO {
 
     default Connection getConnection(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws SQLException {
         return DriverManager.getConnection(
-                databaseCredentialsVigiaNG.getDatabaseUrl(),
-                databaseCredentialsVigiaNG.getDatabaseUsername(),
-                databaseCredentialsVigiaNG.getDatabasePassword());
+                databaseCredentialsVigiaNG.getUrl(),
+                databaseCredentialsVigiaNG.getUsername(),
+                databaseCredentialsVigiaNG.getPassword());
     }
 
 }

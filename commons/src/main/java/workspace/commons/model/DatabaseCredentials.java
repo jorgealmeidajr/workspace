@@ -11,9 +11,9 @@ public class DatabaseCredentials {
 
     private String name;
     private Database database;
-    private String databaseUsername;
-    private String databasePassword;
-    private String databaseUrl;
+    private String username;
+    private String password;
+    private String url;
     private boolean active;
 
 }

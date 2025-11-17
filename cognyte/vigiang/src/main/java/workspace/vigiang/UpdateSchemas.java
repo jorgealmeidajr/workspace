@@ -2,9 +2,9 @@ package workspace.vigiang;
 
 import workspace.commons.model.Database;
 import workspace.commons.model.DbObjectDefinition;
+import workspace.commons.model.SchemaResult;
 import workspace.vigiang.dao.DbSchemaDAO;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
-import workspace.vigiang.model.SchemaResult;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class UpdateSchemas {
 
     private static void handleResult(Future<SchemaResult> future) throws InterruptedException, ExecutionException, IOException {
         SchemaResult result = future.get();
-        DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG = result.getDatabaseCredentialsVigiaNG();
+        DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG = (DatabaseCredentialsVigiaNG) result.getDatabaseCredentials();
         Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(databaseCredentialsVigiaNG);
         System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 
