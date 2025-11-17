@@ -7,15 +7,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Laboratory {
-
-    private String name;
+public class Laboratory extends workspace.commons.model.Laboratory {
     private Carrier carrier;
-    private String alias;
-    private String sshHost;
-    private String sshUsername;
-    private String sshPassword;
-    private int sshPort;
-    private boolean active;
-
 }
