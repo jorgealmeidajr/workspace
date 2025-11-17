@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static workspace.commons.service.FileService.replaceRegion;
+
 public class CheckLaboratories {
 
     public static void main(String[] args) {
@@ -163,32 +165,6 @@ public class CheckLaboratories {
 
     private static String getSshAliasFormat(Laboratory laboratory) {
         return String.format("alias ssh%s='ssh %s@%s'", laboratory.getAlias(), laboratory.getSshUsername(), laboratory.getSshHost());
-    }
-
-    public static void replaceRegion(Path file, String beginMarker, String endMarker, List<String> replacementLines) throws IOException {
-        List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-        int beginIdx = -1, endIdx = -1;
-        for (int i = 0; i < lines.size(); i++) {
-            if (lines.get(i).contains(beginMarker)) {
-                beginIdx = i;
-                break;
-            }
-        }
-        if (beginIdx == -1) throw new IllegalStateException("Begin marker not found: " + beginMarker);
-        for (int i = beginIdx + 1; i < lines.size(); i++) {
-            if (lines.get(i).contains(endMarker)) {
-                endIdx = i;
-                break;
-            }
-        }
-        if (endIdx == -1) throw new IllegalStateException("End marker not found after begin: " + endMarker);
-
-        List<String> out = new ArrayList<>();
-        out.addAll(lines.subList(0, beginIdx + 1));
-        out.addAll(replacementLines);
-        out.addAll(lines.subList(endIdx, lines.size()));
-
-        Files.write(file, out, StandardCharsets.UTF_8);
     }
 
 }

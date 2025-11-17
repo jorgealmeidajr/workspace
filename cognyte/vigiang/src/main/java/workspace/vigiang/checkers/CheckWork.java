@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static workspace.vigiang.checkers.CheckLaboratories.replaceRegion;
+import static workspace.commons.service.FileService.replaceRegion;
 
 public class CheckWork {
 

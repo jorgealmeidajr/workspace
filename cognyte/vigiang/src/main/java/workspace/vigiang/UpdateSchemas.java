@@ -2,6 +2,7 @@ package workspace.vigiang;
 
 import workspace.commons.dao.DbSchemaDAO;
 import workspace.commons.model.Database;
+import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
 import workspace.commons.model.SchemaResult;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
@@ -29,12 +30,12 @@ public class UpdateSchemas {
         System.out.println("## END checking all database schemas.");
     }
 
-    private static void execute(List<DatabaseCredentialsVigiaNG> databasesCredentials) throws IOException, ExecutionException {
+    private static void execute(List<? extends DatabaseCredentials> databasesCredentials) throws IOException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(databasesCredentials.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 
-        for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : databasesCredentials) {
-            Callable<SchemaResult> callableTask = getCallableTask(databaseCredentialsVigiaNG);
+        for (DatabaseCredentials databaseCredentials : databasesCredentials) {
+            Callable<SchemaResult> callableTask = getCallableTask(databaseCredentials);
             callableTasks.add(callableTask);
         }
 
@@ -115,21 +116,21 @@ public class UpdateSchemas {
         return rowDefinitionStr;
     }
 
-    private static Callable<SchemaResult> getCallableTask(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
+    private static Callable<SchemaResult> getCallableTask(DatabaseCredentials databaseCredentials) {
         return () -> {
-            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentialsVigiaNG);
+            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
             // TODO: oracle, create tables statements must be simplify
             // TODO: postgres, create tables statements should be in create sql format
-            List<DbObjectDefinition> tables = dao.listTables(databaseCredentialsVigiaNG);
+            List<DbObjectDefinition> tables = dao.listTables(databaseCredentials);
 
-            List<DbObjectDefinition> views = dao.listViews(databaseCredentialsVigiaNG);
-            List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentialsVigiaNG);
-            List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentialsVigiaNG);
-            List<DbObjectDefinition> procedures = dao.listProcedures(databaseCredentialsVigiaNG);
-            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(databaseCredentialsVigiaNG);
+            List<DbObjectDefinition> views = dao.listViews(databaseCredentials);
+            List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentials);
+            List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentials);
+            List<DbObjectDefinition> procedures = dao.listProcedures(databaseCredentials);
+            List<DbObjectDefinition> packageBodies = dao.listPackageBodies(databaseCredentials);
 
-            return new SchemaResult(databaseCredentialsVigiaNG, tables, views, functions, indexes, procedures, packageBodies);
+            return new SchemaResult(databaseCredentials, tables, views, functions, indexes, procedures, packageBodies);
         };
     }
 

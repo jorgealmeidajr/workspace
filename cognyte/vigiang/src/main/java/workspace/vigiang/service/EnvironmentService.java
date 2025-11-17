@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.dao.DbSchemaDAO;
 import workspace.commons.model.Database;
+import workspace.commons.model.DatabaseCredentials;
 import workspace.vigiang.dao.*;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.Laboratory;
@@ -68,9 +69,9 @@ public class EnvironmentService {
         return null;
     }
 
-    public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) return new OracleSchemaDAO();
-        if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) return new PostgresSchemaDAO();
+    public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentials databaseCredentials) {
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
+        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
         return null;
     }
 
