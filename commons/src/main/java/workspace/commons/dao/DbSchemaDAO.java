@@ -9,7 +9,7 @@ import java.util.List;
 public interface DbSchemaDAO {
 
     @Deprecated
-    List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException;
+    List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException;
 
     List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException;
 

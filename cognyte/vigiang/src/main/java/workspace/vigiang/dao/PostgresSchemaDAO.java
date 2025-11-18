@@ -16,12 +16,13 @@ import static workspace.commons.model.DatabaseCredentials.getConnection;
 public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
-    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        // TODO: postgres, create tables statements should be in create sql format
         String sql =
             "select table_schema, table_name\n" +
             "from information_schema.tables \n" +
             "where table_type in ('BASE TABLE') \n" +
-            "  and table_schema in ('api', 'conf', 'dash', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')\n" +
+            (filter != null ? filter : "") + "\n" +
             "order by table_schema, table_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();

@@ -8,6 +8,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class SchemaResult {
+
     private final DatabaseCredentials databaseCredentials;
     private final List<DbObjectDefinition> tables;
     private final List<DbObjectDefinition> views;
@@ -15,4 +16,5 @@ public class SchemaResult {
     private final List<DbObjectDefinition> indexes;
     private final List<DbObjectDefinition> procedures;
     private final List<DbObjectDefinition> packageBodies;
+    
 }

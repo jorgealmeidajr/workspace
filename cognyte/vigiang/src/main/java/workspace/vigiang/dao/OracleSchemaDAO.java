@@ -3,7 +3,6 @@ package workspace.vigiang.dao;
 import workspace.commons.dao.DbSchemaDAO;
 import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
-import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -20,8 +19,9 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     static final int ROWS = 10;
 
     @Override
-    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
+    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        // TODO: oracle, create tables statements must be simplify
+        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", filter, ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "TABLE");
     }
 
@@ -58,9 +58,9 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         String sql =
             "select ao.owner, ao.object_name\n" +
             "from all_objects ao\n" +
-            "where ao.owner like 'VIGIANG_" + ((DatabaseCredentialsVigiaNG) databaseCredentials).getCarrier().toString() + "'\n" + // TODO:
+            "where ao.owner like '" + databaseCredentials.getUsername() + "'\n" +
             "  and ao.object_type = '" + objectType + "'\n" +
-            where + "\n" +
+            (where != null ? where : "") + "\n" +
             "order by ao.owner, ao.object_name";
 
         if (rows != null) {
