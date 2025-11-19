@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public class FileContent {
 
+    private final String fullName;
     private final String relativeDir;
     private final String name;
     private final String content;

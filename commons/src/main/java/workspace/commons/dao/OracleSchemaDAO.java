@@ -38,6 +38,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        // TODO: the sql should be simplified
         List<String> objects = listOracleObjects(databaseCredentials, "INDEX", filter, ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "INDEX");
     }

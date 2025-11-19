@@ -95,8 +95,9 @@ public class FileService {
                     .map(p -> {
                         Path parent = p.getParent();
                         Path relativeDir = (parent == null) ? Paths.get("") : dirPath.relativize(parent);
+                        String fullName = Paths.get(relativeDir.toString(), p.getFileName().toString()).toString();
                         try {
-                            return new FileContent(relativeDir.toString(), p.getFileName().toString(), Files.readString(p));
+                            return new FileContent(fullName, relativeDir.toString(), p.getFileName().toString(), Files.readString(p));
                         } catch (Exception e) {
                             e.printStackTrace();
                             return null;
