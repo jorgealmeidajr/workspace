@@ -72,11 +72,13 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        var where = (filter != null) ? "where " + filter + "\n" : "";
+
         String sql =
             "select table_schema, table_name, view_definition\n" +
             "from information_schema.views\n" +
-            "where table_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')\n" +
+            where +
             "order by table_schema, table_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -92,12 +94,14 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        filter = (filter != null) ? "  " + filter + "\n" : "";
+
         String sql =
             "select routine_schema, routine_name, routine_definition\n" +
             "from information_schema.routines\n" +
             "where routine_type = 'FUNCTION'\n" +
-            "  and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')\n" +
+            filter +
             "order by routine_schema, routine_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -113,11 +117,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         String sql =
             "select schemaname, tablename, indexname, indexdef\n" +
             "from pg_indexes\n" +
-            "where schemaname in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')\n" +
+            filter + "\n" +
             "order by schemaname, tablename, indexname";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -133,12 +137,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         String sql =
             "select routine_schema as schema_name, routine_name as procedure_name, routine_definition\n" +
             "from information_schema.routines\n" +
             "where routine_type = 'PROCEDURE'\n" +
-            "  and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')\n" +
+            filter + "\n" +
             "order by schema_name, procedure_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -154,7 +158,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         return List.of();
     }
 

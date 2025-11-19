@@ -26,46 +26,50 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", "  and ao.object_name like 'VW_NG_%'", null);
+    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "VIEW");
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", "  and ao.object_name like 'FN_NG_%'", null);
+    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", "  and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')", ROWS);
+    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", filter, ROWS);
         return listObjectDefinitions(databaseCredentials, objects, "INDEX");
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", "  and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')", null);
+    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "PACKAGE_BODY");
     }
 
     private List<String> listOracleObjects(DatabaseCredentials databaseCredentials, String objectType, String where, Integer rows) throws SQLException {
+        String filter = (where != null) ? "  " + where + "\n" : "";
+
         String sql =
             "select ao.owner, ao.object_name\n" +
             "from all_objects ao\n" +
             "where ao.owner like '" + databaseCredentials.getUsername() + "'\n" +
             "  and ao.object_type = '" + objectType + "'\n" +
-            (where != null ? where : "") + "\n" +
+            filter +
             "order by ao.owner, ao.object_name";
 
         if (rows != null) {
             sql += "\nfetch first " + rows + " rows only";
         }
+
+        System.out.println("Executing ORACLE sql:\n" + sql + "\n");
 
         List<String> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -83,6 +87,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         List<DbObjectDefinition> result = new ArrayList<>();
 
         try (Connection conn = getConnection(databaseCredentials)) {
+            // TODO: split the tasks to multiple threads
             for (String object : objects) {
                 String objectName = object.substring(object.indexOf(".") + 1);
                 String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";
