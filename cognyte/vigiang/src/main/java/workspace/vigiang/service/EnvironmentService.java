@@ -2,12 +2,10 @@ package workspace.vigiang.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import workspace.commons.dao.DbSchemaDAO;
-import workspace.commons.dao.OracleSchemaDAO;
-import workspace.commons.dao.PostgresSchemaDAO;
 import workspace.commons.model.Database;
-import workspace.commons.model.DatabaseCredentials;
-import workspace.vigiang.dao.*;
+import workspace.vigiang.dao.OracleVigiaNgDAO;
+import workspace.vigiang.dao.PostgresVigiaNgDAO;
+import workspace.vigiang.dao.VigiaNgDAO;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.Laboratory;
 
@@ -68,12 +66,6 @@ public class EnvironmentService {
     public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
         if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) return new OracleVigiaNgDAO(databaseCredentialsVigiaNG);
         if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) return new PostgresVigiaNgDAO(databaseCredentialsVigiaNG);
-        return null;
-    }
-
-    public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentials databaseCredentials) {
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
-        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
         return null;
     }
 

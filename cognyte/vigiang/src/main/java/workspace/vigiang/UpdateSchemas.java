@@ -129,7 +129,7 @@ public class UpdateSchemas {
 
     private static Callable<SchemaResult> getCallableTask(DatabaseCredentials databaseCredentials) {
         return () -> {
-            DbSchemaDAO dao = EnvironmentService.getDbSchemaDAO(databaseCredentials);
+            DbSchemaDAO dao = workspace.commons.service.EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
             String filter = null;
             if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
