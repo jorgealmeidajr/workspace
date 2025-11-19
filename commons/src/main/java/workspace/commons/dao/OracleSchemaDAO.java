@@ -1,6 +1,5 @@
-package workspace.vigiang.dao;
+package workspace.commons.dao;
 
-import workspace.commons.dao.DbSchemaDAO;
 import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
 

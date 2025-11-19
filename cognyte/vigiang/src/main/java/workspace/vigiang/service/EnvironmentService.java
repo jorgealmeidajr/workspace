@@ -3,6 +3,8 @@ package workspace.vigiang.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.dao.DbSchemaDAO;
+import workspace.commons.dao.OracleSchemaDAO;
+import workspace.commons.dao.PostgresSchemaDAO;
 import workspace.commons.model.Database;
 import workspace.commons.model.DatabaseCredentials;
 import workspace.vigiang.dao.*;
