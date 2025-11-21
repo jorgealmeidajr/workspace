@@ -221,7 +221,7 @@ public class UpdateProjectsByVersion {
 
             resultTxt += "# " + fileContent.getFullName() + ":\n";
             resultTxt += "```\n";
-            resultTxt += input + "\n";
+            resultTxt += input.trim() + "\n";
             resultTxt += "```\n\n";
         }
 
