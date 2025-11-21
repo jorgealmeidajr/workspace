@@ -1,86 +1,75 @@
 package workspace.vigiang.scripts;
 
-import com.microsoft.playwright.*;
+import workspace.commons.model.Laboratory;
+import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.service.GitLabService;
 
-import java.awt.*;
+import java.util.stream.Collectors;
 
 public class GitLabScriptDraft {
 
     public static void main(String[] args) {
         System.out.println("## START: updating laboratories.\n");
 
+        String[] laboratoriesList = "CLARO-01,ENTEL,MOVISTAR,TIM,VIVO".split(",");
+        String[] backendServices = "warrant-service,operation-service".split(",");
+        var frontend = true;
+
         try {
-            Playwright playwright = Playwright.create();
-            var launchOptions = new BrowserType.LaunchOptions()
-                    .setChannel("chrome") // "chrome", "msedge", "chrome-beta", "msedge-beta" or "msedge-dev"
-                    .setHeadless(false)
-                    .setSlowMo(1500);
+            var laboratories = EnvironmentService.getVigiangLaboratories().stream()
+                    .filter(lab -> {
+                        for (var labName : laboratoriesList) {
+                            if (lab.getName().equalsIgnoreCase(labName.trim())) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    })
+                    .collect(Collectors.toList());
 
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            int width = (int) screenSize.getWidth();
-            int height = (int) screenSize.getHeight();
+            String backendDeployHosts = laboratories.stream()
+                    .map(Laboratory::getSshHost)
+                    .collect(Collectors.joining(" "));
 
-            Browser browser = playwright.chromium().launch(launchOptions);
-            BrowserContext context = browser.newContext(new Browser.NewContextOptions().setViewportSize(width, height));
+            String frontendDeployHosts = laboratories.stream()
+                    .map(laboratory -> laboratory.getSshHost() + "-" + laboratory.getAlias())
+                    .collect(Collectors.joining(" "));
 
-            Page page = context.newPage();
+            for (var backendService : backendServices) {
+                updateBackendDeployHosts(backendService, backendDeployHosts);
+            }
 
-            // list of laboratories
-            // list of backend
-            // frontend?
-            execute(page);
+            if (frontend) {
+                updateFrontendDeployHosts(frontendDeployHosts);
+            }
 
-//            browser.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("\n## END: updating laboratories.");
     }
 
-    private static void execute(Page page) {
-        GitLabService.login(page);
-
+    private static void updateBackendDeployHosts(String backendService, String backendDeployHosts) {
         String backendUrl = GitLabService.VigiaNG.getBackendRepositoryUrls().stream()
-                .filter(url -> url.contains("warrant-service"))
+                .filter(url -> url.contains(backendService))
                 .findFirst()
                 .orElseThrow();
 
-        page.navigate(backendUrl);
+        System.out.println("Updating DEPLOY_HOSTS for: " + backendService);
 
-        String initialValue = getVariableValue(page, backendUrl);
-        System.out.println("Initial value: " + initialValue);
-
-        updateVariableValue(page, backendUrl, "TEST");
-        System.out.println("Updated value: " + getVariableValue(page, backendUrl));
-
-        updateVariableValue(page, backendUrl, initialValue);
-        System.out.println("Updated value: " + getVariableValue(page, backendUrl));
+        System.out.println();
     }
 
-    private static String getVariableValue(Page page, String backendUrl) {
-        page.navigate(backendUrl + "/-/settings/ci_cd");
+    private static void updateFrontendDeployHosts(String frontendDeployHosts) {
+        String frontendUrl = GitLabService.VigiaNG.getFrontEndUrl();
 
-        // Variables
-        page.click("#js-cicd-variables-settings");
+        System.out.println("Updating DEPLOY_HOSTS_WEBVIEWER for frontend");
 
-        // DEPLOY_HOSTS
-        page.click("#__BVID__678 > tbody > tr > td:nth-child(4) > div > div > button:nth-child(1)");
+        System.out.println();
 
-        return page.inputValue("#ci-variable-value");
-    }
+        System.out.println("Updating DEPLOY_HOSTS_WORKFLOW for frontend");
 
-    private static void updateVariableValue(Page page, String backendUrl, String value) {
-        page.navigate(backendUrl + "/-/settings/ci_cd");
-
-        // Variables
-        page.click("#js-cicd-variables-settings");
-
-        // DEPLOY_HOSTS
-        page.click("#__BVID__678 > tbody > tr > td:nth-child(4) > div > div > button:nth-child(1)");
-
-        page.fill("#ci-variable-value", value);
-        page.click("#js-cicd-variables-settings > div.settings-content > div > div.row > div > div:nth-child(2) > aside > div.gl-drawer-body.gl-drawer-body-scrim > div.gl-mb-5.gl-flex.gl-gap-3 > button.btn.btn-confirm.btn-md.gl-button");
+        System.out.println();
     }
 
 }
