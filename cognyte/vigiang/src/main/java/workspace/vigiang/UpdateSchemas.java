@@ -91,6 +91,10 @@ public class UpdateSchemas {
     }
 
     private static void updateLocalSchemaFiles(Path databaseSchemaPath, String fileName, List<DbObjectDefinition> data) throws IOException {
+        if (data.isEmpty()) {
+            return;
+        }
+
         var finalLines = new ArrayList<String>();
         for (DbObjectDefinition row : data) {
             String rowDefinitionStr = getRowDefinitionStr(row);
@@ -138,6 +142,7 @@ public class UpdateSchemas {
                 filter = "and table_schema in ('api', 'conf', 'dash', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
             }
             List<DbObjectDefinition> tables = dao.listTables(databaseCredentials, filter);
+//            List<DbObjectDefinition> tables = List.of();
 
             if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                 filter = "and ao.object_name like 'VW_NG_%'";
@@ -152,6 +157,7 @@ public class UpdateSchemas {
                 filter = "and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
             }
             List<DbObjectDefinition> functions = dao.listFunctions(databaseCredentials, filter);
+//            List<DbObjectDefinition> functions = List.of();
 
             if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                 filter = "and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')";
@@ -159,16 +165,19 @@ public class UpdateSchemas {
                 filter = "where schemaname in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
             }
             List<DbObjectDefinition> indexes = dao.listIndexes(databaseCredentials, filter);
+//            List<DbObjectDefinition> indexes = List.of();
 
             if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                 filter = "  and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
             }
             List<DbObjectDefinition> procedures = dao.listProcedures(databaseCredentials, filter);
+//            List<DbObjectDefinition> procedures = List.of();
 
             if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                 filter = "and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')";
             }
             List<DbObjectDefinition> packageBodies = dao.listPackageBodies(databaseCredentials, filter);
+//            List<DbObjectDefinition> packageBodies = List.of();
 
             return new SchemaResult(databaseCredentials, tables, views, functions, indexes, procedures, packageBodies);
         };

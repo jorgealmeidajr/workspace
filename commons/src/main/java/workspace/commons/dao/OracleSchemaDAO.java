@@ -2,14 +2,17 @@ package workspace.commons.dao;
 
 import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
+import workspace.commons.model.SchemaResult;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static workspace.commons.model.DatabaseCredentials.getConnection;
 
@@ -86,29 +89,69 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     private List<DbObjectDefinition> listObjectDefinitions(DatabaseCredentials databaseCredentials, List<String> objects, String objectType) throws SQLException {
         List<DbObjectDefinition> result = new ArrayList<>();
 
-        try (Connection conn = getConnection(databaseCredentials)) {
-            // TODO: split the tasks to multiple threads
-            for (String object : objects) {
-                String objectName = object.substring(object.indexOf(".") + 1);
-                String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";
+        int threads = 50;
+        ExecutorService executorService = Executors.newFixedThreadPool(threads);
 
-                try (Statement stmt = conn.createStatement();
-                     ResultSet rs = stmt.executeQuery(sql)) {
-                    if (rs.next()) {
-                        String definition = rs.getString("DDL");
-                        DbObjectDefinition dbObjectDefinition = new DbObjectDefinition(object, definition);
-                        result.add(dbObjectDefinition);
-                    }
+        List<List<String>> partitions = new ArrayList<>();
+        int partitionSize = (int) Math.ceil((double) objects.size() / threads);
+        for (int i = 0; i < objects.size(); i += partitionSize) {
+            partitions.add(objects.subList(i, Math.min(i + partitionSize, objects.size())));
+        }
+
+        try (Connection conn = getConnection(databaseCredentials)) {
+            List<Callable<List<DbObjectDefinition>>> tasks = getTasks(objectType, partitions, conn);
+
+            try {
+                List<Future<List<DbObjectDefinition>>> futures = executorService.invokeAll(tasks);
+                for (Future<List<DbObjectDefinition>> future : futures) {
+                    List<DbObjectDefinition> definitions = future.get();
+                    result.addAll(definitions);
                 }
 
-                try {
-                    TimeUnit.MILLISECONDS.sleep(50);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
+                if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
+                    executorService.shutdownNow();
+                }
+            } catch (Exception e) {
+                executorService.shutdownNow();
+            } finally {
+                if (!executorService.isShutdown()) {
+                    executorService.shutdown();
                 }
             }
         }
+
+        result.sort(Comparator.comparing(DbObjectDefinition::getName));
         return result;
+    }
+
+    private static List<Callable<List<DbObjectDefinition>>> getTasks(String objectType, List<List<String>> partitions, Connection conn) {
+        List<Callable<List<DbObjectDefinition>>> tasks = new ArrayList<>();
+        for (List<String> partition : partitions) {
+            tasks.add(() -> {
+                List<DbObjectDefinition> definitions = new ArrayList<>();
+                for (String object : partition) {
+                    String objectName = object.substring(object.indexOf(".") + 1);
+                    String sql = "SELECT DBMS_METADATA.GET_DDL('" + objectType + "', '" + objectName + "') as DDL FROM DUAL";
+
+                    try (Statement stmt = conn.createStatement();
+                         ResultSet rs = stmt.executeQuery(sql)) {
+                        if (rs.next()) {
+                            String definition = rs.getString("DDL");
+                            DbObjectDefinition dbObjectDefinition = new DbObjectDefinition(object, definition);
+                            definitions.add(dbObjectDefinition);
+                        }
+                    }
+
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(50);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return definitions;
+            });
+        }
+        return tasks;
     }
 
 }
