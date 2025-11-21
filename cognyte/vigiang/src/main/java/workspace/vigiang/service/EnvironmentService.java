@@ -14,10 +14,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+
+import static workspace.commons.service.EnvironmentService.validateLaboratories;
 
 public class EnvironmentService {
 
@@ -66,24 +66,6 @@ public class EnvironmentService {
         return laboratories.stream()
                 .filter(Laboratory::isActive)
                 .collect(Collectors.toList());
-    }
-
-    public static void validateLaboratories(List<Laboratory> laboratories) {
-        Set<String> names = new HashSet<>();
-        Set<String> aliases = new HashSet<>();
-        Set<String> hosts = new HashSet<>();
-
-        for (Laboratory lab : laboratories) {
-            if (!names.add(lab.getName())) {
-                throw new IllegalArgumentException("Duplicate laboratory name found: " + lab.getName());
-            }
-            if (!aliases.add(lab.getAlias())) {
-                throw new IllegalArgumentException("Duplicate laboratory alias found: " + lab.getAlias());
-            }
-            if (!hosts.add(lab.getSshHost())) {
-                throw new IllegalArgumentException("Duplicate laboratory sshHost found: " + lab.getSshHost());
-            }
-        }
     }
 
     public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
