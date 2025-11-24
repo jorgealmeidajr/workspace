@@ -2,6 +2,7 @@
 import gitlab
 import urllib3
 import os
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -38,15 +39,55 @@ print(f"Updated DEPLOY_HOSTS to: {new_value}")
 version = "2.2"
 
 branches = project.branches.list(all=True)
-print(f"\nBranches containing '{version}' ({sum(1 for b in branches if version in b.name)}):")
+branches = [b for b in branches if version in b.name]
+print(f"\nBranches containing '{version}' ({len(branches)}):")
 for branch in branches:
     if version in branch.name:
         print(f"  - {branch.name}")
 
 tags = project.tags.list(all=True)
-print(f"\nTags containing '{version}' ({sum(1 for t in tags if version in t.name)}):")
+tags = [t for t in tags if version in t.name]
+print(f"\nTags containing '{version}' ({len(tags)}):")
 for tag in tags:
-    if version in tag.name:
-        print(f"  - {tag.name}")
-        if tag.message:
-            print(f"    Description: {tag.message}")
+    print(f"  - {tag.name}")
+    if tag.message:
+        print(f"    Description: {tag.message}")
+
+
+def main():
+    pass
+
+def create_tag_draft():
+    tag_name = "2.2.3"
+    tag_ref = "version-2.2.0"  # Branch or commit SHA to create tag from
+    tag_message = "Official Release - Based on branch: version-2.2.0"
+    # tag_message = "Release Candidate - Based on branch: version-2.2.0"
+
+    #new_tag = project.tags.create({'tag_name': tag_name, 'ref': tag_ref, 'message': tag_message})
+    print(f"\nCreated tag: {new_tag.name}")
+    print(f"  Message: {new_tag.message}")
+    print(f"  Commit: {new_tag.commit['id']}")
+
+    # Get the pipeline status from the newly created tag
+    #commit = project.commits.get(new_tag.commit['id'])
+    pipelines = commit.pipelines.list()
+
+    if pipelines:
+        pipeline = pipelines[0] # Get the most recent pipeline
+        print(f"\nPipeline status: {pipeline.status}")
+        print(f"Pipeline ID: {pipeline.id}")
+        print(f"Pipeline URL: {pipeline.web_url}")
+
+        # Wait for pipeline to finish
+        pipeline.refresh()
+        while pipeline.status in ['pending', 'running']:
+            time.sleep(10)  # Wait 10 seconds
+            pipeline.refresh()
+            print(f"Pipeline status: {pipeline.status}")
+    else:
+        print("\nNo pipeline found for this tag")
+
+    print(f"Final pipeline status: {pipeline.status}")
+
+if __name__ == "__main__":
+    main()
