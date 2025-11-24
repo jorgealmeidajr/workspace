@@ -8,10 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -156,6 +153,33 @@ public class FileService {
         out.addAll(lines.subList(endIdx, lines.size()));
 
         Files.write(file, out, StandardCharsets.UTF_8);
+    }
+
+    public static void writeMd(List<FileContent> fileContents, Path outputPath) throws IOException {
+        String resultTxt = "";
+
+        fileContents.sort(Comparator.comparing(FileContent::getFullName));
+
+        for (FileContent fileContent : fileContents) {
+            String input = fileContent.getContent().trim();
+
+            resultTxt += "# " + fileContent.getFullName() + ":\n";
+            resultTxt += "```\n";
+            resultTxt += input.trim() + "\n";
+            resultTxt += "```\n\n";
+        }
+
+        String newFileContent = resultTxt.trim() + "\n";
+
+        var initialFileContent = "";
+        if (Files.exists(outputPath)) {
+            initialFileContent = new String(Files.readAllBytes(outputPath));
+        }
+
+        if (!initialFileContent.equals(newFileContent)) {
+            System.out.println("updating file: " + outputPath);
+            Files.writeString(outputPath, newFileContent);
+        }
     }
 
 }

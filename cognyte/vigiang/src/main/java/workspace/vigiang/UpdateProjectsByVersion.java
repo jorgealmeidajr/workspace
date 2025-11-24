@@ -16,8 +16,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static workspace.commons.service.FileService.getFileContentsByExtensions;
-import static workspace.commons.service.FileService.getMatches;
+import static workspace.commons.service.FileService.*;
 
 
 public class UpdateProjectsByVersion {
@@ -47,12 +46,12 @@ public class UpdateProjectsByVersion {
                     .filter(f -> f.getRelativeDir().contains("\\repository\\"))
                     .collect(Collectors.toList());
                 updateMappers(versionPath, backendFileContents);
+                writeMd(backendFileContents, Paths.get(versionPath + "\\mybatis.md"));
 
                 List<FileContent> setupFileContents = new ArrayList<>();
                 setupFileContents.addAll(getFileContentsByExtensions(frontendPath, List.of("dockerfile"), List.of("node_modules", "json-server", "tests")));
                 setupFileContents.addAll(getFileContentsByExtensions(backendPath, List.of("Dockerfile", "yaml", "yml"), List.of("node_modules", "commons", "target")));
-                Path outputPath = Paths.get(versionPath + "\\setup.md");
-                writeMd(setupFileContents, outputPath);
+                writeMd(setupFileContents, Paths.get(versionPath + "\\setup.md"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -208,33 +207,6 @@ public class UpdateProjectsByVersion {
             MappersService.writeMappers(versionPath, mappings);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static void writeMd(List<FileContent> fileContents, Path outputPath) throws IOException {
-        String resultTxt = "";
-
-        fileContents.sort(Comparator.comparing(FileContent::getFullName));
-
-        for (FileContent fileContent : fileContents) {
-            String input = fileContent.getContent().trim();
-
-            resultTxt += "# " + fileContent.getFullName() + ":\n";
-            resultTxt += "```\n";
-            resultTxt += input.trim() + "\n";
-            resultTxt += "```\n\n";
-        }
-
-        String newFileContent = resultTxt.trim() + "\n";
-
-        var initialFileContent = "";
-        if (Files.exists(outputPath)) {
-            initialFileContent = new String(Files.readAllBytes(outputPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + outputPath);
-            Files.writeString(outputPath, newFileContent);
         }
     }
 
