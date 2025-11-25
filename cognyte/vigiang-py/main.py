@@ -1,4 +1,3 @@
-# $ pip install -r requirements.txt
 import gitlab
 import urllib3
 import os
