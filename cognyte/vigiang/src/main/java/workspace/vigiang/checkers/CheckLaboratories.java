@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static workspace.commons.service.FileService.replaceRegion;
+import static workspace.commons.service.FileService.writeString;
 
 public class CheckLaboratories {
 
@@ -110,23 +111,9 @@ public class CheckLaboratories {
 
             result = result.trim() + "\n";
 
-            // TODO: this logic repeats many times - refactor it
             Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratoryVigiaNg);
-            Path resultPath = Paths.get(laboratoryPath + "\\laboratoryVigiaNg.md");
-
-            var initialFileContent = "";
-            if (Files.exists(resultPath)) {
-                initialFileContent = new String(Files.readAllBytes(resultPath));
-
-                if (!initialFileContent.equals(result)) {
-                    System.out.println("updating file: " + resultPath);
-                    Files.writeString(resultPath, result, StandardCharsets.UTF_8);
-                }
-
-            } else {
-                System.out.println("creating file: " + resultPath);
-                Files.writeString(resultPath, result, StandardCharsets.UTF_8);
-            }
+            Path outputPath = Paths.get(laboratoryPath + "\\laboratory.md");
+            writeString(outputPath, result);
         }
     }
 

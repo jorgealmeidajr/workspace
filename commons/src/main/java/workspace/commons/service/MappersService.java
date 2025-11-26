@@ -23,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static workspace.commons.service.FileService.writeString;
+
 public class MappersService {
 
     public static String extractFunctionCall(String content) {
@@ -125,19 +127,10 @@ public class MappersService {
         writeContentToFile(resultTxt, versionPath, "\\mappers.txt");
     }
 
-    private static void writeContentToFile(String newFileContent, Path filePath, String fileName) throws IOException {
-        newFileContent = newFileContent.trim() + "\n";
-        Path mappersMdPath = Paths.get(filePath + fileName);
-
-        var initialFileContent = "";
-        if (Files.exists(mappersMdPath)) {
-            initialFileContent = new String(Files.readAllBytes(mappersMdPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + mappersMdPath);
-            Files.writeString(mappersMdPath, newFileContent);
-        }
+    private static void writeContentToFile(String result, Path filePath, String fileName) throws IOException {
+        result = result.trim() + "\n";
+        Path outputPath = Paths.get(filePath + fileName);
+        writeString(outputPath, result);
     }
 
     private static void writeMappersMd(Path versionPath, List<XmlCallMapping> listWithoutDuplicates, List<XmlResultMap> allResultMaps) throws IOException {

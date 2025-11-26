@@ -19,6 +19,8 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static workspace.commons.service.FileService.writeString;
+
 public class UpdateSchemas {
 
     public static void main(String[] args) {
@@ -101,19 +103,9 @@ public class UpdateSchemas {
             finalLines.add(rowDefinitionStr);
         }
 
-        var newFileContent = String.join(System.lineSeparator(), finalLines);
-
-        Path finalFilePath = Paths.get(databaseSchemaPath + "\\" + fileName + ".sql");
-
-        var initialFileContent = "";
-        if (Files.exists(finalFilePath)) {
-            initialFileContent = new String(Files.readAllBytes(finalFilePath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + finalFilePath);
-            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
-        }
+        var result = String.join(System.lineSeparator(), finalLines);
+        Path outputPath = Paths.get(databaseSchemaPath + "\\" + fileName + ".sql");
+        writeString(outputPath, result);
     }
 
     private static String getRowDefinitionStr(DbObjectDefinition row) {

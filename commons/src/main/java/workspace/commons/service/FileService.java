@@ -28,23 +28,15 @@ public class FileService {
             finalLines.add(line);
         }
 
-        var newFileContent =
+        var result =
             "# " + name + " | " + fileName + "\n" +
             "```\n" +
             String.join(System.lineSeparator(), finalLines) +
             "```\n";
 
-        Path finalFilePath = Paths.get(outputFolderPath + "\\" + fileName + ".md");
+        Path outputPath = Paths.get(outputFolderPath + "\\" + fileName + ".md");
 
-        var initialFileContent = "";
-        if (Files.exists(finalFilePath)) {
-            initialFileContent = new String(Files.readAllBytes(finalFilePath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + finalFilePath);
-            Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static int calculateColumnWidth(String[] headers) {
@@ -169,16 +161,23 @@ public class FileService {
             resultTxt += "```\n\n";
         }
 
-        String newFileContent = resultTxt.trim() + "\n";
+        String result = resultTxt.trim() + "\n";
+        writeString(outputPath, result);
+    }
 
+    public static void writeString(Path outputPath, String result) throws IOException {
         var initialFileContent = "";
         if (Files.exists(outputPath)) {
             initialFileContent = new String(Files.readAllBytes(outputPath));
-        }
 
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + outputPath);
-            Files.writeString(outputPath, newFileContent);
+            if (!initialFileContent.equals(result)) {
+                System.out.println("updating file: " + outputPath);
+                Files.writeString(outputPath, result, StandardCharsets.UTF_8);
+            }
+
+        } else {
+            System.out.println("creating file: " + outputPath);
+            Files.writeString(outputPath, result, StandardCharsets.UTF_8);
         }
     }
 

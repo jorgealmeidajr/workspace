@@ -147,46 +147,36 @@ public class UpdateProjectsByVersion {
     }
 
     private static void updateTxt(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
-        String resultTxt = "";
+        String result = "";
 
         if (!vigiangMatches.getFrontendMatches().isEmpty()) {
             List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
                     .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("webviewer"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
-                resultTxt += "webviewer:\n";
-                resultTxt = getFileContentsTxt(matchesFiltered, resultTxt);
-                resultTxt += "\n";
+                result += "webviewer:\n";
+                result = getFileContentsTxt(matchesFiltered, result);
+                result += "\n";
             }
 
             matchesFiltered = vigiangMatches.getFrontendMatches().stream()
                     .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("workflow"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
-                resultTxt += "workflow:\n";
-                resultTxt = getFileContentsTxt(matchesFiltered, resultTxt);
-                resultTxt += "\n";
+                result += "workflow:\n";
+                result = getFileContentsTxt(matchesFiltered, result);
+                result += "\n";
             }
         }
 
         if (!vigiangMatches.getBackendMatches().isEmpty()) {
-            resultTxt += "backend:\n";
-            resultTxt = getFileContentsTxt(vigiangMatches.getBackendMatches(), resultTxt);
-            resultTxt += "\n";
+            result += "backend:\n";
+            result = getFileContentsTxt(vigiangMatches.getBackendMatches(), result);
+            result += "\n";
         }
 
-        String newFileContent = resultTxt;
-        Path allConfigurationsPath = Paths.get(versionPath + "\\" + output + ".txt");
-
-        var initialFileContent = "";
-        if (Files.exists(allConfigurationsPath)) {
-            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + allConfigurationsPath);
-            Files.writeString(allConfigurationsPath, newFileContent);
-        }
+        Path outputPath = Paths.get(versionPath + "\\" + output + ".txt");
+        writeString(outputPath, result);
     }
 
     private static void updateMappers(Path versionPath, List<FileContent> backendFileContents) {
@@ -211,49 +201,39 @@ public class UpdateProjectsByVersion {
     }
 
     private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
-        String resultTxt = "";
+        String result = "";
 
         if (!vigiangMatches.getFrontendMatches().isEmpty()) {
             List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
                     .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("webviewer"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
-                resultTxt += "# webviewer:\n";
-                resultTxt += "```\n";
-                resultTxt = getFileContentsMd(matchesFiltered, resultTxt);
-                resultTxt += "```\n\n";
+                result += "# webviewer:\n";
+                result += "```\n";
+                result = getFileContentsMd(matchesFiltered, result);
+                result += "```\n\n";
             }
 
             matchesFiltered = vigiangMatches.getFrontendMatches().stream()
                     .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("workflow"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
-                resultTxt += "# workflow:\n";
-                resultTxt += "```\n";
-                resultTxt = getFileContentsMd(matchesFiltered, resultTxt);
-                resultTxt += "```\n\n";
+                result += "# workflow:\n";
+                result += "```\n";
+                result = getFileContentsMd(matchesFiltered, result);
+                result += "```\n\n";
             }
         }
 
         if (!vigiangMatches.getBackendMatches().isEmpty()) {
-            resultTxt += "# backend:\n";
-            resultTxt += "```\n";
-            resultTxt = getFileContentsMd(vigiangMatches.getBackendMatches(), resultTxt);
-            resultTxt += "```\n";
+            result += "# backend:\n";
+            result += "```\n";
+            result = getFileContentsMd(vigiangMatches.getBackendMatches(), result);
+            result += "```\n";
         }
 
-        String newFileContent = resultTxt;
-        Path allConfigurationsPath = Paths.get(versionPath + "\\" + output + ".md");
-
-        var initialFileContent = "";
-        if (Files.exists(allConfigurationsPath)) {
-            initialFileContent = new String(Files.readAllBytes(allConfigurationsPath));
-        }
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + allConfigurationsPath);
-            Files.writeString(allConfigurationsPath, newFileContent);
-        }
+        Path outputPath = Paths.get(versionPath + "\\" + output + ".md");
+        writeString(outputPath, result);
     }
 
     private static String getFileContentsTxt(List<FileMatch> matches, String resultTxt) {
