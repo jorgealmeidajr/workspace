@@ -2,6 +2,8 @@ import gitlab
 import urllib3
 import os
 from dotenv import load_dotenv
+from dataclasses import dataclass
+from typing import List
 
 from environment import get_laboratories_vigia_ng
 
@@ -26,40 +28,68 @@ def connect_gitlab():
     return gl
 
 ###################################################################################################
-def main():
-    print("starting script1")
-    
-    load_dotenv()
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+@dataclass
+class Request:
+    laboratories_to_update: List[str]
+    backend_services_to_update: List[str]
+    frontend: bool
 
-    gl = connect_gitlab()
 
-    laboratories_to_update = "CLARO-01,ENTEL,MOVISTAR,TIM,VIVO".split(",")
-    backend_services_to_update = "system-service,zuul-server".split(",")
+def update_deploy_hosts(gl, req):
+    projects = get_projects(gl)
 
     laboratories = get_laboratories_vigia_ng()
 
     laboratories_filtered = [
         lab for lab in laboratories
-        if lab["name"].lower() in [name.lower() for name in laboratories_to_update]
+        if lab["name"].lower() in [name.lower() for name in req.laboratories_to_update]
     ]
 
+    update_backend_projects(laboratories_filtered, projects, req)
+
+    if req.frontend:
+        frontend_deploy_hosts = " ".join(
+            f'{lab["sshHost"]}-{lab["alias"]}' for lab in laboratories_filtered
+        )
+        print(f"frontend deploy hosts: {frontend_deploy_hosts}")
+
+
+def update_backend_projects(laboratories_filtered, projects, req):
     backend_deploy_hosts = " ".join(lab["sshHost"] for lab in laboratories_filtered)
     print(f"backend deploy hosts: {backend_deploy_hosts}")
 
-    frontend_deploy_hosts = " ".join(
-        f'{lab["sshHost"]}-{lab["alias"]}' for lab in laboratories_filtered
-    )
-    print(f"frontend deploy hosts: {frontend_deploy_hosts}")
-
-    projects = get_projects(gl)
-
-    projects_filtered = [
+    backend_projects = [
         project for project in projects
-        if project.name.lower() in [name.lower() for name in backend_services_to_update]
+        if project.name.lower() in [name.lower() for name in req.backend_services_to_update]
     ]
 
-    print("ending script1...")
+    for project in backend_projects:
+        try:
+            var = project.variables.get('DEPLOY_HOSTS')
+            var.value = backend_deploy_hosts
+            var.save()
+            print(f"Updated DEPLOY_HOSTS for project {project.name}")
+        except gitlab.exceptions.GitlabGetError:
+            print(f"DEPLOY_HOSTS not found for project {project.name}, skipping.")
+
+
+def main():
+    print("starting script1: update deploy hosts.")
+
+    req = Request(
+        laboratories_to_update = "CLARO-01,ENTEL,MOVISTAR,TIM,VIVO".split(","),
+        backend_services_to_update = "system-service,zuul-server".split(","),
+        frontend = True
+    )
+
+    load_dotenv()
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    gl = connect_gitlab()
+
+    update_deploy_hosts(gl, req)
+
+    print("ending script1: update deploy hosts.")
 
 
 if __name__ == "__main__":
