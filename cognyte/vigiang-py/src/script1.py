@@ -35,7 +35,7 @@ class Request:
     frontend: bool
 
 
-def update_deploy_hosts(gl, req):
+def update_deploy_hosts(gl, req: Request):
     projects = get_projects(gl)
 
     laboratories = get_laboratories_vigia_ng()
@@ -48,13 +48,36 @@ def update_deploy_hosts(gl, req):
     update_backend_projects(laboratories_filtered, projects, req)
 
     if req.frontend:
-        frontend_deploy_hosts = " ".join(
-            f'{lab["sshHost"]}-{lab["alias"]}' for lab in laboratories_filtered
-        )
-        print(f"frontend deploy hosts: {frontend_deploy_hosts}")
+        update_frontend_projects(laboratories_filtered, projects)
 
 
-def update_backend_projects(laboratories_filtered, projects, req):
+def update_frontend_projects(laboratories_filtered: list, projects: list):
+    frontend_deploy_hosts = " ".join(
+        f'{lab["sshHost"]}-{lab["alias"]}' for lab in laboratories_filtered
+    )
+    print(f"frontend deploy hosts: {frontend_deploy_hosts}")
+
+    frontend_project = next(
+        (project for project in projects if project.name.lower() == "vigia_ng_app"),
+        None
+    )
+
+    update_frontend_variable(frontend_deploy_hosts, frontend_project, 'DEPLOY_HOSTS_WEBVIEWER')
+    update_frontend_variable(frontend_deploy_hosts, frontend_project, 'DEPLOY_HOSTS_WORKFLOW')
+    print("Frontend deploy hosts update completed.\n")
+
+
+def update_frontend_variable(frontend_deploy_hosts: str, frontend_project, variable_name: str):
+    try:
+        var = frontend_project.variables.get(variable_name)
+        var.value = frontend_deploy_hosts
+        var.save()
+        print(f"Updated {variable_name} for project {frontend_project.name}")
+    except gitlab.exceptions.GitlabGetError:
+        print(f"{variable_name} not found for project {frontend_project.name}, skipping.")
+
+
+def update_backend_projects(laboratories_filtered: list, projects: list, req: Request):
     backend_deploy_hosts = " ".join(lab["sshHost"] for lab in laboratories_filtered)
     print(f"backend deploy hosts: {backend_deploy_hosts}")
 
@@ -71,6 +94,7 @@ def update_backend_projects(laboratories_filtered, projects, req):
             print(f"Updated DEPLOY_HOSTS for project {project.name}")
         except gitlab.exceptions.GitlabGetError:
             print(f"DEPLOY_HOSTS not found for project {project.name}, skipping.")
+    print("Backend deploy hosts update completed.\n")
 
 
 def main():
