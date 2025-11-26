@@ -7,7 +7,7 @@ import workspace.vigiang.dao.OracleVigiaNgDAO;
 import workspace.vigiang.dao.PostgresVigiaNgDAO;
 import workspace.vigiang.dao.VigiaNgDAO;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
-import workspace.vigiang.model.Laboratory;
+import workspace.vigiang.model.LaboratoryVigiaNg;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static workspace.commons.service.EnvironmentService.validateLaboratories;
+import static workspace.commons.service.EnvironmentService.getLaboratories;
 
 public class EnvironmentService {
 
@@ -28,7 +28,7 @@ public class EnvironmentService {
     private static final String VIGIANG_DATABASES_PATH = COGNYTE_PATH_STR + "\\vigiang_dbs";
 
     public static List<String> getVersions() {
-        return List.of("1.5", "1.7", "2.1", "2.2");
+        return List.of("1.5", "1.7", "2.0", "2.1", "2.2");
     }
 
     public static List<DatabaseCredentialsVigiaNG> getVigiangDatabases() throws IOException {
@@ -48,24 +48,9 @@ public class EnvironmentService {
                 .collect(Collectors.toList());
     }
 
-    public static List<Laboratory> getVigiangLaboratories() throws IOException {
-        try (InputStream read = EnvironmentService.class.getResourceAsStream("/laboratories.json")) {
-            if (read == null) {
-                throw new IllegalStateException("Resource `/laboratories.json` not found on classpath");
-            }
-            return getLaboratories(read);
-        }
-    }
-
-    private static List<Laboratory> getLaboratories(InputStream read) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        List<Laboratory> laboratories = mapper.readValue(read, new TypeReference<>(){});
-
-        validateLaboratories(laboratories);
-
-        return laboratories.stream()
-                .filter(Laboratory::isActive)
-                .collect(Collectors.toList());
+    public static List<LaboratoryVigiaNg> getLaboratoriesVigiaNg() throws IOException {
+        Path inputPath = Paths.get(getVigiaNgPath() + "\\laboratories.json");
+        return getLaboratories(inputPath, LaboratoryVigiaNg.class);
     }
 
     public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {
@@ -98,14 +83,14 @@ public class EnvironmentService {
         return vigiangPath;
     }
 
-    public static Path getLaboratoryPath(Laboratory laboratory) throws IOException {
+    public static Path getLaboratoryPath(LaboratoryVigiaNg laboratoryVigiaNg) throws IOException {
         Path vigiaNgLaboratoriesPath = getVigiaNgLaboratoriesPath();
 
         Path laboratoryPath;
-        if (laboratory.getCarrier() == null) {
-            laboratoryPath = Paths.get(vigiaNgLaboratoriesPath + "\\" + laboratory.getName());
+        if (laboratoryVigiaNg.getCarrier() == null) {
+            laboratoryPath = Paths.get(vigiaNgLaboratoriesPath + "\\" + laboratoryVigiaNg.getName());
         } else {
-            laboratoryPath = Paths.get(vigiaNgLaboratoriesPath + "\\" + laboratory.getCarrier() + "\\" + laboratory.getName());
+            laboratoryPath = Paths.get(vigiaNgLaboratoriesPath + "\\" + laboratoryVigiaNg.getCarrier() + "\\" + laboratoryVigiaNg.getName());
         }
 
         if (!Files.exists(laboratoryPath)) {

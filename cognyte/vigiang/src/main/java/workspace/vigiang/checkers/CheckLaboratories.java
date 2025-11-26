@@ -3,7 +3,7 @@ package workspace.vigiang.checkers;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import workspace.commons.service.SshExecutor;
-import workspace.vigiang.model.Laboratory;
+import workspace.vigiang.model.LaboratoryVigiaNg;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -35,8 +35,8 @@ public class CheckLaboratories {
 
     private static void updateSh(Path laboratoriesPath) throws IOException {
         String result = "";
-        for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
-            String alias = getSshAliasFormat(laboratory);
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+            String alias = getSshAliasFormat(laboratoryVigiaNg);
             result += alias + "\n";
         }
 
@@ -58,16 +58,16 @@ public class CheckLaboratories {
     private static void updateMd(Path laboratoriesPath) throws IOException {
         String result = "# DEPLOY_HOSTS:\n";
         result += "```\n";
-        for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
-            result += laboratory.getSshHost() + " " + laboratory.getName() + "\n";
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+            result += laboratoryVigiaNg.getSshHost() + " " + laboratoryVigiaNg.getName() + "\n";
         }
         result += "```\n\n";
 
         result += "# vite deploy string:\n";
         result += "```\n";
         String oneline = "";
-        for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
-            oneline += laboratory.getSshHost() + "-" + laboratory.getAlias() + " ";
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+            oneline += laboratoryVigiaNg.getSshHost() + "-" + laboratoryVigiaNg.getAlias() + " ";
         }
         result += oneline.trim() + "\n";
         result += "```\n";
@@ -88,15 +88,15 @@ public class CheckLaboratories {
     }
 
     private static void updateLaboratoriesStateMd() throws Exception {
-        for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
             List<ResultMdItem> items = new ArrayList<>();
 
-            executeCommand("cat /etc/hosts", laboratory, items);
-            executeCommand("cat /etc/hostname", laboratory, items);
-            executeCommand("nproc", laboratory, items);
-            executeCommand("cat /etc/os-release", laboratory, items);
-            executeCommand("docker --version", laboratory, items);
-            executeCommand("cat /etc/docker/daemon.json", laboratory, items);
+            executeCommand("cat /etc/hosts", laboratoryVigiaNg, items);
+            executeCommand("cat /etc/hostname", laboratoryVigiaNg, items);
+            executeCommand("nproc", laboratoryVigiaNg, items);
+            executeCommand("cat /etc/os-release", laboratoryVigiaNg, items);
+            executeCommand("docker --version", laboratoryVigiaNg, items);
+            executeCommand("cat /etc/docker/daemon.json", laboratoryVigiaNg, items);
 
             items.sort(Comparator.comparing(ResultMdItem::getTitle));
 
@@ -111,8 +111,8 @@ public class CheckLaboratories {
             result = result.trim() + "\n";
 
             // TODO: this logic repeats many times - refactor it
-            Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratory);
-            Path resultPath = Paths.get(laboratoryPath + "\\laboratory.md");
+            Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratoryVigiaNg);
+            Path resultPath = Paths.get(laboratoryPath + "\\laboratoryVigiaNg.md");
 
             var initialFileContent = "";
             if (Files.exists(resultPath)) {
@@ -130,12 +130,12 @@ public class CheckLaboratories {
         }
     }
 
-    private static void executeCommand(String command, Laboratory laboratory, List<ResultMdItem> items) throws Exception {
+    private static void executeCommand(String command, LaboratoryVigiaNg laboratoryVigiaNg, List<ResultMdItem> items) throws Exception {
         String sshResponse = SshExecutor.execute(
-                laboratory.getSshUsername(),
-                laboratory.getSshPassword(),
-                laboratory.getSshHost(),
-                laboratory.getSshPort(),
+                laboratoryVigiaNg.getSshUsername(),
+                laboratoryVigiaNg.getSshPassword(),
+                laboratoryVigiaNg.getSshHost(),
+                laboratoryVigiaNg.getSshPort(),
                 command);
 
         var item = new ResultMdItem(command, sshResponse);
@@ -145,8 +145,8 @@ public class CheckLaboratories {
     private static void updateBashrc() throws IOException {
         List<String> aliasList = new ArrayList<>();
 
-        for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
-            String alias = getSshAliasFormat(laboratory);
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+            String alias = getSshAliasFormat(laboratoryVigiaNg);
             aliasList.add(alias);
         }
 
@@ -163,8 +163,8 @@ public class CheckLaboratories {
         }
     }
 
-    private static String getSshAliasFormat(Laboratory laboratory) {
-        return String.format("alias ssh%s='ssh %s@%s'", laboratory.getAlias(), laboratory.getSshUsername(), laboratory.getSshHost());
+    private static String getSshAliasFormat(LaboratoryVigiaNg laboratoryVigiaNg) {
+        return String.format("alias ssh%s='ssh %s@%s'", laboratoryVigiaNg.getAlias(), laboratoryVigiaNg.getSshUsername(), laboratoryVigiaNg.getSshHost());
     }
 
 }

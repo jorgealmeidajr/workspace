@@ -16,7 +16,7 @@ public class GitLabScriptDraft {
         var frontend = true;
 
         try {
-            var laboratories = EnvironmentService.getVigiangLaboratories().stream()
+            var laboratories = EnvironmentService.getLaboratoriesVigiaNg().stream()
                     .filter(lab -> {
                         for (var labName : laboratoriesList) {
                             if (lab.getName().equalsIgnoreCase(labName.trim())) {

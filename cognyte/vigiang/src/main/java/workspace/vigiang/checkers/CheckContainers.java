@@ -2,7 +2,7 @@ package workspace.vigiang.checkers;
 
 import workspace.commons.service.DockerComposeService;
 import workspace.commons.service.SshExecutor;
-import workspace.vigiang.model.Laboratory;
+import workspace.vigiang.model.LaboratoryVigiaNg;
 import workspace.vigiang.service.ContainersService;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -21,14 +21,14 @@ public class CheckContainers {
     public static void main(String[] args) {
         System.out.println("## START checking all containers\n");
         try {
-            for (Laboratory laboratory : EnvironmentService.getVigiangLaboratories()) {
-                System.out.println(laboratory.getName() + ":");
-                Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratory);
+            for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+                System.out.println(laboratoryVigiaNg.getName() + ":");
+                Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratoryVigiaNg);
 
-                updateContainersFile(laboratoryPath, laboratory);
-                updateDockerComposeFile(laboratoryPath, laboratory);
+                updateContainersFile(laboratoryPath, laboratoryVigiaNg);
+                updateDockerComposeFile(laboratoryPath, laboratoryVigiaNg);
                 updateEnvironmentFile(laboratoryPath);
-                updateFrontendScriptFiles(laboratoryPath, laboratory);
+                updateFrontendScriptFiles(laboratoryPath, laboratoryVigiaNg);
 
                 System.out.println();
             }
@@ -38,7 +38,7 @@ public class CheckContainers {
         System.out.println("\n## END checking all containers.");
     }
 
-    private static void updateDockerComposeFile(Path laboratoryPath, Laboratory laboratory) throws Exception {
+    private static void updateDockerComposeFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
         Path dockerComposePath = Paths.get(laboratoryPath + "\\docker-compose.yml");
 
         var initialFileContent = "";
@@ -47,10 +47,10 @@ public class CheckContainers {
         }
 
         var newFileContent = getDockerCompose(
-                laboratory.getSshUsername(),
-                laboratory.getSshPassword(),
-                laboratory.getSshHost(),
-                laboratory.getSshPort());
+                laboratoryVigiaNg.getSshUsername(),
+                laboratoryVigiaNg.getSshPassword(),
+                laboratoryVigiaNg.getSshHost(),
+                laboratoryVigiaNg.getSshPort());
 
         if (!initialFileContent.equals(newFileContent)) {
             System.out.println("updating file: " + dockerComposePath);
@@ -67,7 +67,7 @@ public class CheckContainers {
         Files.writeString(environmentPath, environmentContent, StandardCharsets.UTF_8);
     }
 
-    private static void updateContainersFile(Path laboratoryPath, Laboratory laboratory) throws Exception {
+    private static void updateContainersFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
         Path containersPath = Paths.get(laboratoryPath + "\\containers.txt");
 
         var initialFileContent = "";
@@ -76,10 +76,10 @@ public class CheckContainers {
         }
 
         var newFileContent = listContainers(
-                laboratory.getSshUsername(),
-                laboratory.getSshPassword(),
-                laboratory.getSshHost(),
-                laboratory.getSshPort());
+                laboratoryVigiaNg.getSshUsername(),
+                laboratoryVigiaNg.getSshPassword(),
+                laboratoryVigiaNg.getSshHost(),
+                laboratoryVigiaNg.getSshPort());
 
         if (!initialFileContent.equals(newFileContent)) {
             System.out.println("updating file: " + containersPath);
@@ -87,18 +87,18 @@ public class CheckContainers {
         }
     }
 
-    private static void updateFrontendScriptFiles(Path environmentPath, Laboratory laboratory) throws Exception {
-        updateScriptFile(environmentPath, laboratory, "webviewer_docker_run.sh");
-        updateScriptFile(environmentPath, laboratory, "workflow_docker_run.sh");
+    private static void updateFrontendScriptFiles(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
+        updateScriptFile(environmentPath, laboratoryVigiaNg, "webviewer_docker_run.sh");
+        updateScriptFile(environmentPath, laboratoryVigiaNg, "workflow_docker_run.sh");
     }
 
-    private static void updateScriptFile(Path environmentPath, Laboratory laboratory, String script) throws Exception {
+    private static void updateScriptFile(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg, String script) throws Exception {
         var command = "cat /opt/vigiang/scripts/" + script;
         String sshResponse = SshExecutor.execute(
-                laboratory.getSshUsername(),
-                laboratory.getSshPassword(),
-                laboratory.getSshHost(),
-                laboratory.getSshPort(),
+                laboratoryVigiaNg.getSshUsername(),
+                laboratoryVigiaNg.getSshPassword(),
+                laboratoryVigiaNg.getSshHost(),
+                laboratoryVigiaNg.getSshPort(),
                 command);
 
         Path inputPath = Paths.get(environmentPath + "\\" + script);
