@@ -3,6 +3,8 @@ import urllib3
 import os
 from dotenv import load_dotenv
 
+from environment import get_laboratories_vigia_ng
+
 
 def get_projects(gl):
     projects = gl.projects.list(owned=True, all=True)
@@ -32,7 +34,30 @@ def main():
 
     gl = connect_gitlab()
 
+    laboratories_to_update = "CLARO-01,ENTEL,MOVISTAR,TIM,VIVO".split(",")
+    backend_services_to_update = "system-service,zuul-server".split(",")
+
+    laboratories = get_laboratories_vigia_ng()
+
+    laboratories_filtered = [
+        lab for lab in laboratories
+        if lab["name"].lower() in [name.lower() for name in laboratories_to_update]
+    ]
+
+    backend_deploy_hosts = " ".join(lab["sshHost"] for lab in laboratories_filtered)
+    print(f"backend deploy hosts: {backend_deploy_hosts}")
+
+    frontend_deploy_hosts = " ".join(
+        f'{lab["sshHost"]}-{lab["alias"]}' for lab in laboratories_filtered
+    )
+    print(f"frontend deploy hosts: {frontend_deploy_hosts}")
+
     projects = get_projects(gl)
+
+    projects_filtered = [
+        project for project in projects
+        if project.name.lower() in [name.lower() for name in backend_services_to_update]
+    ]
 
     print("ending script1...")
 
