@@ -8,19 +8,22 @@ from typing import List
 from environment import get_laboratories_vigia_ng
 
 
-def get_projects(gl):
+def get_projects(gl: gitlab.Gitlab) -> list[gitlab.v4.objects.Project]:
     projects = gl.projects.list(owned=True, all=True)
     return sorted(projects, key=lambda p: p.name.lower())
 
-def get_branches(project, version):
+
+def get_branches(project: gitlab.v4.objects.Project, version: str) -> list:
     branches = project.branches.list(all=True)
     return [b for b in branches if version in b.name]
 
-def get_tags(project, version):
+
+def get_tags(project: gitlab.v4.objects.Project, version: str) -> list:
     tags = project.tags.list(all=True)
     return [t for t in tags if version in t.name]
 
-def connect_gitlab():
+
+def connect_gitlab() -> gitlab.Gitlab:
     private_token = os.getenv('GITLAB_PRIVATE_TOKEN')
     gitlab_url = os.getenv('GITLAB_URL')
     gl = gitlab.Gitlab(gitlab_url, private_token=private_token, ssl_verify=False)
@@ -35,7 +38,7 @@ class Request:
     frontend: bool
 
 
-def update_deploy_hosts(gl, req: Request):
+def update_deploy_hosts(gl: gitlab.Gitlab, req: Request) -> None:
     projects = get_projects(gl)
 
     laboratories = get_laboratories_vigia_ng()
@@ -51,7 +54,7 @@ def update_deploy_hosts(gl, req: Request):
         update_frontend_projects(laboratories_filtered, projects)
 
 
-def update_frontend_projects(laboratories_filtered: list, projects: list):
+def update_frontend_projects(laboratories_filtered: list, projects: list) -> None:
     frontend_deploy_hosts = " ".join(
         f'{lab["sshHost"]}-{lab["alias"]}' for lab in laboratories_filtered
     )
@@ -67,7 +70,7 @@ def update_frontend_projects(laboratories_filtered: list, projects: list):
     print("Frontend deploy hosts update completed.\n")
 
 
-def update_frontend_variable(frontend_deploy_hosts: str, frontend_project, variable_name: str):
+def update_frontend_variable(frontend_deploy_hosts: str, frontend_project, variable_name: str) -> None:
     try:
         var = frontend_project.variables.get(variable_name)
         var.value = frontend_deploy_hosts
@@ -77,7 +80,7 @@ def update_frontend_variable(frontend_deploy_hosts: str, frontend_project, varia
         print(f"{variable_name} not found for project {frontend_project.name}, skipping.")
 
 
-def update_backend_projects(laboratories_filtered: list, projects: list, req: Request):
+def update_backend_projects(laboratories_filtered: list, projects: list, req: Request) -> None:
     backend_deploy_hosts = " ".join(lab["sshHost"] for lab in laboratories_filtered)
     print(f"backend deploy hosts: {backend_deploy_hosts}")
 
@@ -97,7 +100,7 @@ def update_backend_projects(laboratories_filtered: list, projects: list, req: Re
     print("Backend deploy hosts update completed.\n")
 
 
-def main():
+def main() -> None:
     print("starting script1: update deploy hosts.")
 
     req = Request(
