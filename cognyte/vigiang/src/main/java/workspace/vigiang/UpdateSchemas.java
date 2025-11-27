@@ -73,6 +73,7 @@ public class UpdateSchemas {
             Path databaseSchemaPath = EnvironmentService.getDatabaseSchemaPath(databaseCredentialsVigiaNG);
             System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 
+            // TODO: write a simple txt with list names of all objects instead of full definitions
 //            updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
             updateLocalSchemaFiles(databaseSchemaPath, "views", result.getViews());
 //            updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());

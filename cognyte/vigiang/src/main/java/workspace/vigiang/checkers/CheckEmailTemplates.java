@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static workspace.commons.service.FileService.writeString;
+
 public class CheckEmailTemplates {
 
     public static void main(String[] args) {
@@ -61,11 +63,12 @@ public class CheckEmailTemplates {
 
     private static void updateEmailTemplates(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<EmailTemplate> emailTemplates) {
         for (EmailTemplate emailTemplate : emailTemplates) {
-            var newFileContent = emailTemplate.getBody();
+            var result = emailTemplate.getBody();
             String emailTemplateId = emailTemplate.getId();
             int carrierIdInt = Integer.parseInt(emailTemplate.getCarrierId());
             String carrierId = String.format("%02d", carrierIdInt);
-            Path finalFilePath = null;
+
+            Path outputPath = null;
 
             try {
                 Path emailTemplatesPath = EnvironmentService.getEmailTemplatesPath(databaseCredentialsVigiaNG);
@@ -75,18 +78,11 @@ public class CheckEmailTemplates {
                     Files.createDirectories(emailCarrierPath);
                 }
 
-                finalFilePath = Paths.get(emailCarrierPath + "\\" + emailTemplateId + ".html");
-                var initialFileContent = "";
-                if (Files.exists(finalFilePath)) {
-                    initialFileContent = new String(Files.readAllBytes(finalFilePath));
-                }
+                outputPath = Paths.get(emailCarrierPath + "\\" + emailTemplateId + ".html");
 
-                if (!initialFileContent.equals(newFileContent)) {
-                    System.out.println("updating file: " + finalFilePath);
-                    Files.writeString(finalFilePath, newFileContent, StandardCharsets.UTF_8);
-                }
+                writeString(outputPath, result);
             } catch (Exception e) {
-                System.err.println("fail on file: " + finalFilePath);
+                System.err.println("fail on file: " + outputPath);
                 e.printStackTrace();
             }
         }

@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static workspace.commons.service.FileService.writeString;
+
 public class CheckContainers {
 
     public static void main(String[] args) {
@@ -39,23 +41,15 @@ public class CheckContainers {
     }
 
     private static void updateDockerComposeFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
-        Path dockerComposePath = Paths.get(laboratoryPath + "\\docker-compose.yml");
+        Path outputPath = Paths.get(laboratoryPath + "\\docker-compose.yml");
 
-        var initialFileContent = "";
-        if (Files.exists(dockerComposePath)) {
-            initialFileContent = new String(Files.readAllBytes(dockerComposePath));
-        }
-
-        var newFileContent = getDockerCompose(
+        var result = getDockerCompose(
                 laboratoryVigiaNg.getSshUsername(),
                 laboratoryVigiaNg.getSshPassword(),
                 laboratoryVigiaNg.getSshHost(),
                 laboratoryVigiaNg.getSshPort());
 
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + dockerComposePath);
-            Files.writeString(dockerComposePath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static void updateEnvironmentFile(Path laboratoryPath) throws IOException {
@@ -68,23 +62,15 @@ public class CheckContainers {
     }
 
     private static void updateContainersFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
-        Path containersPath = Paths.get(laboratoryPath + "\\containers.txt");
+        Path outputPath = Paths.get(laboratoryPath + "\\containers.txt");
 
-        var initialFileContent = "";
-        if (Files.exists(containersPath)) {
-            initialFileContent = new String(Files.readAllBytes(containersPath));
-        }
-
-        var newFileContent = listContainers(
+        var result = listContainers(
                 laboratoryVigiaNg.getSshUsername(),
                 laboratoryVigiaNg.getSshPassword(),
                 laboratoryVigiaNg.getSshHost(),
                 laboratoryVigiaNg.getSshPort());
 
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + containersPath);
-            Files.writeString(containersPath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static void updateFrontendScriptFiles(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
@@ -101,18 +87,11 @@ public class CheckContainers {
                 laboratoryVigiaNg.getSshPort(),
                 command);
 
-        Path inputPath = Paths.get(environmentPath + "\\" + script);
-        String newFileContent = sshResponse.trim();
+        Path outputPath = Paths.get(environmentPath + "\\" + script);
 
-        var initialFileContent = "";
-        if (Files.exists(inputPath)) {
-            initialFileContent = new String(Files.readAllBytes(inputPath));
-        }
+        String result = sshResponse.trim();
 
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + inputPath);
-            Files.writeString(inputPath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static String listContainers(String username, String password, String host, int port) throws Exception {

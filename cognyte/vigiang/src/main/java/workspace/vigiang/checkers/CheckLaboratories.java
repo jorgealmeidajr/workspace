@@ -41,19 +41,9 @@ public class CheckLaboratories {
             result += alias + "\n";
         }
 
-        Path laboratoriesShPath = Paths.get(laboratoriesPath + "\\laboratories.sh");
+        Path outputPath = Paths.get(laboratoriesPath + "\\laboratories.sh");
 
-        var initialFileContent = "";
-        if (Files.exists(laboratoriesShPath)) {
-            initialFileContent = new String(Files.readAllBytes(laboratoriesShPath));
-        }
-
-        var newFileContent = result;
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + laboratoriesShPath);
-            Files.writeString(laboratoriesShPath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static void updateMd(Path laboratoriesPath) throws IOException {
@@ -73,19 +63,9 @@ public class CheckLaboratories {
         result += oneline.trim() + "\n";
         result += "```\n";
 
-        Path laboratoriesShPath = Paths.get(laboratoriesPath + "\\laboratories.md");
+        Path outputPath = Paths.get(laboratoriesPath + "\\laboratories.md");
 
-        var initialFileContent = "";
-        if (Files.exists(laboratoriesShPath)) {
-            initialFileContent = new String(Files.readAllBytes(laboratoriesShPath));
-        }
-
-        var newFileContent = result;
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + laboratoriesShPath);
-            Files.writeString(laboratoriesShPath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static void updateLaboratoriesStateMd() throws Exception {

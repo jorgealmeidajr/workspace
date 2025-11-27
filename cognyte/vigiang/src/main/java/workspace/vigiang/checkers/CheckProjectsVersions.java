@@ -7,14 +7,15 @@ import workspace.vigiang.service.GitLabService;
 
 import java.awt.*;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import static workspace.commons.service.FileService.writeString;
+
 public class CheckProjectsVersions {
 
+    // TODO: replace Playwright with GitLab API calls in python script
     public static void main(String[] args) {
         System.out.println("## START checking all projects versions\n");
         try (Playwright playwright = Playwright.create()) {
@@ -45,19 +46,11 @@ public class CheckProjectsVersions {
 
     private static void updateContainersFile(Page page) throws IOException {
         Path vigiangPath = EnvironmentService.getVigiaNgPath();
-        Path containersPath = Paths.get(vigiangPath + "\\containers.txt");
+        Path outputPath = Paths.get(vigiangPath + "\\containers.txt");
 
-        var initialFileContent = "";
-        if (Files.exists(containersPath)) {
-            initialFileContent = new String(Files.readAllBytes(containersPath));
-        }
+        var result = checkBackEndTags(page);
 
-        var newFileContent = checkBackEndTags(page);
-
-        if (!initialFileContent.equals(newFileContent)) {
-            System.out.println("updating file: " + containersPath);
-            Files.writeString(containersPath, newFileContent, StandardCharsets.UTF_8);
-        }
+        writeString(outputPath, result);
     }
 
     private static String checkBackEndTags(Page page) {
