@@ -1,5 +1,8 @@
 package workspace.commons.service;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
 import workspace.commons.model.SchemaResult;
@@ -12,23 +15,39 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import static workspace.commons.service.FileService.writeString;
 
 public class UpdateSchemasService {
 
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class Request {
+        final boolean updateTxt;
+        final boolean updateSql;
+
+        final boolean updateTables;
+        final boolean updateViews;
+        final boolean updateIndexes;
+        final boolean updateFunctions;
+        final boolean updateProcedures;
+        final boolean updatePackageBodies;
+    }
+
     public static void execute(
             List<? extends DatabaseCredentials> databasesCredentials,
-            Function<DatabaseCredentials, Callable<SchemaResult>> getCallableTask,
-            Consumer<SchemaResult> handleResult)
+            Request request,
+            BiFunction<DatabaseCredentials, Request, Callable<SchemaResult>> getCallableTask,
+            BiConsumer<SchemaResult, Request> handleResult)
             throws ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(databasesCredentials.size());
         List<Callable<SchemaResult>> callableTasks = new ArrayList<>();
 
         for (DatabaseCredentials databaseCredentials : databasesCredentials) {
-            Callable<SchemaResult> callableTask = getCallableTask.apply(databaseCredentials);
+            Callable<SchemaResult> callableTask = getCallableTask.apply(databaseCredentials, request);
             callableTasks.add(callableTask);
         }
 
@@ -36,7 +55,7 @@ public class UpdateSchemasService {
             List<Future<SchemaResult>> futures = executorService.invokeAll(callableTasks);
             for (Future<SchemaResult> future : futures) {
                 SchemaResult result = future.get();
-                handleResult.accept(result);
+                handleResult.accept(result, request);
             }
 
             if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
@@ -51,21 +70,24 @@ public class UpdateSchemasService {
         }
     }
 
-    // TODO: write a simple txt with list names of all objects instead of full definitions
-    public static void update(SchemaResult result, Path databaseSchemaPath) throws IOException {
-//        updateLocalSchemaFiles(databaseSchemaPath, "tables", result.getTables());
+    public static void update(SchemaResult result, Path databaseSchemaPath, Request request) throws IOException {
+        if (request.isUpdateTxt()) {
+            updateSchemaTxt(databaseSchemaPath, "tables", result.getTables());
+            updateSchemaTxt(databaseSchemaPath, "views", result.getViews());
+            updateSchemaTxt(databaseSchemaPath, "indexes", result.getIndexes());
+            updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctions());
+            updateSchemaTxt(databaseSchemaPath, "procedures", result.getProcedures());
+            updateSchemaTxt(databaseSchemaPath, "packageBodies", result.getPackageBodies());
+        }
 
-        updateSchemaSql(databaseSchemaPath, "views", result.getViews());
-        updateSchemaTxt(databaseSchemaPath, "views", result.getViews());
-
-//        updateLocalSchemaFiles(databaseSchemaPath, "indexes", result.getIndexes());
-
-        updateSchemaSql(databaseSchemaPath, "functions", result.getFunctions());
-        updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctions());
-
-        updateSchemaSql(databaseSchemaPath, "procedures", result.getProcedures());
-
-        updateSchemaSql(databaseSchemaPath, "packageBodies", result.getPackageBodies());
+        if (request.isUpdateSql()) {
+//            updateSchemaSql(databaseSchemaPath, "tables", result.getTables());
+            updateSchemaSql(databaseSchemaPath, "views", result.getViews());
+//            updateSchemaSql(databaseSchemaPath, "indexes", result.getIndexes());
+            updateSchemaSql(databaseSchemaPath, "functions", result.getFunctions());
+            updateSchemaSql(databaseSchemaPath, "procedures", result.getProcedures());
+            updateSchemaSql(databaseSchemaPath, "packageBodies", result.getPackageBodies());
+        }
     }
 
     static void updateSchemaSql(Path path, String fileName, List<DbObjectDefinition> data) throws IOException {
