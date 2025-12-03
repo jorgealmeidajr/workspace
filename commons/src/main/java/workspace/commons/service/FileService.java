@@ -167,8 +167,7 @@ public class FileService {
 
     public static void writeString(Path outputPath, String result) throws IOException {
         if (!Files.exists(outputPath) && result.isEmpty()) {
-            System.out.println("ignoring file: " + outputPath);
-            return;
+            return; // ignoring file
         }
 
         var initialFileContent = "";

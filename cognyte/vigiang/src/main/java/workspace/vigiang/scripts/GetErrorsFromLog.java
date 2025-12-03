@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class GetErrorsFromLog {
 
     public static void main(String[] args) throws Exception {
+        // TODO: refactor these parameters
         var logDateStr = "2025-07-05";
         var logPathStr = "C:\\Users\\jjunior\\Downloads\\tim1";
 
@@ -38,6 +39,7 @@ public class GetErrorsFromLog {
     }
 
     private static List<String> getErrorsToIgnore() {
+        // TODO: group these error codes
         return List.of(
                 "LOGIN_INVALID",
                 "INVALID_USER_PASSWORD",
@@ -50,6 +52,7 @@ public class GetErrorsFromLog {
                 "USER_LOCKED",
                 "CAPTCHA_CHECK",
                 "USER_FORGOT_PASSWORD_NOT_FOUND",
+                "CONCURRENCY_LOGIN",
 
                 "listReceivedNotIncludedInterceptions;",
                 "listReceivedInterceptionsWithErrorByDay;",
@@ -59,7 +62,10 @@ public class GetErrorsFromLog {
                 "org.apache.catalina.valves.ErrorReportValve.invoke",
                 "DefaultSecurityFilterChain;Creating filter chain: any request",
                 "SecurityCredentialsConfig;Error while logout",
-                "JwtUsernameAndPasswordAuthenticationFilter;Delegating to authentication failure handler"
+                "JwtUsernameAndPasswordAuthenticationFilter;Delegating to authentication failure handler",
+                "JwtTokenAuthenticationFilter;Error authenticating, invalid token.",
+                "TOTPAuthController;TOTP verification failed",
+                "ErrorFilter;Zuul failure detected: Filter threw Exception"
         );
     }
 

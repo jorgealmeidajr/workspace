@@ -18,12 +18,10 @@ import static workspace.commons.model.DatabaseCredentials.getConnection;
 
 public class OracleSchemaDAO implements DbSchemaDAO {
 
-    static final int ROWS = 10;
-
     @Override
     public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         // TODO: oracle, create tables statements must be simplify
-        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", filter, ROWS);
+        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "TABLE");
     }
 
@@ -42,7 +40,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     @Override
     public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         // TODO: the sql should be simplified
-        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", filter, ROWS);
+        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "INDEX");
     }
 
