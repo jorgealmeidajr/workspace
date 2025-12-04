@@ -61,7 +61,7 @@ public class ContainersService {
         List<String> projectsToIgnore = List.of(
                 "kafka", "mock-smtp", "zookeeper", "admin-server", "objective_moser", "cadvisor", "docker_state_exporter",
                 "node_exporter", "process_exporter", "quirky_shaw", "brave_wright", "schema-registry", "determined_rhodes",
-                "mailhog", "redis"
+                "mailhog", "redis", "boring_bartik"
         );
 
         for (String[] row : data) {

@@ -22,16 +22,14 @@ public class UpdateSchemas {
         try {
             List<DatabaseCredentialsVigiaNG> databasesCredentials = EnvironmentService.getVigiangDatabases();
 
-            boolean update = true;
+            boolean update = false;
             Request request = Request.builder()
-                    .updateTxt(true)
-                    .updateSql(true)
-                    .updateTables(update)
-                    .updateViews(update)
-                    .updateIndexes(update)
-                    .updateFunctions(update)
-                    .updateProcedures(update)
-                    .updatePackageBodies(update)
+                    .updateTablesDefinitions(false) // TODO
+                    .updateViewsDefinitions(update)
+                    .updateIndexesDefinitions(false) // TODO
+                    .updateFunctionsDefinitions(update)
+                    .updateProceduresDefinitions(update)
+                    .updatePackageBodiesDefinitions(update)
                     .build();
 
             execute(databasesCredentials, request, UpdateSchemas::getCallableTask, UpdateSchemas::handleResult);
@@ -60,8 +58,10 @@ public class UpdateSchemas {
         return () -> {
             DbSchemaDAO dao = workspace.commons.service.EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
+            var tablesNames = dao.listTablesNames(databaseCredentials);
+
             List<DbObjectDefinition> tables = List.of();
-            if (request.isUpdateTables()) {
+            if (request.isUpdateTablesDefinitions()) {
                 String filter = null;
                 if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                     filter = "and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')";
@@ -71,8 +71,10 @@ public class UpdateSchemas {
                 tables = dao.listTables(databaseCredentials, filter);
             }
 
+            var viewsNames = dao.listViewsNames(databaseCredentials);
+
             List<DbObjectDefinition> views = List.of();
-            if (request.isUpdateViews()) {
+            if (request.isUpdateViewsDefinitions()) {
                 String filter = null;
                 if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                     filter = "and ao.object_name like 'VW_NG_%'";
@@ -82,8 +84,10 @@ public class UpdateSchemas {
                 views = dao.listViews(databaseCredentials, filter);
             }
 
+            var functionsNames = dao.listFunctionsNames(databaseCredentials);
+
             List<DbObjectDefinition> functions = List.of();
-            if (request.isUpdateFunctions()) {
+            if (request.isUpdateFunctionsDefinitions()) {
                 String filter = null;
                 if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                     filter = "and ao.object_name like 'FN_NG_%'";
@@ -93,8 +97,10 @@ public class UpdateSchemas {
                 functions = dao.listFunctions(databaseCredentials, filter);
             }
 
+            var indexesNames = dao.listIndexesNames(databaseCredentials);
+
             List<DbObjectDefinition> indexes = List.of();
-            if (request.isUpdateIndexes()) {
+            if (request.isUpdateIndexesDefinitions()) {
                 String filter = null;
                 if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                     filter = "and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')";
@@ -104,8 +110,10 @@ public class UpdateSchemas {
                 indexes = dao.listIndexes(databaseCredentials, filter);
             }
 
+            var proceduresNames = dao.listProceduresNames(databaseCredentials);
+
             List<DbObjectDefinition> procedures = List.of();
-            if (request.isUpdateProcedures()) {
+            if (request.isUpdateProceduresDefinitions()) {
                 String filter = null;
                 if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                     filter = "  and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
@@ -113,8 +121,10 @@ public class UpdateSchemas {
                 procedures = dao.listProcedures(databaseCredentials, filter);
             }
 
+            var packageBodiesNames = dao.listPackageBodiesNames(databaseCredentials);
+
             List<DbObjectDefinition> packageBodies = List.of();
-            if (request.isUpdatePackageBodies()) {
+            if (request.isUpdatePackageBodiesDefinitions()) {
                 String filter = null;
                 if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                     filter = "and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')";
@@ -122,7 +132,21 @@ public class UpdateSchemas {
                 packageBodies = dao.listPackageBodies(databaseCredentials, filter);
             }
 
-            return new SchemaResult(databaseCredentials, tables, views, functions, indexes, procedures, packageBodies);
+            return SchemaResult.builder()
+                    .databaseCredentials(databaseCredentials)
+                    .tablesNames(tablesNames)
+                    .tables(tables)
+                    .viewsNames(viewsNames)
+                    .views(views)
+                    .functionsNames(functionsNames)
+                    .functions(functions)
+                    .indexesNames(indexesNames)
+                    .indexes(indexes)
+                    .proceduresNames(proceduresNames)
+                    .procedures(procedures)
+                    .packageBodiesNames(packageBodiesNames)
+                    .packageBodies(packageBodies)
+                    .build();
         };
     }
 

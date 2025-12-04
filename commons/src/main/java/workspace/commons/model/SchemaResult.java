@@ -1,20 +1,28 @@
 package workspace.commons.model;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
 
-@AllArgsConstructor
 @Getter
+@Builder
 public class SchemaResult {
 
-    private final DatabaseCredentials databaseCredentials;
-    private final List<DbObjectDefinition> tables;
-    private final List<DbObjectDefinition> views;
-    private final List<DbObjectDefinition> functions;
-    private final List<DbObjectDefinition> indexes;
-    private final List<DbObjectDefinition> procedures;
-    private final List<DbObjectDefinition> packageBodies;
-    
+    private DatabaseCredentials databaseCredentials;
+
+    private List<String> tablesNames;
+    private List<String> viewsNames;
+    private List<String> functionsNames;
+    private List<String> indexesNames;
+    private List<String> proceduresNames;
+    private List<String> packageBodiesNames;
+
+    private List<DbObjectDefinition> tables;
+    private List<DbObjectDefinition> views;
+    private List<DbObjectDefinition> functions;
+    private List<DbObjectDefinition> indexes;
+    private List<DbObjectDefinition> procedures;
+    private List<DbObjectDefinition> packageBodies;
+
 }

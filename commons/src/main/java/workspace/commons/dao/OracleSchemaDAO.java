@@ -2,14 +2,12 @@ package workspace.commons.dao;
 
 import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
-import workspace.commons.model.SchemaResult;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
@@ -19,10 +17,20 @@ import static workspace.commons.model.DatabaseCredentials.getConnection;
 public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
+    public List<String> listTablesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return listOracleObjects(databaseCredentials, "TABLE", null, null);
+    }
+
+    @Override
     public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         // TODO: oracle, create tables statements must be simplify
         List<String> objects = listOracleObjects(databaseCredentials, "TABLE", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "TABLE");
+    }
+
+    @Override
+    public List<String> listViewsNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return listOracleObjects(databaseCredentials, "VIEW", null, null);
     }
 
     @Override
@@ -32,9 +40,19 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
+    public List<String> listFunctionsNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return listOracleObjects(databaseCredentials, "FUNCTION", null, null);
+    }
+
+    @Override
     public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", filter, null);
         return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
+    }
+
+    @Override
+    public List<String> listIndexesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return listOracleObjects(databaseCredentials, "INDEX", null, null);
     }
 
     @Override
@@ -45,8 +63,18 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
+    public List<String> listProceduresNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return List.of();
+    }
+
+    @Override
     public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         return List.of();
+    }
+
+    @Override
+    public List<String> listPackageBodiesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return listOracleObjects(databaseCredentials, "PACKAGE BODY", null, null);
     }
 
     @Override

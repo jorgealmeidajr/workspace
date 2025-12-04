@@ -3,6 +3,7 @@ package workspace.commons.service;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import workspace.commons.model.Database;
 import workspace.commons.model.DatabaseCredentials;
 import workspace.commons.model.DbObjectDefinition;
 import workspace.commons.model.SchemaResult;
@@ -26,15 +27,12 @@ public class UpdateSchemasService {
     @Getter
     @Builder
     public static class Request {
-        final boolean updateTxt;
-        final boolean updateSql;
-
-        final boolean updateTables;
-        final boolean updateViews;
-        final boolean updateIndexes;
-        final boolean updateFunctions;
-        final boolean updateProcedures;
-        final boolean updatePackageBodies;
+        final boolean updateTablesDefinitions;
+        final boolean updateViewsDefinitions;
+        final boolean updateIndexesDefinitions;
+        final boolean updateFunctionsDefinitions;
+        final boolean updateProceduresDefinitions;
+        final boolean updatePackageBodiesDefinitions;
     }
 
     public static void execute(
@@ -71,21 +69,31 @@ public class UpdateSchemasService {
     }
 
     public static void update(SchemaResult result, Path databaseSchemaPath, Request request) throws IOException {
-        if (request.isUpdateTxt()) {
-            updateSchemaTxt(databaseSchemaPath, "tables", result.getTables());
-            updateSchemaTxt(databaseSchemaPath, "views", result.getViews());
-            updateSchemaTxt(databaseSchemaPath, "indexes", result.getIndexes());
-            updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctions());
-            updateSchemaTxt(databaseSchemaPath, "procedures", result.getProcedures());
-            updateSchemaTxt(databaseSchemaPath, "packageBodies", result.getPackageBodies());
-        }
+        Database database = result.getDatabaseCredentials().getDatabase();
 
-        if (request.isUpdateSql()) {
-//            updateSchemaSql(databaseSchemaPath, "tables", result.getTables());
+        updateSchemaTxt(databaseSchemaPath, "tables", result.getTablesNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "views", result.getViewsNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "indexes", result.getIndexesNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctionsNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "procedures", result.getProceduresNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "packageBodies", result.getPackageBodiesNames(), database);
+
+        if (request.isUpdateTablesDefinitions()) {
+            updateSchemaSql(databaseSchemaPath, "tables", result.getTables());
+        }
+        if (request.isUpdateViewsDefinitions()) {
             updateSchemaSql(databaseSchemaPath, "views", result.getViews());
-//            updateSchemaSql(databaseSchemaPath, "indexes", result.getIndexes());
+        }
+        if (request.isUpdateIndexesDefinitions()) {
+            updateSchemaSql(databaseSchemaPath, "indexes", result.getIndexes());
+        }
+        if (request.isUpdateFunctionsDefinitions()) {
             updateSchemaSql(databaseSchemaPath, "functions", result.getFunctions());
+        }
+        if (request.isUpdateProceduresDefinitions()) {
             updateSchemaSql(databaseSchemaPath, "procedures", result.getProcedures());
+        }
+        if (request.isUpdatePackageBodiesDefinitions()) {
             updateSchemaSql(databaseSchemaPath, "packageBodies", result.getPackageBodies());
         }
     }
@@ -110,18 +118,21 @@ public class UpdateSchemasService {
         writeString(outputPath, result);
     }
 
-    static void updateSchemaTxt(Path path, String fileName, List<DbObjectDefinition> data) throws IOException {
+    static void updateSchemaTxt(Path path, String fileName, List<String> names, Database database) throws IOException {
         if (!Files.exists(path)) {
             throw new IOException("Path does not exist: " + path);
         }
 
-        if (data.isEmpty()) {
+        if (names.isEmpty()) {
             return;
         }
 
         var finalLines = new ArrayList<String>();
-        for (DbObjectDefinition row : data) {
-            String name = getValueAfterDot(row.getName());
+        for (String name : names) {
+            if (Database.ORACLE.equals(database)) {
+                name = getValueAfterDot(name);
+            }
+
             finalLines.add(name);
         }
         Collections.sort(finalLines);

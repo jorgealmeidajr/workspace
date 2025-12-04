@@ -15,6 +15,30 @@ import static workspace.commons.model.DatabaseCredentials.getConnection;
 public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
+    public List<String> listTablesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        String sql =
+            "select table_schema, table_name \n" +
+            "from information_schema.tables \n" +
+            "where table_type in ('BASE TABLE') \n" +
+            "order by table_schema, table_name";
+
+        System.out.println("Executing POSTGRES sql:\n" + sql + "\n");
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var tableSchema = rs.getString("table_schema");
+                var tableName = rs.getString("table_name");
+                var name = tableSchema + "." + tableName;
+                result.add(name);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         // TODO: postgres, create tables statements should be in create sql format
         String sql =
@@ -34,6 +58,27 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
                 var name = tableSchema + "." + tableName;
                 var definition = getTableDefinition(conn, tableSchema, tableName);
                 result.add(new DbObjectDefinition(name, definition));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> listViewsNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        String sql =
+            "select table_schema, table_name \n" +
+            "from information_schema.views \n" +
+            "order by table_schema, table_name";
+
+        System.out.println("Executing POSTGRES sql:\n" + sql + "\n");
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var name = rs.getString("table_schema") + "." + rs.getString("table_name");
+                result.add(name);
             }
         }
         return result;
@@ -93,6 +138,26 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
+    public List<String> listFunctionsNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        String sql =
+            "select routine_schema, routine_name \n" +
+            "from information_schema.routines \n" +
+            "where routine_type = 'FUNCTION' \n" +
+            "order by routine_schema, routine_name";
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var name = rs.getString("routine_schema") + "." + rs.getString("routine_name");
+                result.add(name);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         filter = (filter != null) ? "  " + filter + "\n" : "";
 
@@ -110,6 +175,25 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             while(rs.next()) {
                 var name = rs.getString("routine_schema") + "." + rs.getString("routine_name");
                 result.add(new DbObjectDefinition(name, rs.getString("routine_definition")));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> listIndexesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        String sql =
+            "select schemaname, tablename, indexname \n" +
+            "from pg_indexes \n" +
+            "order by schemaname, tablename, indexname";
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var name = rs.getString("schemaname") + "." + rs.getString("tablename") + " " + rs.getString("indexname");
+                result.add(name);
             }
         }
         return result;
@@ -136,6 +220,26 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
+    public List<String> listProceduresNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        String sql =
+            "select routine_schema as schema_name, routine_name as procedure_name \n" +
+            "from information_schema.routines \n" +
+            "where routine_type = 'PROCEDURE' \n" +
+            "order by schema_name, procedure_name";
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var name = rs.getString("schema_name") + "." + rs.getString("procedure_name");
+                result.add(name);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
         String sql =
             "select routine_schema as schema_name, routine_name as procedure_name, routine_definition\n" +
@@ -154,6 +258,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<String> listPackageBodiesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+        return List.of();
     }
 
     @Override
