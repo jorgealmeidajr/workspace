@@ -49,9 +49,8 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(String filter) throws SQLException {
-        List<String> objects = listOracleObjects("FUNCTION", filter);
-        return listObjectDefinitions(objects, "FUNCTION");
+    public List<DbObjectDefinition> listFunctionsDefinitions(List<String> names) throws SQLException {
+        return listObjectDefinitions(names, "FUNCTION");
     }
 
     @Override
@@ -60,10 +59,9 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(String filter) throws SQLException {
+    public List<DbObjectDefinition> listIndexesDefinitions(List<String> names) throws SQLException {
         // TODO: the sql should be simplified
-        List<String> objects = listOracleObjects("INDEX", filter);
-        return listObjectDefinitions(objects, "INDEX");
+        return listObjectDefinitions(names, "INDEX");
     }
 
     @Override

@@ -32,6 +32,7 @@ public class UpdateSchemas {
 
     private static Request getRequest() {
         final var postgresSchemas = List.of("api", "conf", "dash", "evt", "gen", "itc", "log", "ofc", "prog", "public", "sec", "sync");
+        final var oraclePrefixes = List.of("ITC", "CFG", "LOG", "SIT", "SEG", "OFC", "PTB", "QDS", "LOC");
 
         boolean update = false;
 
@@ -46,8 +47,7 @@ public class UpdateSchemas {
                     if (Database.ORACLE.equals(database)) {
                         name = getValueAfterDot(name);
                         String prefix = name.contains("_") ? name.substring(0, name.indexOf("_")) : name;
-                        var prefixes = List.of("ITC", "CFG", "LOG", "SIT", "SEG", "OFC", "PTB", "QDS", "LOC");
-                        return prefixes.contains(prefix);
+                        return oraclePrefixes.contains(prefix);
                     } else if (Database.POSTGRES.equals(database)) {
                         if (!name.contains(".")) return false;
                         String schema = name.contains(".") ? name.substring(0, name.indexOf(".")) : name;
@@ -59,6 +59,29 @@ public class UpdateSchemas {
                     if (Database.ORACLE.equals(database)) {
                         name = getValueAfterDot(name);
                         return name.startsWith("VW_NG_");
+                    } else if (Database.POSTGRES.equals(database)) {
+                        if (!name.contains(".")) return false;
+                        String schema = name.substring(0, name.indexOf("."));
+                        return postgresSchemas.contains(schema);
+                    }
+                    return false;
+                })
+                .functionsFilter((String name, Database database) -> {
+                    if (Database.ORACLE.equals(database)) {
+                        name = getValueAfterDot(name);
+                        return name.startsWith("FN_NG_");
+                    } else if (Database.POSTGRES.equals(database)) {
+                        if (!name.contains(".")) return false;
+                        String schema = name.substring(0, name.indexOf("."));
+                        return postgresSchemas.contains(schema);
+                    }
+                    return false;
+                })
+                .indexesFilter((String name, Database database) -> {
+                    if (Database.ORACLE.equals(database)) {
+                        name = getValueAfterDot(name);
+                        String prefix = name.contains("_") ? name.substring(0, name.indexOf("_")) : name;
+                        return oraclePrefixes.contains(prefix);
                     } else if (Database.POSTGRES.equals(database)) {
                         if (!name.contains(".")) return false;
                         String schema = name.substring(0, name.indexOf("."));
@@ -84,6 +107,7 @@ public class UpdateSchemas {
         System.out.println();
     }
 
+    // TODO: move to commons
     private static Callable<SchemaResult> getCallableTask(DatabaseCredentials databaseCredentials, Request request) {
         return () -> {
             DbSchemaDAO dao = workspace.commons.service.EnvironmentService.getDbSchemaDAO(databaseCredentials);
@@ -114,26 +138,22 @@ public class UpdateSchemas {
 
             List<DbObjectDefinition> functions = List.of();
             if (request.isUpdateFunctionsDefinitions()) {
-                String filter = null;
-                if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
-                    filter = "and ao.object_name like 'FN_NG_%'";
-                } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
-                    filter = "and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
-                }
-                functions = dao.listFunctions(filter);
+                var functionsNamesFiltered = functionsNames.stream()
+                        .filter(name -> request.getFunctionsFilter().test(name, databaseCredentials.getDatabase()))
+                        .collect(Collectors.toList());
+
+                functions = dao.listFunctionsDefinitions(functionsNamesFiltered);
             }
 
             var indexesNames = dao.listIndexesNames();
 
             List<DbObjectDefinition> indexes = List.of();
             if (request.isUpdateIndexesDefinitions()) {
-                String filter = null;
-                if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
-                    filter = "and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')";
-                } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
-                    filter = "where schemaname in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
-                }
-                indexes = dao.listIndexes(filter);
+                var indexesNamesFiltered = indexesNames.stream()
+                        .filter(name -> request.getIndexesFilter().test(name, databaseCredentials.getDatabase()))
+                        .collect(Collectors.toList());
+
+                indexes = dao.listIndexesDefinitions(indexesNamesFiltered);
             }
 
             var proceduresNames = dao.listProceduresNames();

@@ -17,11 +17,11 @@ public interface DbSchemaDAO {
 
     List<String> listFunctionsNames() throws SQLException;
 
-    List<DbObjectDefinition> listFunctions(String filter) throws SQLException;
+    List<DbObjectDefinition> listFunctionsDefinitions(List<String> names) throws SQLException;
 
     List<String> listIndexesNames() throws SQLException;
 
-    List<DbObjectDefinition> listIndexes(String filter) throws SQLException;
+    List<DbObjectDefinition> listIndexesDefinitions(List<String> names) throws SQLException;
 
     List<String> listProceduresNames() throws SQLException;
 

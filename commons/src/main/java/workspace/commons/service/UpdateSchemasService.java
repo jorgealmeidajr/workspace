@@ -28,15 +28,17 @@ public class UpdateSchemasService {
     @Getter
     @Builder
     public static class Request {
-        final boolean updateTablesDefinitions;
-        final boolean updateViewsDefinitions;
-        final boolean updateIndexesDefinitions;
-        final boolean updateFunctionsDefinitions;
-        final boolean updateProceduresDefinitions;
-        final boolean updatePackageBodiesDefinitions;
+        boolean updateTablesDefinitions;
+        boolean updateViewsDefinitions;
+        boolean updateIndexesDefinitions;
+        boolean updateFunctionsDefinitions;
+        boolean updateProceduresDefinitions;
+        boolean updatePackageBodiesDefinitions;
 
-        final BiPredicate<String, Database> tablesFilter;
-        final BiPredicate<String, Database> viewsFilter;
+        BiPredicate<String, Database> tablesFilter;
+        BiPredicate<String, Database> viewsFilter;
+        BiPredicate<String, Database> indexesFilter;
+        BiPredicate<String, Database> functionsFilter;
     }
 
     public static void execute(

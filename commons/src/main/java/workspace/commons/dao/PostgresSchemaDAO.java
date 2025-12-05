@@ -166,14 +166,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(String filter) throws SQLException {
-        filter = (filter != null) ? "  " + filter + "\n" : "";
-
+    public List<DbObjectDefinition> listFunctionsDefinitions(List<String> names) throws SQLException {
         String sql =
-            "select routine_schema, routine_name, routine_definition\n" +
-            "from information_schema.routines\n" +
-            "where routine_type = 'FUNCTION'\n" +
-            filter +
+            "select routine_schema, routine_name, routine_definition \n" +
+            "from information_schema.routines \n" +
+            "where routine_type = 'FUNCTION' \n" +
             "order by routine_schema, routine_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -182,7 +179,10 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var name = rs.getString("routine_schema") + "." + rs.getString("routine_name");
-                result.add(new DbObjectDefinition(name, rs.getString("routine_definition")));
+
+                if (names.contains(name)) {
+                    result.add(new DbObjectDefinition(name, rs.getString("routine_definition")));
+                }
             }
         }
         return result;
@@ -208,11 +208,10 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(String filter) throws SQLException {
+    public List<DbObjectDefinition> listIndexesDefinitions(List<String> names) throws SQLException {
         String sql =
-            "select schemaname, tablename, indexname, indexdef\n" +
-            "from pg_indexes\n" +
-            filter + "\n" +
+            "select schemaname, tablename, indexname, indexdef \n" +
+            "from pg_indexes \n" +
             "order by schemaname, tablename, indexname";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -221,7 +220,10 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var name = rs.getString("schemaname") + "." + rs.getString("tablename") + " " + rs.getString("indexname");
-                result.add(new DbObjectDefinition(name, rs.getString("indexdef")));
+
+                if (names.contains(name)) {
+                    result.add(new DbObjectDefinition(name, rs.getString("indexdef")));
+                }
             }
         }
         return result;
