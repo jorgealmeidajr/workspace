@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 public class EnvironmentService {
 
     public static DbSchemaDAO getDbSchemaDAO(DatabaseCredentials databaseCredentials) {
-        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO();
-        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO();
+        if (Database.ORACLE.equals(databaseCredentials.getDatabase())) return new OracleSchemaDAO(databaseCredentials);
+        if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) return new PostgresSchemaDAO(databaseCredentials);
         return null;
     }
 

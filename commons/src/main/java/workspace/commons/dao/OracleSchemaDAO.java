@@ -16,74 +16,84 @@ import static workspace.commons.model.DatabaseCredentials.getConnection;
 
 public class OracleSchemaDAO implements DbSchemaDAO {
 
-    @Override
-    public List<String> listTablesNames(DatabaseCredentials databaseCredentials) throws SQLException {
-        return listOracleObjects(databaseCredentials, "TABLE", null, null);
+    private final DatabaseCredentials databaseCredentials;
+
+    public OracleSchemaDAO(DatabaseCredentials databaseCredentials) {
+        this.databaseCredentials = databaseCredentials;
     }
 
     @Override
-    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<String> listTablesNames() throws SQLException {
+        return listOracleObjects("TABLE", null);
+    }
+
+    @Override
+    public List<DbObjectDefinition> listTables(String filter) throws SQLException {
         // TODO: oracle, create tables statements must be simplify
-        List<String> objects = listOracleObjects(databaseCredentials, "TABLE", filter, null);
-        return listObjectDefinitions(databaseCredentials, objects, "TABLE");
+        List<String> objects = listOracleObjects("TABLE", filter);
+        return listObjectDefinitions(objects, "TABLE");
     }
 
     @Override
-    public List<String> listViewsNames(DatabaseCredentials databaseCredentials) throws SQLException {
-        return listOracleObjects(databaseCredentials, "VIEW", null, null);
+    public List<String> listViewsNames() throws SQLException {
+        return listOracleObjects("VIEW", null);
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "VIEW", filter, null);
-        return listObjectDefinitions(databaseCredentials, objects, "VIEW");
+    public List<DbObjectDefinition> listViews(String filter) throws SQLException {
+        List<String> objects = listOracleObjects("VIEW", filter);
+        return listObjectDefinitions(objects, "VIEW");
     }
 
     @Override
-    public List<String> listFunctionsNames(DatabaseCredentials databaseCredentials) throws SQLException {
-        return listOracleObjects(databaseCredentials, "FUNCTION", null, null);
+    public List<String> listFunctionsNames() throws SQLException {
+        return listOracleObjects("FUNCTION", null);
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "FUNCTION", filter, null);
-        return listObjectDefinitions(databaseCredentials, objects, "FUNCTION");
+    public List<DbObjectDefinition> listFunctions(String filter) throws SQLException {
+        List<String> objects = listOracleObjects("FUNCTION", filter);
+        return listObjectDefinitions(objects, "FUNCTION");
     }
 
     @Override
-    public List<String> listIndexesNames(DatabaseCredentials databaseCredentials) throws SQLException {
-        return listOracleObjects(databaseCredentials, "INDEX", null, null);
+    public List<String> listIndexesNames() throws SQLException {
+        return listOracleObjects("INDEX", null);
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listIndexes(String filter) throws SQLException {
         // TODO: the sql should be simplified
-        List<String> objects = listOracleObjects(databaseCredentials, "INDEX", filter, null);
-        return listObjectDefinitions(databaseCredentials, objects, "INDEX");
+        List<String> objects = listOracleObjects("INDEX", filter);
+        return listObjectDefinitions(objects, "INDEX");
     }
 
     @Override
-    public List<String> listProceduresNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listProceduresNames() throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(String filter) throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<String> listPackageBodiesNames(DatabaseCredentials databaseCredentials) throws SQLException {
-        return listOracleObjects(databaseCredentials, "PACKAGE BODY", null, null);
+    public List<String> listPackageBodiesNames() throws SQLException {
+        return listOracleObjects("PACKAGE BODY", null);
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
-        List<String> objects = listOracleObjects(databaseCredentials, "PACKAGE BODY", filter, null);
-        return listObjectDefinitions(databaseCredentials, objects, "PACKAGE_BODY");
+    public List<DbObjectDefinition> listPackageBodies(String filter) throws SQLException {
+        List<String> objects = listOracleObjects("PACKAGE BODY", filter);
+        return listObjectDefinitions(objects, "PACKAGE_BODY");
     }
 
-    private List<String> listOracleObjects(DatabaseCredentials databaseCredentials, String objectType, String where, Integer rows) throws SQLException {
+    private List<String> listOracleObjects(String objectType, String where) throws SQLException {
+        return listOracleObjects(objectType, where, null);
+    }
+
+    private List<String> listOracleObjects(String objectType, String where, Integer rows) throws SQLException {
         String filter = (where != null) ? "  " + where + "\n" : "";
 
         String sql =
@@ -112,7 +122,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         return result;
     }
 
-    private List<DbObjectDefinition> listObjectDefinitions(DatabaseCredentials databaseCredentials, List<String> objects, String objectType) throws SQLException {
+    private List<DbObjectDefinition> listObjectDefinitions(List<String> objects, String objectType) throws SQLException {
         List<DbObjectDefinition> result = new ArrayList<>();
 
         int threads = 50;

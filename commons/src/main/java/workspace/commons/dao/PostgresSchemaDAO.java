@@ -14,8 +14,14 @@ import static workspace.commons.model.DatabaseCredentials.getConnection;
 
 public class PostgresSchemaDAO implements DbSchemaDAO {
 
+    private final DatabaseCredentials databaseCredentials;
+
+    public PostgresSchemaDAO(DatabaseCredentials databaseCredentials) {
+        this.databaseCredentials = databaseCredentials;
+    }
+
     @Override
-    public List<String> listTablesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listTablesNames() throws SQLException {
         String sql =
             "select table_schema, table_name \n" +
             "from information_schema.tables \n" +
@@ -39,7 +45,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listTables(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listTables(String filter) throws SQLException {
         // TODO: postgres, create tables statements should be in create sql format
         String sql =
             "select table_schema, table_name\n" +
@@ -64,7 +70,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listViewsNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listViewsNames() throws SQLException {
         String sql =
             "select table_schema, table_name \n" +
             "from information_schema.views \n" +
@@ -116,7 +122,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listViews(String filter) throws SQLException {
         var where = (filter != null) ? "where " + filter + "\n" : "";
 
         String sql =
@@ -138,7 +144,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listFunctionsNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listFunctionsNames() throws SQLException {
         String sql =
             "select routine_schema, routine_name \n" +
             "from information_schema.routines \n" +
@@ -158,7 +164,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listFunctions(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listFunctions(String filter) throws SQLException {
         filter = (filter != null) ? "  " + filter + "\n" : "";
 
         String sql =
@@ -181,7 +187,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listIndexesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listIndexesNames() throws SQLException {
         String sql =
             "select schemaname, tablename, indexname \n" +
             "from pg_indexes \n" +
@@ -200,7 +206,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listIndexes(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listIndexes(String filter) throws SQLException {
         String sql =
             "select schemaname, tablename, indexname, indexdef\n" +
             "from pg_indexes\n" +
@@ -220,7 +226,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listProceduresNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listProceduresNames() throws SQLException {
         String sql =
             "select routine_schema as schema_name, routine_name as procedure_name \n" +
             "from information_schema.routines \n" +
@@ -240,7 +246,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listProcedures(String filter) throws SQLException {
         String sql =
             "select routine_schema as schema_name, routine_name as procedure_name, routine_definition\n" +
             "from information_schema.routines\n" +
@@ -261,12 +267,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<String> listPackageBodiesNames(DatabaseCredentials databaseCredentials) throws SQLException {
+    public List<String> listPackageBodiesNames() throws SQLException {
         return List.of();
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(DatabaseCredentials databaseCredentials, String filter) throws SQLException {
+    public List<DbObjectDefinition> listPackageBodies(String filter) throws SQLException {
         return List.of();
     }
 

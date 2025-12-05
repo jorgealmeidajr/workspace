@@ -58,7 +58,7 @@ public class UpdateSchemas {
         return () -> {
             DbSchemaDAO dao = workspace.commons.service.EnvironmentService.getDbSchemaDAO(databaseCredentials);
 
-            var tablesNames = dao.listTablesNames(databaseCredentials);
+            var tablesNames = dao.listTablesNames();
 
             List<DbObjectDefinition> tables = List.of();
             if (request.isUpdateTablesDefinitions()) {
@@ -68,10 +68,10 @@ public class UpdateSchemas {
                 } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                     filter = "and table_schema in ('api', 'conf', 'dash', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
                 }
-                tables = dao.listTables(databaseCredentials, filter);
+                tables = dao.listTables(filter);
             }
 
-            var viewsNames = dao.listViewsNames(databaseCredentials);
+            var viewsNames = dao.listViewsNames();
 
             List<DbObjectDefinition> views = List.of();
             if (request.isUpdateViewsDefinitions()) {
@@ -81,10 +81,10 @@ public class UpdateSchemas {
                 } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                     filter = "table_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
                 }
-                views = dao.listViews(databaseCredentials, filter);
+                views = dao.listViews(filter);
             }
 
-            var functionsNames = dao.listFunctionsNames(databaseCredentials);
+            var functionsNames = dao.listFunctionsNames();
 
             List<DbObjectDefinition> functions = List.of();
             if (request.isUpdateFunctionsDefinitions()) {
@@ -94,10 +94,10 @@ public class UpdateSchemas {
                 } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                     filter = "and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
                 }
-                functions = dao.listFunctions(databaseCredentials, filter);
+                functions = dao.listFunctions(filter);
             }
 
-            var indexesNames = dao.listIndexesNames(databaseCredentials);
+            var indexesNames = dao.listIndexesNames();
 
             List<DbObjectDefinition> indexes = List.of();
             if (request.isUpdateIndexesDefinitions()) {
@@ -107,10 +107,10 @@ public class UpdateSchemas {
                 } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                     filter = "where schemaname in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
                 }
-                indexes = dao.listIndexes(databaseCredentials, filter);
+                indexes = dao.listIndexes(filter);
             }
 
-            var proceduresNames = dao.listProceduresNames(databaseCredentials);
+            var proceduresNames = dao.listProceduresNames();
 
             List<DbObjectDefinition> procedures = List.of();
             if (request.isUpdateProceduresDefinitions()) {
@@ -118,10 +118,10 @@ public class UpdateSchemas {
                 if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
                     filter = "  and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
                 }
-                procedures = dao.listProcedures(databaseCredentials, filter);
+                procedures = dao.listProcedures(filter);
             }
 
-            var packageBodiesNames = dao.listPackageBodiesNames(databaseCredentials);
+            var packageBodiesNames = dao.listPackageBodiesNames();
 
             List<DbObjectDefinition> packageBodies = List.of();
             if (request.isUpdatePackageBodiesDefinitions()) {
@@ -129,7 +129,7 @@ public class UpdateSchemas {
                 if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
                     filter = "and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')";
                 }
-                packageBodies = dao.listPackageBodies(databaseCredentials, filter);
+                packageBodies = dao.listPackageBodies(filter);
             }
 
             return SchemaResult.builder()
