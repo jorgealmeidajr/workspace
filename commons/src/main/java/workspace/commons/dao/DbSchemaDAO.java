@@ -9,11 +9,11 @@ public interface DbSchemaDAO {
 
     List<String> listTablesNames() throws SQLException;
 
-    List<DbObjectDefinition> listTables(String filter) throws SQLException;
+    List<DbObjectDefinition> listTablesDefinitions(List<String> names) throws SQLException;
 
     List<String> listViewsNames() throws SQLException;
 
-    List<DbObjectDefinition> listViews(String filter) throws SQLException;
+    List<DbObjectDefinition> listViewsDefinitions(List<String> names) throws SQLException;
 
     List<String> listFunctionsNames() throws SQLException;
 

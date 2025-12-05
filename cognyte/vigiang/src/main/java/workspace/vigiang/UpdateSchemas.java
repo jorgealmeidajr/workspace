@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static workspace.commons.service.UpdateSchemasService.*;
 
@@ -21,22 +22,51 @@ public class UpdateSchemas {
         System.out.println("\n## START checking all database schemas\n");
         try {
             List<DatabaseCredentialsVigiaNG> databasesCredentials = EnvironmentService.getVigiangDatabases();
-
-            boolean update = false;
-            Request request = Request.builder()
-                    .updateTablesDefinitions(false) // TODO
-                    .updateViewsDefinitions(update)
-                    .updateIndexesDefinitions(false) // TODO
-                    .updateFunctionsDefinitions(update)
-                    .updateProceduresDefinitions(update)
-                    .updatePackageBodiesDefinitions(update)
-                    .build();
-
+            Request request = getRequest();
             execute(databasesCredentials, request, UpdateSchemas::getCallableTask, UpdateSchemas::handleResult);
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("## END checking all database schemas.");
+    }
+
+    private static Request getRequest() {
+        final var postgresSchemas = List.of("api", "conf", "dash", "evt", "gen", "itc", "log", "ofc", "prog", "public", "sec", "sync");
+
+        boolean update = false;
+
+        return Request.builder()
+                .updateTablesDefinitions(false) // TODO:
+                .updateViewsDefinitions(update)
+                .updateIndexesDefinitions(false) // TODO:
+                .updateFunctionsDefinitions(update)
+                .updateProceduresDefinitions(update)
+                .updatePackageBodiesDefinitions(update)
+                .tablesFilter((String name, Database database) -> {
+                    if (Database.ORACLE.equals(database)) {
+                        name = getValueAfterDot(name);
+                        String prefix = name.contains("_") ? name.substring(0, name.indexOf("_")) : name;
+                        var prefixes = List.of("ITC", "CFG", "LOG", "SIT", "SEG", "OFC", "PTB", "QDS", "LOC");
+                        return prefixes.contains(prefix);
+                    } else if (Database.POSTGRES.equals(database)) {
+                        if (!name.contains(".")) return false;
+                        String schema = name.contains(".") ? name.substring(0, name.indexOf(".")) : name;
+                        return postgresSchemas.contains(schema);
+                    }
+                    return false;
+                })
+                .viewsFilter((String name, Database database) -> {
+                    if (Database.ORACLE.equals(database)) {
+                        name = getValueAfterDot(name);
+                        return name.startsWith("VW_NG_");
+                    } else if (Database.POSTGRES.equals(database)) {
+                        if (!name.contains(".")) return false;
+                        String schema = name.substring(0, name.indexOf("."));
+                        return postgresSchemas.contains(schema);
+                    }
+                    return false;
+                })
+                .build();
     }
 
     private static void handleResult(SchemaResult result, Request request) {
@@ -62,26 +92,22 @@ public class UpdateSchemas {
 
             List<DbObjectDefinition> tables = List.of();
             if (request.isUpdateTablesDefinitions()) {
-                String filter = null;
-                if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
-                    filter = "and SUBSTR(ao.object_name, 0, 3) in ('ITC', 'CFG', 'LOG', 'SIT', 'SEG', 'OFC', 'PTB', 'QDS', 'LOC')";
-                } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
-                    filter = "and table_schema in ('api', 'conf', 'dash', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
-                }
-                tables = dao.listTables(filter);
+                var tablesNamesFiltered = tablesNames.stream()
+                        .filter(name -> request.getTablesFilter().test(name, databaseCredentials.getDatabase()))
+                        .collect(Collectors.toList());
+
+                tables = dao.listTablesDefinitions(tablesNamesFiltered);
             }
 
             var viewsNames = dao.listViewsNames();
 
             List<DbObjectDefinition> views = List.of();
             if (request.isUpdateViewsDefinitions()) {
-                String filter = null;
-                if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
-                    filter = "and ao.object_name like 'VW_NG_%'";
-                } else if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
-                    filter = "table_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
-                }
-                views = dao.listViews(filter);
+                var viewsNamesFiltered = viewsNames.stream()
+                        .filter(name -> request.getViewsFilter().test(name, databaseCredentials.getDatabase()))
+                        .collect(Collectors.toList());
+
+                views = dao.listViewsDefinitions(viewsNamesFiltered);
             }
 
             var functionsNames = dao.listFunctionsNames();

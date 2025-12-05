@@ -28,10 +28,9 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listTables(String filter) throws SQLException {
+    public List<DbObjectDefinition> listTablesDefinitions(List<String> names) throws SQLException {
         // TODO: oracle, create tables statements must be simplify
-        List<String> objects = listOracleObjects("TABLE", filter);
-        return listObjectDefinitions(objects, "TABLE");
+        return listObjectDefinitions(names, "TABLE");
     }
 
     @Override
@@ -40,9 +39,8 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(String filter) throws SQLException {
-        List<String> objects = listOracleObjects("VIEW", filter);
-        return listObjectDefinitions(objects, "VIEW");
+    public List<DbObjectDefinition> listViewsDefinitions(List<String> names) throws SQLException {
+        return listObjectDefinitions(names, "VIEW");
     }
 
     @Override
@@ -115,7 +113,8 @@ public class OracleSchemaDAO implements DbSchemaDAO {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                var name = rs.getString("owner") + "." + rs.getString("object_name");
+                String owner = rs.getString("owner");
+                var name = owner + "." + rs.getString("object_name");
                 result.add(name);
             }
         }

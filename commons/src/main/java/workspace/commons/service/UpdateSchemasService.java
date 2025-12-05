@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 import static workspace.commons.service.FileService.writeString;
 
@@ -33,6 +34,9 @@ public class UpdateSchemasService {
         final boolean updateFunctionsDefinitions;
         final boolean updateProceduresDefinitions;
         final boolean updatePackageBodiesDefinitions;
+
+        final BiPredicate<String, Database> tablesFilter;
+        final BiPredicate<String, Database> viewsFilter;
     }
 
     public static void execute(
@@ -142,7 +146,7 @@ public class UpdateSchemasService {
         writeString(outputPath, result);
     }
 
-    private static String getValueAfterDot(String name) {
+    public static String getValueAfterDot(String name) {
         int dotIndex = name.indexOf(".");
         return dotIndex >= 0 ? name.substring(dotIndex + 1) : name;
     }

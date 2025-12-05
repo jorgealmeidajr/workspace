@@ -45,13 +45,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listTables(String filter) throws SQLException {
+    public List<DbObjectDefinition> listTablesDefinitions(List<String> names) throws SQLException {
         // TODO: postgres, create tables statements should be in create sql format
         String sql =
-            "select table_schema, table_name\n" +
+            "select table_schema, table_name \n" +
             "from information_schema.tables \n" +
             "where table_type in ('BASE TABLE') \n" +
-            (filter != null ? filter : "") + "\n" +
             "order by table_schema, table_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -62,8 +61,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
                 var tableSchema = rs.getString("table_schema");
                 var tableName = rs.getString("table_name");
                 var name = tableSchema + "." + tableName;
-                var definition = getTableDefinition(conn, tableSchema, tableName);
-                result.add(new DbObjectDefinition(name, definition));
+
+                if (names.contains(name)) {
+                    var definition = getTableDefinition(conn, tableSchema, tableName);
+                    result.add(new DbObjectDefinition(name, definition));
+                }
             }
         }
         return result;
@@ -122,13 +124,10 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listViews(String filter) throws SQLException {
-        var where = (filter != null) ? "where " + filter + "\n" : "";
-
+    public List<DbObjectDefinition> listViewsDefinitions(List<String> names) throws SQLException {
         String sql =
-            "select table_schema, table_name, view_definition\n" +
-            "from information_schema.views\n" +
-            where +
+            "select table_schema, table_name, view_definition \n" +
+            "from information_schema.views \n" +
             "order by table_schema, table_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -137,7 +136,10 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var name = rs.getString("table_schema") + "." + rs.getString("table_name");
-                result.add(new DbObjectDefinition(name, rs.getString("view_definition")));
+
+                if (names.contains(name)) {
+                    result.add(new DbObjectDefinition(name, rs.getString("view_definition")));
+                }
             }
         }
         return result;
