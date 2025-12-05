@@ -25,10 +25,10 @@ public interface DbSchemaDAO {
 
     List<String> listProceduresNames() throws SQLException;
 
-    List<DbObjectDefinition> listProcedures(String filter) throws SQLException;
+    List<DbObjectDefinition> listProceduresDefinitions(List<String> names) throws SQLException;
 
     List<String> listPackageBodiesNames() throws SQLException;
 
-    List<DbObjectDefinition> listPackageBodies(String filter) throws SQLException;
+    List<DbObjectDefinition> listPackageBodiesDefinitions(List<String> names) throws SQLException;
 
 }

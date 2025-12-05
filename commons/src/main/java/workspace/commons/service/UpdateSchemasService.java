@@ -39,6 +39,8 @@ public class UpdateSchemasService {
         BiPredicate<String, Database> viewsFilter;
         BiPredicate<String, Database> indexesFilter;
         BiPredicate<String, Database> functionsFilter;
+        BiPredicate<String, Database> proceduresFilter;
+        BiPredicate<String, Database> packageBodiesFilter;
     }
 
     public static void execute(

@@ -70,7 +70,7 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(String filter) throws SQLException {
+    public List<DbObjectDefinition> listProceduresDefinitions(List<String> names) throws SQLException {
         return List.of();
     }
 
@@ -80,9 +80,8 @@ public class OracleSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(String filter) throws SQLException {
-        List<String> objects = listOracleObjects("PACKAGE BODY", filter);
-        return listObjectDefinitions(objects, "PACKAGE_BODY");
+    public List<DbObjectDefinition> listPackageBodiesDefinitions(List<String> names) throws SQLException {
+        return listObjectDefinitions(names, "PACKAGE_BODY");
     }
 
     private List<String> listOracleObjects(String objectType, String where) throws SQLException {

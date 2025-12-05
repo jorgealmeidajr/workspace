@@ -33,13 +33,14 @@ public class UpdateSchemas {
     private static Request getRequest() {
         final var postgresSchemas = List.of("api", "conf", "dash", "evt", "gen", "itc", "log", "ofc", "prog", "public", "sec", "sync");
         final var oraclePrefixes = List.of("ITC", "CFG", "LOG", "SIT", "SEG", "OFC", "PTB", "QDS", "LOC");
+        final var oraclePackagePrefixes = List.of("PITC", "PCFG", "PLOG", "PSIT", "PSEG", "POFC", "PPTB", "PQDS", "PLOC");
 
-        boolean update = false;
+        boolean update = true;
 
         return Request.builder()
-                .updateTablesDefinitions(false) // TODO:
+                .updateTablesDefinitions(false)
                 .updateViewsDefinitions(update)
-                .updateIndexesDefinitions(false) // TODO:
+                .updateIndexesDefinitions(false)
                 .updateFunctionsDefinitions(update)
                 .updateProceduresDefinitions(update)
                 .updatePackageBodiesDefinitions(update)
@@ -86,6 +87,22 @@ public class UpdateSchemas {
                         if (!name.contains(".")) return false;
                         String schema = name.substring(0, name.indexOf("."));
                         return postgresSchemas.contains(schema);
+                    }
+                    return false;
+                })
+                .proceduresFilter((String name, Database database) -> {
+                    if (Database.POSTGRES.equals(database)) {
+                        if (!name.contains(".")) return false;
+                        String schema = name.substring(0, name.indexOf("."));
+                        return postgresSchemas.contains(schema);
+                    }
+                    return false;
+                })
+                .packageBodiesFilter((String name, Database database) -> {
+                    if (Database.ORACLE.equals(database)) {
+                        name = getValueAfterDot(name);
+                        String prefix = name.contains("_") ? name.substring(0, name.indexOf("_")) : name;
+                        return oraclePackagePrefixes.contains(prefix);
                     }
                     return false;
                 })
@@ -160,22 +177,22 @@ public class UpdateSchemas {
 
             List<DbObjectDefinition> procedures = List.of();
             if (request.isUpdateProceduresDefinitions()) {
-                String filter = null;
-                if (Database.POSTGRES.equals(databaseCredentials.getDatabase())) {
-                    filter = "  and routine_schema in ('api', 'conf', 'dash', 'evt', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')";
-                }
-                procedures = dao.listProcedures(filter);
+                var proceduresNamesFiltered = proceduresNames.stream()
+                        .filter(name -> request.getProceduresFilter().test(name, databaseCredentials.getDatabase()))
+                        .collect(Collectors.toList());
+
+                procedures = dao.listProceduresDefinitions(proceduresNamesFiltered);
             }
 
             var packageBodiesNames = dao.listPackageBodiesNames();
 
             List<DbObjectDefinition> packageBodies = List.of();
             if (request.isUpdatePackageBodiesDefinitions()) {
-                String filter = null;
-                if (Database.ORACLE.equals(databaseCredentials.getDatabase())) {
-                    filter = "and SUBSTR(ao.object_name, 0, 4) in ('PITC', 'PCFG', 'PLOG', 'PSIT', 'PSEG', 'POFC', 'PPTB', 'PQDS', 'PLOC')";
-                }
-                packageBodies = dao.listPackageBodies(filter);
+                var packageBodiesNamesFiltered = packageBodiesNames.stream()
+                        .filter(name -> request.getPackageBodiesFilter().test(name, databaseCredentials.getDatabase()))
+                        .collect(Collectors.toList());
+
+                packageBodies = dao.listPackageBodiesDefinitions(packageBodiesNamesFiltered);
             }
 
             return SchemaResult.builder()

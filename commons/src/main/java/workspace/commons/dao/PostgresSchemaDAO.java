@@ -250,12 +250,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listProcedures(String filter) throws SQLException {
+    public List<DbObjectDefinition> listProceduresDefinitions(List<String> names) throws SQLException {
         String sql =
-            "select routine_schema as schema_name, routine_name as procedure_name, routine_definition\n" +
-            "from information_schema.routines\n" +
-            "where routine_type = 'PROCEDURE'\n" +
-            filter + "\n" +
+            "select routine_schema as schema_name, routine_name as procedure_name, routine_definition \n" +
+            "from information_schema.routines \n" +
+            "where routine_type = 'PROCEDURE' \n" +
             "order by schema_name, procedure_name";
 
         List<DbObjectDefinition> result = new ArrayList<>();
@@ -264,7 +263,10 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
                 var name = rs.getString("schema_name") + "." + rs.getString("procedure_name");
-                result.add(new DbObjectDefinition(name, rs.getString("routine_definition")));
+
+                if (names.contains(name)) {
+                    result.add(new DbObjectDefinition(name, rs.getString("routine_definition")));
+                }
             }
         }
         return result;
@@ -276,7 +278,7 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     }
 
     @Override
-    public List<DbObjectDefinition> listPackageBodies(String filter) throws SQLException {
+    public List<DbObjectDefinition> listPackageBodiesDefinitions(List<String> names) throws SQLException {
         return List.of();
     }
 
