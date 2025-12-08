@@ -33,7 +33,7 @@ public class UpdateProjectsByVersion {
             Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
             var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons", "target"));
-            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js"), List.of("node_modules", "json-server", "tests"));
+            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js", "tsx"), List.of("node_modules", "json-server", "tests"));
             VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
 
             try {
@@ -138,7 +138,7 @@ public class UpdateProjectsByVersion {
 
         var vigiangMatches = new VigiangMatches(
             getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of()),
-            getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of("NODE_ENV")),
+            getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of("NODE_ENV", "globals")),
             VigiangMatchType.ENVIRONMENT);
         MATCHES.add(vigiangMatches);
 
@@ -167,6 +167,16 @@ public class UpdateProjectsByVersion {
                 result = getFileContentsTxt(matchesFiltered, result);
                 result += "\n";
             }
+
+            // TODO: enable this when version >= 3.0
+//            matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+//                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("vigia-components"))
+//                    .collect(Collectors.toList());
+//            if (!matchesFiltered.isEmpty()) {
+//                result += "components:\n";
+//                result = getFileContentsTxt(matchesFiltered, result);
+//                result += "\n";
+//            }
         }
 
         if (!vigiangMatches.getBackendMatches().isEmpty()) {

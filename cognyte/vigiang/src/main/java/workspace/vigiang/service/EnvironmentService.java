@@ -28,7 +28,7 @@ public class EnvironmentService {
     private static final String VIGIANG_DATABASES_PATH = VIGIANG_PATH_STR + "\\databases";
 
     public static List<String> getVersions() {
-        return List.of("1.5", "1.7", "2.0", "2.1", "2.2");
+        return List.of("1.5", "1.7", "2.0", "2.1", "2.2", "3.0");
     }
 
     public static List<DatabaseCredentialsVigiaNG> getVigiangDatabases() throws IOException {
