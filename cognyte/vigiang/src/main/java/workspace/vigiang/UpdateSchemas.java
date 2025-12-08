@@ -30,7 +30,7 @@ public class UpdateSchemas {
         final var oraclePrefixes = List.of("ITC", "CFG", "LOG", "SIT", "SEG", "OFC", "PTB", "QDS", "LOC");
         final var oraclePackagePrefixes = List.of("PITC", "PCFG", "PLOG", "PSIT", "PSEG", "POFC", "PPTB", "PQDS", "PLOC");
 
-        boolean update = true;
+        boolean update = false;
 
         return Request.builder()
                 .updateTablesDefinitions(false)

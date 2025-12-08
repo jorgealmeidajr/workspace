@@ -22,10 +22,10 @@ import static workspace.commons.service.EnvironmentService.getLaboratories;
 public class EnvironmentService {
 
     private static final String WORK_PATH_STR = "C:\\work";
-    private static final String COGNYTE_PATH_STR = WORK_PATH_STR + "\\COGNYTE1";
+    private static final String COGNYTE_PATH_STR = WORK_PATH_STR + "\\COGNYTE";
     private static final String VIGIANG_PATH_STR = COGNYTE_PATH_STR + "\\VIGIANG";
-    private static final String VIGIANG_LABORATORIES_PATH = COGNYTE_PATH_STR + "\\vigiang_labs";
-    private static final String VIGIANG_DATABASES_PATH = COGNYTE_PATH_STR + "\\vigiang_dbs";
+    private static final String VIGIANG_LABORATORIES_PATH = VIGIANG_PATH_STR + "\\laboratories";
+    private static final String VIGIANG_DATABASES_PATH = VIGIANG_PATH_STR + "\\databases";
 
     public static List<String> getVersions() {
         return List.of("1.5", "1.7", "2.0", "2.1", "2.2");
