@@ -112,7 +112,8 @@ public class UpdateProjectsByVersion {
         );
 
         List<Pattern> frontendPatterns = List.of(
-            Pattern.compile("hasRole\\((?:'|\")ROLE_([A-Z0-9_]+)(?:'|\")\\)")
+            Pattern.compile("hasRole\\((?:'|\")ROLE_([A-Z0-9_]+)(?:'|\")\\)"),
+            Pattern.compile("(?:'|\")ROLE_([A-Z0-9_]+)(?:'|\")")
         );
 
         var vigiangMatches = new VigiangMatches(
@@ -185,6 +186,8 @@ public class UpdateProjectsByVersion {
             result += "\n";
         }
 
+        result = result.trim() + "\n";
+
         Path outputPath = Paths.get(versionPath + "\\" + output + ".txt");
         writeString(outputPath, result);
     }
@@ -241,6 +244,8 @@ public class UpdateProjectsByVersion {
             result = getFileContentsMd(vigiangMatches.getBackendMatches(), result);
             result += "```\n";
         }
+
+        result = result.trim() + "\n";
 
         Path outputPath = Paths.get(versionPath + "\\" + output + ".md");
         writeString(outputPath, result);
