@@ -26,6 +26,18 @@ public class FileConfigRegistry {
         "filterQuery", Map.of(
             Database.ORACLE, new FileConfig("CFG_NG_FILTERQUERY", new String[] { "MODULE", "LABEL", "VALUE" }),
             Database.POSTGRES, new FileConfig("conf.filterquery", new String[] { "module", "label", "value" })
+        ),
+        "zoneInterception", Map.of(
+            Database.ORACLE, new FileConfig("CFG_TP_ZONA_TP_VL_ITC", new String[] {
+                "CD_OPERADORA", "NM_OPERADORA", "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO", "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS"
+            }),
+            Database.POSTGRES, new FileConfig("conf.tp_zone_tp_vl_itc", new String[] {
+                "carrier_id", "carrier_name", "network_element_type_name", "target_type_name", "itc_form_visible", "visible", "rules"
+            })
+        ),
+        "validationRule", Map.of(
+            Database.ORACLE, new FileConfig("CFG_NG_VALIDATRULES", new String[] { "CD_OPERADORA", "NM_OPERADORA", "MODULO", "VALID_RULES" }),
+            Database.POSTGRES, new FileConfig("conf.validatrules", new String[] { "carrier_id", "carrier_name", "module", "valid_rules" })
         )
     );
 

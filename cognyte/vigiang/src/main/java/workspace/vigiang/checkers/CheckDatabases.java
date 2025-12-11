@@ -93,48 +93,24 @@ public class CheckDatabases {
     }
 
     private static void updateLocalZoneInterceptionFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_TP_ZONA_TP_VL_ITC";
-            columns = new String[] {
-                "CD_OPERADORA", "NM_OPERADORA",
-                "NM_ZONA_MONIT", "NM_TIPO_VALOR_INTERCEPTADO",
-                "SN_VISIVEL_CAD_ITC", "SN_VISIVEL_LOTE", "NM_REGRAS"
-            };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.tp_zone_tp_vl_itc";
-            columns = new String[] {
-                "carrier_id", "carrier_name",
-                "network_element_type_name", "target_type_name",
-                "itc_form_visible", "visible", "rules"
-            };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("zoneInterception", databaseCredentialsVigiaNG.getDatabase());
 
         try {
             List<String[]> data = dao.listZoneInterceptions();
             Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-            FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+            FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
     private static void updateLocalValidationRuleFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_NG_VALIDATRULES";
-            columns = new String[] { "CD_OPERADORA", "NM_OPERADORA", "MODULO", "VALID_RULES" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.validatrules";
-            columns = new String[] { "carrier_id", "carrier_name", "module", "valid_rules" };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("validationRule", databaseCredentialsVigiaNG.getDatabase());
 
         try {
             List<String[]> data = dao.listValidationRules();
             Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-            FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+            FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
