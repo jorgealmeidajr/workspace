@@ -4,6 +4,7 @@ import workspace.commons.model.Database;
 import workspace.commons.service.FileService;
 import workspace.vigiang.model.Configuration;
 import workspace.vigiang.model.Feature;
+import workspace.vigiang.model.FileConfigRegistry;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.dao.VigiaNgDAO;
@@ -49,89 +50,46 @@ public class CheckDatabases {
     }
 
     private static void updateLocalFeatureFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws SQLException, IOException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_NG_FEATURE";
-            columns = new String[] { "ID_FEATURE", "ID_STATUS", "ID_DESCRICAO" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.feature";
-            columns = new String[] { "feature", "status", "description" };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("feature", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = dao.listFeatures().stream()
                 .map(Feature::toArray)
                 .collect(Collectors.toList());
 
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateLocalConfigurationFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws SQLException, IOException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_NG_SITE";
-            columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.site";
-            columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value" };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("configuration", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = dao.listConfigurationValues().stream()
                 .map(Configuration::toArray)
                 .collect(Collectors.toList());
 
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateLocalPrivilegeFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "SEG_PRIVILEGIO";
-            columns = new String[] { "CD_PRIVILEGIO", "ID_PRIVILEGIO", "NM_PRIVILEGIO" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "sec.privilege";
-            columns = new String[] { "id", "privilegeid", "name" };
-        }
-
+        var fileConfig = FileConfigRegistry.getConfig("privilege", databaseCredentialsVigiaNG.getDatabase());
         List<String[]> data = dao.listPrivileges();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateLocalProfileFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "SEG_PERFIL_PRIVILEGIO";
-            columns = new String[] { "CD_OPERADORA", "NM_PERFIL", "NM_PRIVILEGIO" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "sec.profile_privilege";
-            columns = new String[] { "carrier_id", "profile_name", "privilege_name" };
-        }
-
+        var fileConfig = FileConfigRegistry.getConfig("profile", databaseCredentialsVigiaNG.getDatabase());
         List<String[]> data = dao.listProfiles();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateLocalFilterQueryFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_NG_FILTERQUERY";
-            columns = new String[] { "MODULE", "LABEL", "VALUE" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.filterquery";
-            columns = new String[] { "module", "label", "value" };
-        }
-
+        var fileConfig = FileConfigRegistry.getConfig("filterQuery", databaseCredentialsVigiaNG.getDatabase());
         List<String[]> data = dao.listFilterQueries();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateLocalZoneInterceptionFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) {
