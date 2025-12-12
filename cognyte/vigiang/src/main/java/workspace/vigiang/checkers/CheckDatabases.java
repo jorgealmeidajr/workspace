@@ -117,46 +117,27 @@ public class CheckDatabases {
     }
 
     private static void updateLocalQdsValidationRuleFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_TIPO_NUMERO_QDS";
-            columns = new String[] { "ID_TIPO_NUMERO_QDS", "NM_CHAVE", "TP_CONSULTA", "SN_VOUCHER_DATE", "VALID_RULES" };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
+        if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
             return;
         }
+
+        var fileConfig = FileConfigRegistry.getConfig("qdsValidationRule", databaseCredentialsVigiaNG.getDatabase());
 
         try {
             List<String[]> data = dao.listQdsValidationRules();
             Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-            FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+            FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
     }
 
     private static void updateLocalCarriersFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws SQLException, IOException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_OPERADORA";
-            columns = new String[] {
-                "CD_OPERADORA", "NM_OPERADORA",
-                "ID_SMTP_HOST", "ID_SMTP_USER", "ID_SMPT_PASSWORD", "ID_SMPT_ACCOUNT", "ID_SMTP_PORT",
-                "DE_COMENTARIO", "SN_MULTIOPERADORA", "ID_REGEX", "DS_LOCAL_IMAGENS",  "DS_REGEX", "ID_API_KEY_MAPS", "SN_TOKEN"
-            };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.carrier";
-            columns = new String[] {
-                "id", "name",
-                "smtp_host", "smtp_user", "smpt_password", "smpt_account", "smtp_port",
-                "comments", "muti_carrier", "regex", "local_images", "ds_regex", "api_key_maps", "token"
-            };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("carrier", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = dao.listCarriers();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
 
         writeLogos(databaseCredentialsVigiaNG, data);
     }
@@ -205,25 +186,11 @@ public class CheckDatabases {
     }
 
     private static void updateLocalZonesFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws SQLException, IOException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_ZONA_MONIT";
-            columns = new String[] {
-                "CD_OPERADORA", "NM_OPERADORA",
-                "CD_ZONA_MONIT", "NM_ZONA_MONIT", "DE_COMENTARIOS"//, "IN_ATIVO"
-            };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.zone_monit";
-            columns = new String[] {
-                "carrier_id", "carrier_name",
-                "zone_monit_id", "zone_monit_name", "comments", "active"
-            };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("zone", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = dao.listZones();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
 }
