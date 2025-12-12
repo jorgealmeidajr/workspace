@@ -81,6 +81,33 @@ public class FileConfigRegistry {
             })
         ));
 
+        configurations.put("report", Map.of(
+            Database.ORACLE, new FileConfig("CFG_RELATORIO", new String[] {
+                "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA", "NM_OPERADORA"
+            }),
+            Database.POSTGRES, new FileConfig("conf.report", new String[] {
+                "id", "report_id", "report_type", "carrier_id", "carrier_name"
+            })
+        ));
+
+        configurations.put("configReport", Map.of(
+            Database.ORACLE, new FileConfig("CFG_SITE_RELATORIO", new String[] {
+                "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO"
+            }),
+            Database.POSTGRES, new FileConfig("conf.site_report", new String[] {
+                "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id"
+            })
+        ));
+
+        configurations.put("emailTemplate", Map.of(
+            Database.ORACLE, new FileConfig("CFG_EMAIL_SERVICOS", new String[] {
+                "CD_OPERADORA", "NM_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO"
+            }),
+            Database.POSTGRES, new FileConfig("conf.service_email", new String[] {
+                "carrier_id", "carrier_name", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to"
+            })
+        ));
+
         return configurations;
     }
 

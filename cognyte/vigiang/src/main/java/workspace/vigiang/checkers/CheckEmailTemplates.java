@@ -1,14 +1,13 @@
 package workspace.vigiang.checkers;
 
-import workspace.commons.model.Database;
 import workspace.commons.service.FileService;
+import workspace.vigiang.model.FileConfigRegistry;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.model.EmailTemplate;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.dao.VigiaNgDAO;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,26 +38,14 @@ public class CheckEmailTemplates {
     }
 
     private static void updateLocalEmailTemplatesFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<EmailTemplate> emailTemplates) throws IOException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_EMAIL_SERVICOS";
-            columns = new String[] {
-                "CD_OPERADORA", "NM_OPERADORA", "ID_TIPO_SERVICO", "DE_ASSUNTO", "DE_NOME", "DE_NOME_ARQUIVO", "DE_REMETENTE", "DE_DESTINATARIO"
-            };
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.service_email";
-            columns = new String[] {
-                "carrier_id", "carrier_name", "service_type", "email_subject", "service_name", "attach_name", "email_from", "email_to"
-            };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("emailTemplate", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = emailTemplates.stream()
                 .map(EmailTemplate::toArray)
                 .collect(Collectors.toList());
 
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateEmailTemplates(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<EmailTemplate> emailTemplates) {

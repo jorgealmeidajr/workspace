@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
-import workspace.commons.model.Database;
 import workspace.commons.service.FileService;
+import workspace.vigiang.model.FileConfigRegistry;
 import workspace.vigiang.service.EnvironmentService;
 import workspace.vigiang.model.DatabaseCredentialsVigiaNG;
 import workspace.vigiang.model.ReportTemplate;
@@ -40,23 +40,14 @@ public class CheckReportTemplates {
     }
 
     private static void updateLocalReportFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<ReportTemplate> reportTemplates) throws IOException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_RELATORIO";
-            columns = new String[] { "CD_RELATORIO", "ID_RELATORIO", "TP_RELATORIO", "CD_OPERADORA", "NM_OPERADORA" };
-
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.report";
-            columns = new String[] { "id", "report_id", "report_type", "carrier_id", "carrier_name" };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("report", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = reportTemplates.stream()
                 .map(ReportTemplate::toArray)
                 .collect(Collectors.toList());
 
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
     private static void updateLocalReportTemplates(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, List<ReportTemplate> reportTemplates) throws IOException {
@@ -109,20 +100,11 @@ public class CheckReportTemplates {
     }
 
     private static void updateLocalConfigReportFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws IOException, SQLException {
-        String fileName = null;
-        String[] columns = null;
-        if (Database.ORACLE.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "CFG_SITE_RELATORIO";
-            columns = new String[] { "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO" };
-
-        } else if (Database.POSTGRES.equals(databaseCredentialsVigiaNG.getDatabase())) {
-            fileName = "conf.site_report";
-            columns = new String[] { "carrier_id", "parameter_id", "parameter_description", "value", "id", "report_id" };
-        }
+        var fileConfig = FileConfigRegistry.getConfig("reportConfig", databaseCredentialsVigiaNG.getDatabase());
 
         List<String[]> data = dao.listConfigurationReports();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
-        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileName, columns, data, databaseDataPath);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }
 
 }
