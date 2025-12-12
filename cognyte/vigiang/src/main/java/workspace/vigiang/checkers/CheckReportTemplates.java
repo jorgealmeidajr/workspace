@@ -21,7 +21,7 @@ public class CheckReportTemplates {
     public static void main(String[] args) {
         System.out.println("## START checking all report templates\n");
         try {
-            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getVigiangDatabases()) {
+            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getDatabasesVigiaNg()) {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
                 System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 

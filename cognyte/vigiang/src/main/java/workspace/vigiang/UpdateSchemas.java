@@ -16,7 +16,7 @@ public class UpdateSchemas {
     public static void main(String[] args) {
         System.out.println("\n## START checking all database schemas\n");
         try {
-            List<DatabaseCredentialsVigiaNG> databasesCredentials = EnvironmentService.getVigiangDatabases();
+            List<DatabaseCredentialsVigiaNG> databasesCredentials = EnvironmentService.getDatabasesVigiaNg();
             Request request = getRequest();
             execute(databasesCredentials, request, UpdateSchemas::handleResult);
         } catch (Exception e) {

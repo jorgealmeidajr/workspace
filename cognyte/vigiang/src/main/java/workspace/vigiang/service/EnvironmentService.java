@@ -31,11 +31,9 @@ public class EnvironmentService {
         return List.of("1.5", "1.7", "2.0", "2.1", "2.2", "3.0");
     }
 
-    public static List<DatabaseCredentialsVigiaNG> getVigiangDatabases() throws IOException {
-        try (InputStream read = EnvironmentService.class.getResourceAsStream("/databases.json")) {
-            if (read == null) {
-                throw new IllegalStateException("Resource `/databases.json` not found on classpath");
-            }
+    public static List<DatabaseCredentialsVigiaNG> getDatabasesVigiaNg() throws IOException {
+        Path inputPath = Paths.get(getVigiaNgPath() + "\\databases.json");
+        try (InputStream read = Files.newInputStream(inputPath)) {
             return getDatabaseCredentials(read);
         }
     }
@@ -151,7 +149,7 @@ public class EnvironmentService {
     }
 
     public static DatabaseCredentialsVigiaNG getDatabaseCredentials(String databaseName) throws IOException {
-        return getVigiangDatabases().stream()
+        return getDatabasesVigiaNg().stream()
                 .filter((credentials) -> credentials.getName().equals(databaseName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));

@@ -13,9 +13,9 @@ import java.util.ArrayList;
 
 import static workspace.commons.service.FileService.writeString;
 
+@Deprecated
 public class CheckProjectsVersions {
 
-    // TODO: replace Playwright with GitLab API calls in python script
     public static void main(String[] args) {
         System.out.println("## START checking all projects versions\n");
         try (Playwright playwright = Playwright.create()) {
