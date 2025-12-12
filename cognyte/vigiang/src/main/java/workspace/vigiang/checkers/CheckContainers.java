@@ -1,7 +1,7 @@
 package workspace.vigiang.checkers;
 
 import workspace.commons.service.DockerComposeService;
-import workspace.commons.service.SshExecutor;
+import workspace.commons.service.SshService;
 import workspace.vigiang.model.LaboratoryVigiaNg;
 import workspace.vigiang.service.ContainersService;
 import workspace.vigiang.service.EnvironmentService;
@@ -80,7 +80,7 @@ public class CheckContainers {
 
     private static void updateScriptFile(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg, String script) throws Exception {
         var command = "cat /opt/vigiang/scripts/" + script;
-        String sshResponse = SshExecutor.execute(
+        String sshResponse = SshService.execute(
                 laboratoryVigiaNg.getSshUsername(),
                 laboratoryVigiaNg.getSshPassword(),
                 laboratoryVigiaNg.getSshHost(),
@@ -101,7 +101,7 @@ public class CheckContainers {
 
     private static List<String[]> listDockerContainers(String username, String password, String host, int port) throws Exception {
         var command = "docker ps -a --format 'table {{.Names}}\\t{{.Image}}'";
-        String sshResponse = SshExecutor.execute(username, password, host, port, command);
+        String sshResponse = SshService.execute(username, password, host, port, command);
         List<String> initialLines = new ArrayList<>(Arrays.asList(sshResponse.split("\\R")));
         initialLines.remove(0);
         initialLines.sort(Comparator.naturalOrder());
@@ -125,7 +125,7 @@ public class CheckContainers {
 
     private static String getDockerCompose(String username, String password, String host, int port) throws Exception {
         var command = "cat /opt/vigiang/scripts/docker-compose.yml";
-        return SshExecutor.execute(username, password, host, port, command);
+        return SshService.execute(username, password, host, port, command);
     }
 
 }

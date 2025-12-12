@@ -6,7 +6,7 @@ import com.jcraft.jsch.Session;
 
 import java.io.ByteArrayOutputStream;
 
-public class SshExecutor {
+public class SshService {
 
     public static String execute(String username, String password, String host, int port, String command) throws Exception {
         String response = "";
@@ -29,7 +29,7 @@ public class SshExecutor {
                 Thread.sleep(100);
             }
 
-            String responseString = new String(responseStream.toByteArray());
+            String responseString = responseStream.toString();
             response = responseString.trim();
 
         } finally {
