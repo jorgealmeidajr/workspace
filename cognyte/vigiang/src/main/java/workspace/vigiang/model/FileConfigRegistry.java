@@ -90,7 +90,7 @@ public class FileConfigRegistry {
             })
         ));
 
-        configurations.put("configReport", Map.of(
+        configurations.put("reportConfig", Map.of(
             Database.ORACLE, new FileConfig("CFG_SITE_RELATORIO", new String[] {
                 "CD_OPERADORA", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO", "CD_RELATORIO", "ID_RELATORIO"
             }),
