@@ -156,7 +156,7 @@ public class UpdateProjectsByVersion {
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "webviewer:\n";
-                result = getFileContentsTxt(matchesFiltered, result);
+                result += getFileContentsTxt(matchesFiltered);
                 result += "\n";
             }
 
@@ -165,24 +165,14 @@ public class UpdateProjectsByVersion {
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "workflow:\n";
-                result = getFileContentsTxt(matchesFiltered, result);
+                result += getFileContentsTxt(matchesFiltered);
                 result += "\n";
             }
-
-            // TODO: enable this when version >= 3.0
-//            matchesFiltered = vigiangMatches.getFrontendMatches().stream()
-//                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("vigia-components"))
-//                    .collect(Collectors.toList());
-//            if (!matchesFiltered.isEmpty()) {
-//                result += "components:\n";
-//                result = getFileContentsTxt(matchesFiltered, result);
-//                result += "\n";
-//            }
         }
 
         if (!vigiangMatches.getBackendMatches().isEmpty()) {
             result += "backend:\n";
-            result = getFileContentsTxt(vigiangMatches.getBackendMatches(), result);
+            result += getFileContentsTxt(vigiangMatches.getBackendMatches());
             result += "\n";
         }
 
@@ -223,7 +213,7 @@ public class UpdateProjectsByVersion {
             if (!matchesFiltered.isEmpty()) {
                 result += "# webviewer:\n";
                 result += "```\n";
-                result = getFileContentsMd(matchesFiltered, result);
+                result += getFileContentsMd(matchesFiltered);
                 result += "```\n\n";
             }
 
@@ -233,7 +223,7 @@ public class UpdateProjectsByVersion {
             if (!matchesFiltered.isEmpty()) {
                 result += "# workflow:\n";
                 result += "```\n";
-                result = getFileContentsMd(matchesFiltered, result);
+                result += getFileContentsMd(matchesFiltered);
                 result += "```\n\n";
             }
         }
@@ -241,7 +231,7 @@ public class UpdateProjectsByVersion {
         if (!vigiangMatches.getBackendMatches().isEmpty()) {
             result += "# backend:\n";
             result += "```\n";
-            result = getFileContentsMd(vigiangMatches.getBackendMatches(), result);
+            result += getFileContentsMd(vigiangMatches.getBackendMatches());
             result += "```\n";
         }
 
@@ -251,28 +241,30 @@ public class UpdateProjectsByVersion {
         writeString(outputPath, result);
     }
 
-    private static String getFileContentsTxt(List<FileMatch> matches, String resultTxt) {
+    private static String getFileContentsTxt(List<FileMatch> matches) {
         List<String> sortedMatches = matches.stream()
                 .map(FileMatch::getMatch)
                 .distinct()
                 .sorted()
                 .collect(Collectors.toList());
 
+        String result = "";
         for (String match : sortedMatches) {
-            resultTxt += "  " + match + "\n";
+            result += "  " + match + "\n";
         }
-        return resultTxt;
+        return result;
     }
 
-    private static String getFileContentsMd(List<FileMatch> matches, String resultTxt) {
+    private static String getFileContentsMd(List<FileMatch> matches) {
         Map<String, List<FileMatch>> grouped = matches.stream()
                 .collect(Collectors.groupingBy(fm -> fm.getRelativeDir() == null ? "" : fm.getRelativeDir()));
 
         List<String> dirs = new ArrayList<>(grouped.keySet());
         dirs.sort(String::compareTo);
 
+        String result = "";
         for (String dir : dirs) {
-            resultTxt += dir + ":\n";
+            result += dir + ":\n";
 
             List<FileMatch> sortedUnique = grouped.get(dir).stream()
                     .collect(Collectors.collectingAndThen(
@@ -283,11 +275,11 @@ public class UpdateProjectsByVersion {
                     ));
 
             for (FileMatch fm : sortedUnique) {
-                resultTxt += "  " + fm.getMatch() + "\n";
+                result += "  " + fm.getMatch() + "\n";
             }
-            resultTxt += "\n";
+            result += "\n";
         }
-        return resultTxt;
+        return result;
     }
 
     private static void validateProjectDirectories(String workDir, String version) {
