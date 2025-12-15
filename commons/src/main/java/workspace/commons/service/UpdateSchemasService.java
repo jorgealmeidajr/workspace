@@ -135,10 +135,19 @@ public class UpdateSchemasService {
             return;
         }
 
+        var postgresSchemasToSkip = List.of("information_schema", "pg_catalog", "pgagent");
+
         var finalLines = new ArrayList<String>();
         for (String name : names) {
             if (Database.ORACLE.equals(database)) {
                 name = getValueAfterDot(name);
+            }
+
+            if (Database.POSTGRES.equals(database)) {
+                var schema = getValueBeforeDot(name);
+                if (postgresSchemasToSkip.contains(schema)) {
+                    continue;
+                }
             }
 
             finalLines.add(name);
@@ -153,6 +162,11 @@ public class UpdateSchemasService {
     public static String getValueAfterDot(String name) {
         int dotIndex = name.indexOf(".");
         return dotIndex >= 0 ? name.substring(dotIndex + 1) : name;
+    }
+
+    static String getValueBeforeDot(String name) {
+        int dotIndex = name.indexOf(".");
+        return dotIndex >= 0 ? name.substring(0, dotIndex) : name;
     }
 
     private static String getRowDefinitionStr(DbObjectDefinition row) {
