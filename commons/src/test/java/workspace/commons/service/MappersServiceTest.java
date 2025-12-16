@@ -370,7 +370,7 @@ public class MappersServiceTest {
     @Nested
     class GetXmlMappingsTest {
         @Test
-        public void testGetXmlMappings_NoSelect() {
+        public void testGetXmlMappings_EmptyMapper() {
             String content =
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
@@ -383,6 +383,8 @@ public class MappersServiceTest {
                 assertEquals("com.example.EmptyMapper", result.getNamespace());
                 assertEquals(database, result.getDatabase());
                 assertEquals(0, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -412,6 +414,8 @@ public class MappersServiceTest {
                 assertEquals("com.suntech.vigiaNG.userservice.repository.UserMapper", result.getNamespace());
                 assertEquals(database, result.getDatabase());
                 assertEquals(1, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
 
                 XmlCallMapping select1 = result.getSelects().get(0);
                 assertEquals("listUser", select1.getId());
@@ -446,31 +450,14 @@ public class MappersServiceTest {
                 assertEquals("com.example.MyMapper", result.getNamespace());
                 assertEquals(database, result.getDatabase());
                 assertEquals(2, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
 
                 XmlCallMapping select1 = result.getSelects().get(0);
                 assertEquals("getUser", select1.getId());
 
                 XmlCallMapping select2 = result.getSelects().get(1);
                 assertEquals("listUsers", select2.getId());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Test
-        public void testGetXmlMappings_NoInsert() {
-            String content =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
-                "<mapper namespace=\"com.example.EmptyMapper\">\n" +
-                "</mapper>";
-
-            try {
-                String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.EmptyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getInserts().size());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -502,7 +489,9 @@ public class MappersServiceTest {
                 XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
                 assertEquals("com.example.MyMapper", result.getNamespace());
                 assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
                 assertEquals(1, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
 
                 XmlCallMapping insert1 = result.getInserts().get(0);
                 assertEquals("saveNoteUsers", insert1.getId());
@@ -534,13 +523,86 @@ public class MappersServiceTest {
                 XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
                 assertEquals("com.example.MyMapper", result.getNamespace());
                 assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
                 assertEquals(2, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
 
                 XmlCallMapping insert1 = result.getInserts().get(0);
                 assertEquals("insertOne", insert1.getId());
 
                 XmlCallMapping insert2 = result.getInserts().get(1);
                 assertEquals("insertTwo", insert2.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_OneUpdate() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.suntech.vigiaNG.configserver.repository.ConfigMapper\">\n" +
+                "    <update id=\"updateConfiguration\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "        {\n" +
+                "            call conf.f_site_upd(\n" +
+                "                #{userLogin, jdbcType=VARCHAR, mode=IN},\n" +
+                "                #{userIp,    jdbcType=VARCHAR, mode=IN},\n" +
+                "                #{id,        jdbcType=VARCHAR, mode=IN, typeHandler=com.suntech.vigiaNG.commons.typehandler.LongToIntegerTypeHandler}::varchar,\n" +
+                "                #{value,     jdbcType=VARCHAR, mode=IN}\n" +
+                "            )\n" +
+                "        }\n" +
+                "    </update>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.suntech.vigiaNG.configserver.repository.ConfigMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(1, result.getUpdates().size());
+
+                XmlCallMapping update1 = result.getUpdates().get(0);
+                assertEquals("updateConfiguration", update1.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_TwoUpdates() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.MyMapper\">\n" +
+                "    <update id=\"updateOne\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "       {\n" +
+                "           call schema.proc_update_one( #{param1, jdbcType=VARCHAR, mode=IN} )\n" +
+                "       }\n" +
+                "   </update>\n" +
+                "    <update id=\"updateTwo\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "       {\n" +
+                "           call schema.proc_update_two( #{param2, jdbcType=INTEGER, mode=IN} )\n" +
+                "       }\n" +
+                "   </update>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.MyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(2, result.getUpdates().size());
+
+                XmlCallMapping update1 = result.getUpdates().get(0);
+                assertEquals("updateOne", update1.getId());
+
+                XmlCallMapping update2 = result.getUpdates().get(1);
+                assertEquals("updateTwo", update2.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

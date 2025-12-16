@@ -50,13 +50,16 @@ public class MappersService {
         return result;
     }
 
-    public static String getNamespace(Document document) {
+    private static String getNamespace(Document document) {
         String namespace = "";
         Node node = document.getElementsByTagName("mapper").item(0);
         NamedNodeMap attributes = node.getAttributes();
         for (int a = 0; a < attributes.getLength(); a++) {
             Node attribute = attributes.item(a);
-            if ("namespace".equals(attribute.getNodeName())) namespace = attribute.getNodeValue();
+            if ("namespace".equals(attribute.getNodeName())) {
+                namespace = attribute.getNodeValue();
+                break;
+            }
         }
         return namespace;
     }
