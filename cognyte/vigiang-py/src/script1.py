@@ -104,7 +104,7 @@ def main() -> None:
     print("starting script1: update deploy hosts.")
 
     req = Request(
-        laboratories_to_update = "CLARO-01,ENTEL,MOVISTAR,TIM,VIVO".split(","),
+        laboratories_to_update = "TIM,CLARO1,VIVO,ALGAR,ENTEL,MOVISTAR,QA1".split(","),
         backend_services_to_update = "system-service,zuul-server".split(","),
         frontend = True
     )

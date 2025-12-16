@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 WORK_PATH_STR = r"C:\work"
-COGNYTE_PATH_STR = WORK_PATH_STR + r"\COGNYTE1"
+COGNYTE_PATH_STR = WORK_PATH_STR + r"\COGNYTE"
 VIGIANG_PATH_STR = COGNYTE_PATH_STR + r"\VIGIANG"
 
 

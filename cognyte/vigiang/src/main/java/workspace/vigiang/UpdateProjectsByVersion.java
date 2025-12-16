@@ -21,8 +21,6 @@ import static workspace.commons.service.FileService.*;
 
 public class UpdateProjectsByVersion {
 
-    static final List<VigiangMatches> MATCHES = new ArrayList<>();
-
     public static void main(String[] args) {
         var WORK_DIR = "C:\\work\\vigiang";
 
@@ -55,8 +53,6 @@ public class UpdateProjectsByVersion {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            MATCHES.clear();
         }
     }
 
@@ -81,7 +77,6 @@ public class UpdateProjectsByVersion {
                 .collect(Collectors.toList());
 
         var vigiangMatches = new VigiangMatches(backendMatches, frontendMatches, VigiangMatchType.CONFIGURATION);
-        MATCHES.add(vigiangMatches);
 
         updateTxt(versionPath, vigiangMatches, "configurations");
         updateMd(versionPath, vigiangMatches, "configurations");
@@ -100,7 +95,6 @@ public class UpdateProjectsByVersion {
             getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of()),
             getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of()),
             VigiangMatchType.FEATURE);
-        MATCHES.add(vigiangMatches);
 
         updateTxt(versionPath, vigiangMatches, "features");
         updateMd(versionPath, vigiangMatches, "features");
@@ -120,7 +114,6 @@ public class UpdateProjectsByVersion {
             getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of("LIST_TAG")),
             getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of()),
             VigiangMatchType.PRIVILEGE);
-        MATCHES.add(vigiangMatches);
 
         updateTxt(versionPath, vigiangMatches, "privileges");
         updateMd(versionPath, vigiangMatches, "privileges");
@@ -141,7 +134,6 @@ public class UpdateProjectsByVersion {
             getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of()),
             getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of("NODE_ENV", "globals")),
             VigiangMatchType.ENVIRONMENT);
-        MATCHES.add(vigiangMatches);
 
         updateTxt(versionPath, vigiangMatches, "environment");
         updateMd(versionPath, vigiangMatches, "environment");
