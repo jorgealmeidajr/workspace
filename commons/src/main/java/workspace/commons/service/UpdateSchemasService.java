@@ -22,6 +22,8 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import static workspace.commons.service.FileService.writeString;
+import static workspace.commons.utils.StringUtils.getValueAfterDot;
+import static workspace.commons.utils.StringUtils.getValueBeforeDot;
 
 public class UpdateSchemasService {
 
@@ -157,16 +159,6 @@ public class UpdateSchemasService {
         var result = String.join(System.lineSeparator(), finalLines);
         Path outputPath = Paths.get(path + "\\" + fileName + ".txt");
         writeString(outputPath, result);
-    }
-
-    public static String getValueAfterDot(String name) {
-        int dotIndex = name.indexOf(".");
-        return dotIndex >= 0 ? name.substring(dotIndex + 1) : name;
-    }
-
-    static String getValueBeforeDot(String name) {
-        int dotIndex = name.indexOf(".");
-        return dotIndex >= 0 ? name.substring(0, dotIndex) : name;
     }
 
     private static String getRowDefinitionStr(DbObjectDefinition row) {

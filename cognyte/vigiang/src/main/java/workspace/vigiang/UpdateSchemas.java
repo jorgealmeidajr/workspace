@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static workspace.commons.service.UpdateSchemasService.*;
+import static workspace.commons.utils.StringUtils.getValueAfterDot;
 
 public class UpdateSchemas {
 
