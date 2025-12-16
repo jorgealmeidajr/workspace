@@ -27,13 +27,15 @@ import static workspace.commons.service.FileService.writeString;
 public class MappersService {
 
     public static String extractFunctionCall(String content) {
-        String result = "";
-        content = content.trim();
+        String result;
+        content = content.trim().toLowerCase();
 
         Pattern r = Pattern.compile("call\\s+(\\w+.\\w+)");
         Matcher m = r.matcher(content);
         if (m.find()) {
             result = m.group(1);
+        } else {
+            return "";
         }
         return result.toUpperCase() + "()";
     }
