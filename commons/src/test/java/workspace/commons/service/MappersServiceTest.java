@@ -2,6 +2,8 @@ package workspace.commons.service;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import workspace.commons.model.XmlCallMapping;
+import workspace.commons.model.XmlMyBatisMapping;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -362,6 +364,186 @@ public class MappersServiceTest {
             assertEquals("userIp", result.get(1));
             assertEquals("filters", result.get(2));
             assertEquals("fields", result.get(3));
+        }
+    }
+
+    @Nested
+    class GetXmlMappingsTest {
+        @Test
+        public void testGetXmlMappings_NoSelect() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.EmptyMapper\">\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.EmptyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_OneSelect() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.suntech.vigiaNG.userservice.repository.UserMapper\">\n" +
+                "    <select id=\"listUser\" resultMap=\"listUserResult\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\" fetchSize=\"1000\">\n" +
+                "        {\n" +
+                "            #{resultSet, jdbcType=CURSOR, mode=OUT,javaType=java.sql.ResultSet,resultMap=listUserResult} = call fn_ng_users_list(\n" +
+                "                #{userLogin,  jdbcType=VARCHAR,  mode=IN},\n" +
+                "                #{userIp,     jdbcType=VARCHAR,  mode=IN},\n" +
+                "                #{filters,     jdbcType=VARCHAR,  mode=IN},\n" +
+                "                #{fields,     jdbcType=VARCHAR,  mode=IN}\n" +
+                "            )\n" +
+                "        }\n" +
+                "    </select>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.suntech.vigiaNG.userservice.repository.UserMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(1, result.getSelects().size());
+
+                XmlCallMapping select1 = result.getSelects().get(0);
+                assertEquals("listUser", select1.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_TwoSelects() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.MyMapper\">\n" +
+                "    <select id=\"getUser\" resultMap=\"getUserResult\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "        {\n" +
+                "            #{resultSet, jdbcType=CURSOR, mode=OUT,javaType=java.sql.ResultSet,resultMap=getUserResult} = call fn_get_user(\n" +
+                "                #{userId,  jdbcType=INTEGER,  mode=IN}\n" +
+                "            )\n" +
+                "        }\n" +
+                "    </select>\n" +
+                "    <select id=\"listUsers\" resultMap=\"listUsersResult\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "        {\n" +
+                "            #{resultSet, jdbcType=CURSOR, mode=OUT,javaType=java.sql.ResultSet,resultMap=listUsersResult} = call fn_list_users()\n" +
+                "        }\n" +
+                "    </select>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.MyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(2, result.getSelects().size());
+
+                XmlCallMapping select1 = result.getSelects().get(0);
+                assertEquals("getUser", select1.getId());
+
+                XmlCallMapping select2 = result.getSelects().get(1);
+                assertEquals("listUsers", select2.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_NoInsert() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.EmptyMapper\">\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.EmptyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getInserts().size());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_OneInsert() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.MyMapper\">\n" +
+                "    <insert id=\"saveNoteUsers\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "       {\n" +
+                "           call conf.f_notes_user_ins(\n" +
+                "               #{userLogin, jdbcType=VARCHAR,   mode=IN},\n" +
+                "               #{userIp,    jdbcType=VARCHAR,   mode=IN},\n" +
+                "               #{noteId,    jdbcType=BIGINT,    mode=IN}::integer,\n" +
+                "               #{login,     jdbcType=VARCHAR,   mode=IN},\n" +
+                "               #{date,      jdbcType=TIMESTAMP, mode=IN},\n" +
+                "               #{closed,    jdbcType=VARCHAR,   mode=IN},\n" +
+                "               #{read,      jdbcType=VARCHAR,   mode=IN}\n" +
+                "           )\n" +
+                "       }\n" +
+                "   </insert>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.MyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(1, result.getInserts().size());
+
+                XmlCallMapping insert1 = result.getInserts().get(0);
+                assertEquals("saveNoteUsers", insert1.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_TwoInserts() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.MyMapper\">\n" +
+                "    <insert id=\"insertOne\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "       {\n" +
+                "           call schema.proc_insert_one( #{param1, jdbcType=VARCHAR, mode=IN} )\n" +
+                "       }\n" +
+                "   </insert>\n" +
+                "    <insert id=\"insertTwo\" parameterType=\"java.util.Map\" statementType=\"CALLABLE\">\n" +
+                "       {\n" +
+                "           call schema.proc_insert_two( #{param2, jdbcType=INTEGER, mode=IN} )\n" +
+                "       }\n" +
+                "   </insert>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.MyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(2, result.getInserts().size());
+
+                XmlCallMapping insert1 = result.getInserts().get(0);
+                assertEquals("insertOne", insert1.getId());
+
+                XmlCallMapping insert2 = result.getInserts().get(1);
+                assertEquals("insertTwo", insert2.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

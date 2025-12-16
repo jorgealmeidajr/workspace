@@ -96,7 +96,7 @@ public class MappersService {
 
             String currentId = null;
             for (XmlCallMapping xmlCallMapping : result) {
-                if ("()".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
+                if ("".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
                     System.out.println("case to check: " + namespace + ", " + xmlCallMapping.getId() + ", " + xmlCallMapping.getDatabase());
                     continue;
                 }
@@ -156,7 +156,7 @@ public class MappersService {
             resultMd += "```\n";
             String currentId = null;
             for (XmlCallMapping xmlCallMapping : result) {
-                if ("()".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
+                if ("".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
                     System.out.println("case to check: " + key + ", " + xmlCallMapping.getId() + ", " + xmlCallMapping.getDatabase());
                     continue;
                 }
@@ -216,7 +216,6 @@ public class MappersService {
 
             resultMd += "```\n\n";
         }
-        System.out.println();
 
         writeContentToFile(resultMd, versionPath, "\\mappers.md");
     }
@@ -288,17 +287,24 @@ public class MappersService {
             String functionCall = extractFunctionCall(content);
             List<String> functionParams = extractFunctionParams(content);
 
-            NamedNodeMap attributes = node.getAttributes();
-            String id = "";
-            for (int a = 0; a < attributes.getLength(); a++) {
-                Node attribute = attributes.item(a);
-                if ("id".equals(attribute.getNodeName())) id = attribute.getNodeValue();
-
-                var temp = new XmlCallMapping(namespace, id, database, functionCall, functionParams);
-                resultList.add(temp);
-            }
+            String id = getId(node);
+            var temp = new XmlCallMapping(namespace, id, database, functionCall, functionParams);
+            resultList.add(temp);
         }
         return resultList;
+    }
+
+    private static String getId(Node node) {
+        NamedNodeMap attributes = node.getAttributes();
+        String id = "";
+        for (int a = 0; a < attributes.getLength(); a++) {
+            Node attribute = attributes.item(a);
+            if ("id".equals(attribute.getNodeName())) {
+                id = attribute.getNodeValue();
+                break;
+            }
+        }
+        return id;
     }
 
 }
