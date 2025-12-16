@@ -174,4 +174,195 @@ public class MappersServiceTest {
         }
     }
 
+    @Nested
+    class ExtractFunctionParamsTest {
+        @Test
+        public void testExtractFunctionParamsOracle() {
+            String content =
+                "{\n" +
+                "  call pseg_Usuario.Sp_Consultar_Registro_Login(\n" +
+                "    #{userLogin, jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{resultSet, jdbcType=CURSOR,  mode=OUT, javaType=java.sql.ResultSet, resultMap=loadUserByUsernameResult}\n" +
+                "  )\n" +
+                "}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(1, result.size());
+            assertEquals("userLogin", result.get(0));
+        }
+
+        @Test
+        public void testExtractFunctionParamsMultipleInputParams() {
+            String content =
+                "{\n" +
+                "  call Srq_Usuario.Sp_Validar(\n" +
+                "    #{userLogin,    jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{userIp,       jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{password,     jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{appName,      jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{validCaptcha, jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{resultSet,    jdbcType=CURSOR,  mode=OUT, javaType=java.sql.ResultSet, resultMap=Authentication_singleUserResult}\n" +
+                "  )\n" +
+                "}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(5, result.size());
+            assertEquals("userLogin", result.get(0));
+            assertEquals("userIp", result.get(1));
+            assertEquals("password", result.get(2));
+            assertEquals("appName", result.get(3));
+            assertEquals("validCaptcha", result.get(4));
+        }
+
+        @Test
+        public void testExtractFunctionParamsPostgres() {
+            String content =
+                "{\n" +
+                "  call sec.f_user_by_login_get(\n" +
+                "    #{ userLogin, jdbcType=VARCHAR, mode=IN },\n" +
+                "    #{ resultSet, jdbcType=OTHER,   mode=OUT, javaType=java.sql.ResultSet, resultMap=loadUserByUsernameResult }\n" +
+                "  )\n" +
+                "}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(1, result.size());
+            assertEquals("userLogin", result.get(0));
+        }
+
+        @Test
+        public void testExtractFunctionParamsPostgresMultiple() {
+            String content =
+                "call sec.sp_user_validate(\n" +
+                "  #{ userLogin,    jdbcType=VARCHAR, mode=IN  },\n" +
+                "  #{ userIp,       jdbcType=VARCHAR, mode=IN  },\n" +
+                "  #{ password,     jdbcType=VARCHAR, mode=IN  },\n" +
+                "  #{ appName,      jdbcType=VARCHAR, mode=IN  },\n" +
+                "  #{ validCaptcha, jdbcType=VARCHAR, mode=IN  },\n" +
+                "  #{ message,      jdbcType=VARCHAR, mode=OUT },\n" +
+                "  #{ resultSet,    jdbcType=OTHER,   mode=OUT, javaType=java.sql.ResultSet, resultMap=authenticationSingleUserResult }\n" +
+                ")";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(5, result.size());
+            assertEquals("userLogin", result.get(0));
+            assertEquals("userIp", result.get(1));
+            assertEquals("password", result.get(2));
+            assertEquals("appName", result.get(3));
+            assertEquals("validCaptcha", result.get(4));
+        }
+
+        @Test
+        public void testExtractFunctionParamsIgnoresOutMode() {
+            String content =
+                "{\n" +
+                "  #{id, jdbcType=INTEGER, mode=OUT} = call fn_ng_user2factoraut_ins(\n" +
+                "    #{userId,                  jdbcType=INTEGER, mode=IN},\n" +
+                "    #{lastPassword,            jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{timeMillisFromLastLogin, jdbcType=INTEGER, mode=IN},\n" +
+                "    #{totpSecret,              jdbcType=VARCHAR, mode=IN}\n" +
+                "  )\n" +
+                "}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(4, result.size());
+            assertEquals("userId", result.get(0));
+            assertEquals("lastPassword", result.get(1));
+            assertEquals("timeMillisFromLastLogin", result.get(2));
+            assertEquals("totpSecret", result.get(3));
+        }
+
+        @Test
+        public void testExtractFunctionParamsEmptyString() {
+            String content = "";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(0, result.size());
+        }
+
+        @Test
+        public void testExtractFunctionParamsNoParams() {
+            String content = "{\n  call schema.function()\n}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(0, result.size());
+        }
+
+        @Test
+        public void testExtractFunctionParamsOnlyOutMode() {
+            String content =
+                "#{ message,      jdbcType=VARCHAR, mode=OUT },\n" +
+                "#{ resultSet,    jdbcType=OTHER,   mode=OUT, javaType=java.sql.ResultSet }";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(0, result.size());
+        }
+
+        @Test
+        public void testExtractFunctionParamsWithVariousSpacing() {
+            String content =
+                "#{userLogin, jdbcType=VARCHAR, mode=IN},\n" +
+                "#{ userIp, jdbcType=VARCHAR, mode=IN },\n" +
+                "#{  password,    jdbcType=VARCHAR,    mode=IN  }";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(3, result.size());
+            assertEquals("userLogin", result.get(0));
+            assertEquals("userIp", result.get(1));
+            assertEquals("password", result.get(2));
+        }
+
+        @Test
+        public void testExtractFunctionParamsWithUnderscoresAndNumbers() {
+            String content =
+                "#{user_login_1, jdbcType=VARCHAR, mode=IN},\n" +
+                "#{param_name_2, jdbcType=INTEGER, mode=IN},\n" +
+                "#{id_3, jdbcType=BIGINT, mode=IN}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(3, result.size());
+            assertEquals("user_login_1", result.get(0));
+            assertEquals("param_name_2", result.get(1));
+            assertEquals("id_3", result.get(2));
+        }
+
+        @Test
+        public void testExtractFunctionParamsMixedWithoutAndInMode() {
+            String content =
+                "#{id, mode=OUT},\n" +
+                "#{firstName, mode=IN},\n" +
+                "#{lastName, mode=IN},\n" +
+                "#{message, mode=OUT}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(2, result.size());
+            assertEquals("firstName", result.get(0));
+            assertEquals("lastName", result.get(1));
+        }
+
+        @Test
+        public void testExtractFunctionParamsOrderPreservation() {
+            String content =
+                "#{param1, mode=IN},\n" +
+                "#{param2, mode=IN},\n" +
+                "#{param3, mode=IN},\n" +
+                "#{param4, mode=IN},\n" +
+                "#{param5, mode=IN}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(5, result.size());
+            assertEquals("param1", result.get(0));
+            assertEquals("param2", result.get(1));
+            assertEquals("param3", result.get(2));
+            assertEquals("param4", result.get(3));
+            assertEquals("param5", result.get(4));
+        }
+
+        @Test
+        public void testExtractFunctionParamsComplexContent() {
+            String content =
+                "{\n" +
+                "  #{resultSet, jdbcType=OTHER, mode=OUT,javaType=java.sql.ResultSet,resultMap=listInterceptionLogMap} = call log.f_log_interception_list(\n" +
+                "    #{userLogin, jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{userIp,    jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{filters,   jdbcType=VARCHAR, mode=IN},\n" +
+                "    #{fields,    jdbcType=VARCHAR, mode=IN}\n" +
+                "  )\n" +
+                "}";
+            var result = MappersService.extractFunctionParams(content);
+            assertEquals(4, result.size());
+            assertEquals("userLogin", result.get(0));
+            assertEquals("userIp", result.get(1));
+            assertEquals("filters", result.get(2));
+            assertEquals("fields", result.get(3));
+        }
+    }
+
 }
