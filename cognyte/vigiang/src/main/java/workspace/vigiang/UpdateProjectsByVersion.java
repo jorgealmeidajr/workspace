@@ -30,8 +30,8 @@ public class UpdateProjectsByVersion {
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
             Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
-            var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons", "target"));
-            var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js", "tsx"), List.of("node_modules", "json-server", "tests"));
+            final var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons", "target"));
+            final var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js", "tsx"), List.of("node_modules", "json-server", "tests"));
             VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
 
             try {
@@ -39,17 +39,8 @@ public class UpdateProjectsByVersion {
                 updateFeatures(versionPath, vigiangFileContents);
                 updatePrivileges(versionPath, vigiangFileContents);
                 updateEnvironment(versionPath, vigiangFileContents);
-
-                backendFileContents = getFileContentsByExtensions(backendPath, List.of("xml"), List.of("commons", "target")).stream()
-                    .filter(f -> f.getRelativeDir().contains("\\repository\\"))
-                    .collect(Collectors.toList());
-                updateMappers(versionPath, backendFileContents);
-                writeMd(backendFileContents, Paths.get(versionPath + "\\mybatis.md"));
-
-                List<FileContent> setupFileContents = new ArrayList<>();
-                setupFileContents.addAll(getFileContentsByExtensions(frontendPath, List.of("dockerfile"), List.of("node_modules", "json-server", "tests")));
-                setupFileContents.addAll(getFileContentsByExtensions(backendPath, List.of("Dockerfile", "yaml", "yml"), List.of("node_modules", "commons", "target")));
-                writeMd(setupFileContents, Paths.get(versionPath + "\\setup.md"));
+                updateMybatis(backendPath, versionPath);
+                updateSetup(frontendPath, backendPath, versionPath);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -137,6 +128,23 @@ public class UpdateProjectsByVersion {
 
         updateTxt(versionPath, vigiangMatches, "environment");
         updateMd(versionPath, vigiangMatches, "environment");
+    }
+
+    private static void updateMybatis(Path backendPath, Path versionPath) throws IOException {
+        var fileContents = getFileContentsByExtensions(backendPath, List.of("xml"), List.of("commons", "target")).stream()
+                .filter(f -> f.getRelativeDir().contains("\\repository\\"))
+                .collect(Collectors.toList());
+
+        updateMappers(versionPath, fileContents);
+        writeMd(fileContents, Paths.get(versionPath + "\\mybatis.md"));
+    }
+
+    private static void updateSetup(Path frontendPath, Path backendPath, Path versionPath) throws IOException {
+        List<FileContent> fileContents = new ArrayList<>();
+        fileContents.addAll(getFileContentsByExtensions(frontendPath, List.of("dockerfile"), List.of("node_modules", "json-server", "tests")));
+        fileContents.addAll(getFileContentsByExtensions(backendPath, List.of("Dockerfile", "yaml", "yml"), List.of("node_modules", "commons", "target")));
+
+        writeMd(fileContents, Paths.get(versionPath + "\\setup.md"));
     }
 
     private static void updateTxt(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
