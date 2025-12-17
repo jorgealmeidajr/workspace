@@ -20,6 +20,9 @@ public class FileContent {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("name cannot be empty or null");
         }
+        if (content == null || content.isEmpty()) {
+            throw new IllegalArgumentException("content cannot be empty or null");
+        }
         this.fullName = fullName;
         this.relativeDir = relativeDir;
         this.name = name;

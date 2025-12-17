@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import static workspace.commons.model.FileMatch.getContentMd;
 import static workspace.commons.model.FileMatch.getContentTxt;
+import static workspace.commons.service.FileContentService.getFileContentsByExtensions;
+import static workspace.commons.service.FileContentService.getMatches;
 import static workspace.commons.service.FileService.*;
 
 
