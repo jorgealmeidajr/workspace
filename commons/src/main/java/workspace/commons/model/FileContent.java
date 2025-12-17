@@ -1,9 +1,7 @@
 package workspace.commons.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public class FileContent {
 
@@ -11,5 +9,21 @@ public class FileContent {
     private final String relativeDir;
     private final String name;
     private final String content;
+
+    public FileContent(String fullName, String relativeDir, String name, String content) {
+        if (fullName == null || fullName.isEmpty()) {
+            throw new IllegalArgumentException("fullName cannot be empty or null");
+        }
+        if (relativeDir == null || relativeDir.isEmpty()) {
+            throw new IllegalArgumentException("relativeDir cannot be empty or null");
+        }
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("name cannot be empty or null");
+        }
+        this.fullName = fullName;
+        this.relativeDir = relativeDir;
+        this.name = name;
+        this.content = content;
+    }
 
 }

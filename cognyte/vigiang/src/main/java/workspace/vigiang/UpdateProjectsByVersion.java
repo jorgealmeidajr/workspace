@@ -152,7 +152,7 @@ public class UpdateProjectsByVersion {
 
         if (!vigiangMatches.getFrontendMatches().isEmpty()) {
             List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
-                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("webviewer"))
+                    .filter(m -> m.getRelativeDir().contains("webviewer"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "webviewer:\n";
@@ -161,7 +161,7 @@ public class UpdateProjectsByVersion {
             }
 
             matchesFiltered = vigiangMatches.getFrontendMatches().stream()
-                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("workflow"))
+                    .filter(m -> m.getRelativeDir().contains("workflow"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "workflow:\n";
@@ -208,7 +208,7 @@ public class UpdateProjectsByVersion {
 
         if (!vigiangMatches.getFrontendMatches().isEmpty()) {
             List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
-                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("webviewer"))
+                    .filter(m -> m.getRelativeDir().contains("webviewer"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "# webviewer:\n";
@@ -218,7 +218,7 @@ public class UpdateProjectsByVersion {
             }
 
             matchesFiltered = vigiangMatches.getFrontendMatches().stream()
-                    .filter(m -> m.getRelativeDir() != null && m.getRelativeDir().contains("workflow"))
+                    .filter(m -> m.getRelativeDir().contains("workflow"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "# workflow:\n";
@@ -257,7 +257,7 @@ public class UpdateProjectsByVersion {
 
     private static String getFileContentsMd(List<FileMatch> matches) {
         Map<String, List<FileMatch>> grouped = matches.stream()
-                .collect(Collectors.groupingBy(fm -> fm.getRelativeDir() == null ? "" : fm.getRelativeDir()));
+                .collect(Collectors.groupingBy(FileMatch::getRelativeDir));
 
         List<String> dirs = new ArrayList<>(grouped.keySet());
         dirs.sort(String::compareTo);
