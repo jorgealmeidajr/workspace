@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static workspace.commons.model.FileMatch.getContentMd;
+import static workspace.commons.model.FileMatch.getContentTxt;
 import static workspace.commons.service.FileService.*;
 
 
@@ -156,7 +158,7 @@ public class UpdateProjectsByVersion {
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "webviewer:\n";
-                result += getFileContentsTxt(matchesFiltered);
+                result += getContentTxt(matchesFiltered);
                 result += "\n";
             }
 
@@ -165,14 +167,14 @@ public class UpdateProjectsByVersion {
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
                 result += "workflow:\n";
-                result += getFileContentsTxt(matchesFiltered);
+                result += getContentTxt(matchesFiltered);
                 result += "\n";
             }
         }
 
         if (!vigiangMatches.getBackendMatches().isEmpty()) {
             result += "backend:\n";
-            result += getFileContentsTxt(vigiangMatches.getBackendMatches());
+            result += getContentTxt(vigiangMatches.getBackendMatches());
             result += "\n";
         }
 
@@ -213,7 +215,7 @@ public class UpdateProjectsByVersion {
             if (!matchesFiltered.isEmpty()) {
                 result += "# webviewer:\n";
                 result += "```\n";
-                result += getFileContentsMd(matchesFiltered);
+                result += getContentMd(matchesFiltered);
                 result += "```\n\n";
             }
 
@@ -223,7 +225,7 @@ public class UpdateProjectsByVersion {
             if (!matchesFiltered.isEmpty()) {
                 result += "# workflow:\n";
                 result += "```\n";
-                result += getFileContentsMd(matchesFiltered);
+                result += getContentMd(matchesFiltered);
                 result += "```\n\n";
             }
         }
@@ -231,7 +233,7 @@ public class UpdateProjectsByVersion {
         if (!vigiangMatches.getBackendMatches().isEmpty()) {
             result += "# backend:\n";
             result += "```\n";
-            result += getFileContentsMd(vigiangMatches.getBackendMatches());
+            result += getContentMd(vigiangMatches.getBackendMatches());
             result += "```\n";
         }
 
@@ -239,47 +241,6 @@ public class UpdateProjectsByVersion {
 
         Path outputPath = Paths.get(versionPath + "\\" + output + ".md");
         writeString(outputPath, result);
-    }
-
-    private static String getFileContentsTxt(List<FileMatch> matches) {
-        List<String> sortedMatches = matches.stream()
-                .map(FileMatch::getMatch)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
-
-        String result = "";
-        for (String match : sortedMatches) {
-            result += "  " + match + "\n";
-        }
-        return result;
-    }
-
-    private static String getFileContentsMd(List<FileMatch> matches) {
-        Map<String, List<FileMatch>> grouped = matches.stream()
-                .collect(Collectors.groupingBy(FileMatch::getRelativeDir));
-
-        List<String> dirs = new ArrayList<>(grouped.keySet());
-        dirs.sort(String::compareTo);
-
-        String result = "";
-        for (String dir : dirs) {
-            result += dir + ":\n";
-
-            List<FileMatch> sortedUnique = grouped.get(dir).stream()
-                    .collect(Collectors.collectingAndThen(
-                            Collectors.toMap(FileMatch::getMatch, fm -> fm, (a, b) -> a, LinkedHashMap::new),
-                            m -> m.values().stream()
-                                    .sorted(Comparator.comparing(FileMatch::getMatch))
-                                    .collect(Collectors.toList())
-                    ));
-
-            for (FileMatch fm : sortedUnique) {
-                result += "  " + fm.getMatch() + "\n";
-            }
-            result += "\n";
-        }
-        return result;
     }
 
     private static void validateProjectDirectories(String workDir, String version) {
