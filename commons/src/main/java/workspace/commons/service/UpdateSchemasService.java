@@ -161,7 +161,7 @@ public class UpdateSchemasService {
         writeString(outputPath, result);
     }
 
-    private static String getRowDefinitionStr(DbObjectDefinition row) {
+    static String getRowDefinitionStr(DbObjectDefinition row) {
         String name = row.getName();
         int dotIndex = name.indexOf(".");
         String nameAfterDot = dotIndex >= 0 ? name.substring(dotIndex + 1) : name;
