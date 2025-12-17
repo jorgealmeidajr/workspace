@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import workspace.commons.model.XmlCallMapping;
 import workspace.commons.model.XmlMyBatisMapping;
+import workspace.commons.model.XmlResultMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -385,6 +386,7 @@ public class MappersServiceTest {
                 assertEquals(0, result.getSelects().size());
                 assertEquals(0, result.getInserts().size());
                 assertEquals(0, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -416,6 +418,7 @@ public class MappersServiceTest {
                 assertEquals(1, result.getSelects().size());
                 assertEquals(0, result.getInserts().size());
                 assertEquals(0, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
 
                 XmlCallMapping select1 = result.getSelects().get(0);
                 assertEquals("listUser", select1.getId());
@@ -452,6 +455,7 @@ public class MappersServiceTest {
                 assertEquals(2, result.getSelects().size());
                 assertEquals(0, result.getInserts().size());
                 assertEquals(0, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
 
                 XmlCallMapping select1 = result.getSelects().get(0);
                 assertEquals("getUser", select1.getId());
@@ -492,6 +496,7 @@ public class MappersServiceTest {
                 assertEquals(0, result.getSelects().size());
                 assertEquals(1, result.getInserts().size());
                 assertEquals(0, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
 
                 XmlCallMapping insert1 = result.getInserts().get(0);
                 assertEquals("saveNoteUsers", insert1.getId());
@@ -526,6 +531,7 @@ public class MappersServiceTest {
                 assertEquals(0, result.getSelects().size());
                 assertEquals(2, result.getInserts().size());
                 assertEquals(0, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
 
                 XmlCallMapping insert1 = result.getInserts().get(0);
                 assertEquals("insertOne", insert1.getId());
@@ -563,6 +569,7 @@ public class MappersServiceTest {
                 assertEquals(0, result.getSelects().size());
                 assertEquals(0, result.getInserts().size());
                 assertEquals(1, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
 
                 XmlCallMapping update1 = result.getUpdates().get(0);
                 assertEquals("updateConfiguration", update1.getId());
@@ -597,12 +604,82 @@ public class MappersServiceTest {
                 assertEquals(0, result.getSelects().size());
                 assertEquals(0, result.getInserts().size());
                 assertEquals(2, result.getUpdates().size());
+                assertEquals(0, result.getResultMaps().size());
 
                 XmlCallMapping update1 = result.getUpdates().get(0);
                 assertEquals("updateOne", update1.getId());
 
                 XmlCallMapping update2 = result.getUpdates().get(1);
                 assertEquals("updateTwo", update2.getId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_OneResultMap() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.MyMapper\">\n" +
+                "    <resultMap id=\"userResultMap\" type=\"com.example.User\">\n" +
+                "        <id property=\"id\" column=\"user_id\" />\n" +
+                "        <result property=\"username\" column=\"user_name\" />\n" +
+                "        <result property=\"email\" column=\"user_email\" />\n" +
+                "    </resultMap>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.MyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
+                assertEquals(1, result.getResultMaps().size());
+
+                XmlResultMap xmlResultMap1 = result.getResultMaps().get(0);
+                assertEquals("userResultMap", xmlResultMap1.getId());
+                assertEquals(2, xmlResultMap1.getResults().size());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        public void testGetXmlMappings_TwoResultMaps() {
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\n" +
+                "<mapper namespace=\"com.example.MyMapper\">\n" +
+                "    <resultMap id=\"userResultMap\" type=\"com.example.User\">\n" +
+                "        <id property=\"id\" column=\"user_id\" />\n" +
+                "        <result property=\"username\" column=\"user_name\" />\n" +
+                "    </resultMap>\n" +
+                "    <resultMap id=\"orderResultMap\" type=\"com.example.Order\">\n" +
+                "        <id property=\"orderId\" column=\"order_id\" />\n" +
+                "        <result property=\"amount\" column=\"order_amount\" />\n" +
+                "    </resultMap>\n" +
+                "</mapper>";
+
+            try {
+                String database = "oracle";
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
+                assertEquals("com.example.MyMapper", result.getNamespace());
+                assertEquals(database, result.getDatabase());
+                assertEquals(0, result.getSelects().size());
+                assertEquals(0, result.getInserts().size());
+                assertEquals(0, result.getUpdates().size());
+                assertEquals(2, result.getResultMaps().size());
+
+                XmlResultMap xmlResultMap1 = result.getResultMaps().get(0);
+                assertEquals("userResultMap", xmlResultMap1.getId());
+                assertEquals(1, xmlResultMap1.getResults().size());
+
+                XmlResultMap xmlResultMap2 = result.getResultMaps().get(1);
+                assertEquals("orderResultMap", xmlResultMap2.getId());
+                assertEquals(1, xmlResultMap2.getResults().size());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

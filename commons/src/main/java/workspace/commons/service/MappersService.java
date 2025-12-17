@@ -26,7 +26,7 @@ import static workspace.commons.service.FileService.writeString;
 
 public class MappersService {
 
-    public static String extractFunctionCall(String content) {
+    static String extractFunctionCall(String content) {
         String result;
         content = content.trim().toLowerCase();
 
@@ -40,7 +40,7 @@ public class MappersService {
         return result.toUpperCase() + "()";
     }
 
-    public static List<String> extractFunctionParams(String content) {
+    static List<String> extractFunctionParams(String content) {
         var result = new ArrayList<String>();
         Pattern r = Pattern.compile("#\\{\\s*(\\w+)[^}]*mode=IN[^}]*\\}");
         Matcher m = r.matcher(content);
@@ -223,7 +223,7 @@ public class MappersService {
         writeContentToFile(resultMd, versionPath, "\\mappers.md");
     }
 
-    public static List<XmlResultMap> getResultMaps(Document document, String database, String namespace) {
+    private static List<XmlResultMap> getResultMaps(Document document, String database, String namespace) {
         var result = new ArrayList<XmlResultMap>();
 
         NodeList nodeList1 = document.getElementsByTagName("resultMap");

@@ -36,6 +36,7 @@ class Request:
     laboratories_to_update: List[str]
     backend_services_to_update: List[str]
     frontend: bool
+    backend: bool
 
 
 def update_deploy_hosts(gl: gitlab.Gitlab, req: Request) -> None:
@@ -48,7 +49,8 @@ def update_deploy_hosts(gl: gitlab.Gitlab, req: Request) -> None:
         if lab["name"].lower() in [name.lower() for name in req.laboratories_to_update]
     ]
 
-    update_backend_projects(laboratories_filtered, projects, req)
+    if req.backend:
+        update_backend_projects(laboratories_filtered, projects, req)
 
     if req.frontend:
         update_frontend_projects(laboratories_filtered, projects)
@@ -104,9 +106,10 @@ def main() -> None:
     print("starting script1: update deploy hosts.")
 
     req = Request(
-        laboratories_to_update = "TIM,CLARO1,VIVO,ALGAR,ENTEL,MOVISTAR,QA1".split(","),
+        laboratories_to_update = "TIM,CLARO1,VIVO,ENTEL,MOVISTAR,QA1".split(","),
         backend_services_to_update = "system-service,zuul-server".split(","),
-        frontend = True
+        frontend = True,
+        backend = False
     )
 
     load_dotenv()
