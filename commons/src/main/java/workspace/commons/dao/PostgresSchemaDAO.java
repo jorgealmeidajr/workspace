@@ -22,11 +22,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listTablesNames() throws SQLException {
-        String sql =
-            "select table_schema, table_name \n" +
-            "from information_schema.tables \n" +
-            "where table_type in ('BASE TABLE') \n" +
-            "order by table_schema, table_name";
+        String sql = """
+            select table_schema, table_name
+            from information_schema.tables
+            where table_type in ('BASE TABLE')
+            order by table_schema, table_name
+            """;
 
         System.out.println("Executing POSTGRES sql:\n" + sql + "\n");
 
@@ -47,11 +48,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     @Override
     public List<DbObjectDefinition> listTablesDefinitions(List<String> names) throws SQLException {
         // TODO: postgres, create tables statements should be in create sql format
-        String sql =
-            "select table_schema, table_name \n" +
-            "from information_schema.tables \n" +
-            "where table_type in ('BASE TABLE') \n" +
-            "order by table_schema, table_name";
+        String sql = """
+            select table_schema, table_name
+            from information_schema.tables
+            where table_type in ('BASE TABLE')
+            order by table_schema, table_name
+            """;
 
         List<DbObjectDefinition> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -73,10 +75,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listViewsNames() throws SQLException {
-        String sql =
-            "select table_schema, table_name \n" +
-            "from information_schema.views \n" +
-            "order by table_schema, table_name";
+        String sql = """
+            select table_schema, table_name
+            from information_schema.views
+            order by table_schema, table_name
+            """;
 
         System.out.println("Executing POSTGRES sql:\n" + sql + "\n");
 
@@ -95,15 +98,15 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
     @Deprecated
     private static String getTableDefinition(Connection conn, String tableSchema, String tableName) throws SQLException {
         String result = "";
-        String sql =
-            "select \n" +
-            "  table_schema, table_name, column_name, column_default, is_nullable, data_type, \n" +
-            "  character_maximum_length, udt_name\n" +
-            "from information_schema.columns\n" +
-            "where table_schema in ('api', 'conf', 'dash', 'gen', 'itc', 'log', 'ofc', 'prog', 'public', 'sec', 'sync')\n" +
-            "  and table_schema = '" + tableSchema + "'\n" +
-            "  and table_name = '" + tableName + "'\n" +
-            "order by table_schema, table_name, ordinal_position";
+        String sql = """
+            select
+              table_schema, table_name, column_name, column_default, is_nullable, data_type,
+              character_maximum_length, udt_name
+            from information_schema.columns
+            where table_schema = '%s'
+              and table_name = '%s'
+            order by table_schema, table_name, ordinal_position
+            """.formatted(tableSchema, tableName);
 
         List<String[]> data = new ArrayList<>();
         try (Statement stmt = conn.createStatement();
@@ -125,10 +128,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listViewsDefinitions(List<String> names) throws SQLException {
-        String sql =
-            "select table_schema, table_name, view_definition \n" +
-            "from information_schema.views \n" +
-            "order by table_schema, table_name";
+        String sql = """
+            select table_schema, table_name, view_definition
+            from information_schema.views
+            order by table_schema, table_name
+            """;
 
         List<DbObjectDefinition> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -147,11 +151,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listFunctionsNames() throws SQLException {
-        String sql =
-            "select routine_schema, routine_name \n" +
-            "from information_schema.routines \n" +
-            "where routine_type = 'FUNCTION' \n" +
-            "order by routine_schema, routine_name";
+        String sql = """
+            select routine_schema, routine_name
+            from information_schema.routines
+            where routine_type = 'FUNCTION'
+            order by routine_schema, routine_name
+            """;
 
         List<String> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -167,11 +172,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listFunctionsDefinitions(List<String> names) throws SQLException {
-        String sql =
-            "select routine_schema, routine_name, routine_definition \n" +
-            "from information_schema.routines \n" +
-            "where routine_type = 'FUNCTION' \n" +
-            "order by routine_schema, routine_name";
+        String sql = """
+            select routine_schema, routine_name, routine_definition
+            from information_schema.routines
+            where routine_type = 'FUNCTION'
+            order by routine_schema, routine_name
+            """;
 
         List<DbObjectDefinition> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -190,10 +196,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listIndexesNames() throws SQLException {
-        String sql =
-            "select schemaname, tablename, indexname \n" +
-            "from pg_indexes \n" +
-            "order by schemaname, tablename, indexname";
+        String sql = """
+            select schemaname, tablename, indexname
+            from pg_indexes
+            order by schemaname, tablename, indexname
+            """;
 
         List<String> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -209,10 +216,11 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listIndexesDefinitions(List<String> names) throws SQLException {
-        String sql =
-            "select schemaname, tablename, indexname, indexdef \n" +
-            "from pg_indexes \n" +
-            "order by schemaname, tablename, indexname";
+        String sql = """
+            select schemaname, tablename, indexname, indexdef
+            from pg_indexes
+            order by schemaname, tablename, indexname
+            """;
 
         List<DbObjectDefinition> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -231,11 +239,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listProceduresNames() throws SQLException {
-        String sql =
-            "select routine_schema as schema_name, routine_name as procedure_name \n" +
-            "from information_schema.routines \n" +
-            "where routine_type = 'PROCEDURE' \n" +
-            "order by schema_name, procedure_name";
+        String sql = """
+            select routine_schema as schema_name, routine_name as procedure_name
+            from information_schema.routines
+            where routine_type = 'PROCEDURE'
+            order by schema_name, procedure_name
+            """;
 
         List<String> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);
@@ -251,11 +260,12 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listProceduresDefinitions(List<String> names) throws SQLException {
-        String sql =
-            "select routine_schema as schema_name, routine_name as procedure_name, routine_definition \n" +
-            "from information_schema.routines \n" +
-            "where routine_type = 'PROCEDURE' \n" +
-            "order by schema_name, procedure_name";
+        String sql = """
+            select routine_schema as schema_name, routine_name as procedure_name, routine_definition
+            from information_schema.routines
+            where routine_type = 'PROCEDURE'
+            order by schema_name, procedure_name
+            """;
 
         List<DbObjectDefinition> result = new ArrayList<>();
         try (Connection conn = getConnection(databaseCredentials);

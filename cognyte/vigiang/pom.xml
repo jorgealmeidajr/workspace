@@ -10,7 +10,12 @@
   <name>vigiang</name>
 
   <properties>
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven-compiler-plugin.version>3.12.0</maven-compiler-plugin.version>
   </properties>
 
   <dependencies>
@@ -56,9 +61,9 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.12.0</version>
+          <version>${maven-compiler-plugin.version}</version>
           <configuration>
-            <release>11</release>
+            <release>${maven.compiler.release}</release>
           </configuration>
         </plugin>
       </plugins>
