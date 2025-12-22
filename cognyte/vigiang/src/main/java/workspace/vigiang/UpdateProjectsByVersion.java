@@ -1,18 +1,14 @@
 package workspace.vigiang;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import workspace.commons.model.FileContent;
 import workspace.commons.model.FileMatch;
-import workspace.commons.model.XmlMyBatisMapping;
-import workspace.commons.service.MappersService;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -20,7 +16,9 @@ import static workspace.commons.model.FileMatch.getContentMd;
 import static workspace.commons.model.FileMatch.getContentTxt;
 import static workspace.commons.service.FileContentService.getFileContentsByExtensions;
 import static workspace.commons.service.FileContentService.getMatches;
-import static workspace.commons.service.FileService.*;
+import static workspace.commons.service.FileService.writeMd;
+import static workspace.commons.service.FileService.writeString;
+import static workspace.vigiang.service.EnvironmentService.validateProjectDirectories;
 
 
 public class UpdateProjectsByVersion {
@@ -36,14 +34,13 @@ public class UpdateProjectsByVersion {
 
             final var backendFileContents = getFileContentsByExtensions(backendPath, List.of("java", "yaml"), List.of("commons", "target"));
             final var frontendFileContents = getFileContentsByExtensions(frontendPath, List.of("js", "tsx"), List.of("node_modules", "json-server", "tests"));
-            VigiangFileContents vigiangFileContents = new VigiangFileContents(backendFileContents, frontendFileContents);
+            VigiaFileContents vigiaFileContents = new VigiaFileContents(backendFileContents, frontendFileContents);
 
             try {
-                updateConfigurations(versionPath, vigiangFileContents);
-                updateFeatures(versionPath, vigiangFileContents);
-                updatePrivileges(versionPath, vigiangFileContents);
-                updateEnvironment(versionPath, vigiangFileContents);
-                updateMybatis(backendPath, versionPath);
+                updateConfigurations(versionPath, vigiaFileContents);
+                updateFeatures(versionPath, vigiaFileContents);
+                updatePrivileges(versionPath, vigiaFileContents);
+                updateEnvironment(versionPath, vigiaFileContents);
                 updateSetup(frontendPath, backendPath, versionPath);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -51,7 +48,7 @@ public class UpdateProjectsByVersion {
         }
     }
 
-    private static void updateConfigurations(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
+    private static void updateConfigurations(Path versionPath, VigiaFileContents vigiaFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
             Pattern.compile("\\.getConfiguration\\(['\"]([^'\"]+)['\"]"),
             Pattern.compile("\"(cnfg.*)\"")
@@ -61,9 +58,9 @@ public class UpdateProjectsByVersion {
             Pattern.compile("getConfiguration\\(['\"]([^'\"]+)['\"]")
         );
 
-        List<FileMatch> frontendMatches = getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of());
+        List<FileMatch> frontendMatches = getMatches(vigiaFileContents.frontendFileContents(), frontendPatterns, List.of());
 
-        List<FileMatch> backendMatches = getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of());
+        List<FileMatch> backendMatches = getMatches(vigiaFileContents.backendFileContents(), backendPatterns, List.of());
         backendMatches = backendMatches.stream()
                 .map(m -> {
                     var matchStr = m.getMatch().replaceAll(",", "");
@@ -71,13 +68,13 @@ public class UpdateProjectsByVersion {
                 })
                 .collect(Collectors.toList());
 
-        var vigiangMatches = new VigiangMatches(backendMatches, frontendMatches, VigiangMatchType.CONFIGURATION);
+        var vigiangMatches = new VigiaMatches(backendMatches, frontendMatches, VigiangMatchType.CONFIGURATION);
 
         updateTxt(versionPath, vigiangMatches, "configurations");
         updateMd(versionPath, vigiangMatches, "configurations");
     }
 
-    private static void updateFeatures(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
+    private static void updateFeatures(Path versionPath, VigiaFileContents vigiaFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
             Pattern.compile("\\.ifFeature\\([\"']([^\"']+)[\"']\\)")
         );
@@ -86,16 +83,16 @@ public class UpdateProjectsByVersion {
             Pattern.compile("ifFeature\\(['\"]([^'\"]+)['\"]")
         );
 
-        var vigiangMatches = new VigiangMatches(
-            getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of()),
-            getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of()),
+        var vigiangMatches = new VigiaMatches(
+            getMatches(vigiaFileContents.backendFileContents(), backendPatterns, List.of()),
+            getMatches(vigiaFileContents.frontendFileContents(), frontendPatterns, List.of()),
             VigiangMatchType.FEATURE);
 
         updateTxt(versionPath, vigiangMatches, "features");
         updateMd(versionPath, vigiangMatches, "features");
     }
 
-    private static void updatePrivileges(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
+    private static void updatePrivileges(Path versionPath, VigiaFileContents vigiaFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
             Pattern.compile("((LIST_|CREATE_|CHANGE_)[A-Z_]*)")
         );
@@ -105,16 +102,16 @@ public class UpdateProjectsByVersion {
             Pattern.compile("(?:'|\")ROLE_([A-Z0-9_]+)(?:'|\")")
         );
 
-        var vigiangMatches = new VigiangMatches(
-            getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of("LIST_TAG")),
-            getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of()),
+        var vigiangMatches = new VigiaMatches(
+            getMatches(vigiaFileContents.backendFileContents(), backendPatterns, List.of("LIST_TAG")),
+            getMatches(vigiaFileContents.frontendFileContents(), frontendPatterns, List.of()),
             VigiangMatchType.PRIVILEGE);
 
         updateTxt(versionPath, vigiangMatches, "privileges");
         updateMd(versionPath, vigiangMatches, "privileges");
     }
 
-    private static void updateEnvironment(Path versionPath, VigiangFileContents vigiangFileContents) throws IOException {
+    private static void updateEnvironment(Path versionPath, VigiaFileContents vigiaFileContents) throws IOException {
         List<Pattern> backendPatterns = List.of(
             Pattern.compile("[$][{](\\w+)[}]")
         );
@@ -125,22 +122,13 @@ public class UpdateProjectsByVersion {
             Pattern.compile("env[.](\\w+)")
         );
 
-        var vigiangMatches = new VigiangMatches(
-            getMatches(vigiangFileContents.getBackendFileContents(), backendPatterns, List.of()),
-            getMatches(vigiangFileContents.getFrontendFileContents(), frontendPatterns, List.of("NODE_ENV", "globals")),
+        var vigiangMatches = new VigiaMatches(
+            getMatches(vigiaFileContents.backendFileContents(), backendPatterns, List.of()),
+            getMatches(vigiaFileContents.frontendFileContents(), frontendPatterns, List.of("NODE_ENV", "globals")),
             VigiangMatchType.ENVIRONMENT);
 
         updateTxt(versionPath, vigiangMatches, "environment");
         updateMd(versionPath, vigiangMatches, "environment");
-    }
-
-    private static void updateMybatis(Path backendPath, Path versionPath) throws IOException {
-        var fileContents = getFileContentsByExtensions(backendPath, List.of("xml"), List.of("commons", "target")).stream()
-                .filter(f -> f.getRelativeDir().contains("\\repository\\"))
-                .collect(Collectors.toList());
-
-        updateMappers(versionPath, fileContents);
-        writeMd(fileContents, Paths.get(versionPath + "\\mybatis.md"));
     }
 
     private static void updateSetup(Path frontendPath, Path backendPath, Path versionPath) throws IOException {
@@ -151,11 +139,11 @@ public class UpdateProjectsByVersion {
         writeMd(fileContents, Paths.get(versionPath + "\\setup.md"));
     }
 
-    private static void updateTxt(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
+    private static void updateTxt(Path versionPath, VigiaMatches vigiaMatches, String output) throws IOException {
         String result = "";
 
-        if (!vigiangMatches.getFrontendMatches().isEmpty()) {
-            List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+        if (!vigiaMatches.frontendMatches().isEmpty()) {
+            List<FileMatch> matchesFiltered = vigiaMatches.frontendMatches().stream()
                     .filter(m -> m.getRelativeDir().contains("webviewer"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
@@ -164,7 +152,7 @@ public class UpdateProjectsByVersion {
                 result += "\n";
             }
 
-            matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+            matchesFiltered = vigiaMatches.frontendMatches().stream()
                     .filter(m -> m.getRelativeDir().contains("workflow"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
@@ -174,9 +162,9 @@ public class UpdateProjectsByVersion {
             }
         }
 
-        if (!vigiangMatches.getBackendMatches().isEmpty()) {
+        if (!vigiaMatches.backendMatches().isEmpty()) {
             result += "backend:\n";
-            result += getContentTxt(vigiangMatches.getBackendMatches());
+            result += getContentTxt(vigiaMatches.backendMatches());
             result += "\n";
         }
 
@@ -186,32 +174,11 @@ public class UpdateProjectsByVersion {
         writeString(outputPath, result);
     }
 
-    private static void updateMappers(Path versionPath, List<FileContent> backendFileContents) {
-        try {
-            var mappings = new ArrayList<XmlMyBatisMapping>();
-            for (FileContent backendFileContent : backendFileContents) {
-                String database = null;
-                if (backendFileContent.getRelativeDir().endsWith("\\oracle")) {
-                    database = "oracle";
-                } else if (backendFileContent.getRelativeDir().endsWith("\\postgres")) {
-                    database = "postgres";
-                }
-
-                var mapping = MappersService.getXmlMappings(backendFileContent.getContent(), database);
-                mappings.add(mapping);
-            }
-
-            MappersService.writeMappers(versionPath, mappings);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void updateMd(Path versionPath, VigiangMatches vigiangMatches, String output) throws IOException {
+    private static void updateMd(Path versionPath, VigiaMatches vigiaMatches, String output) throws IOException {
         String result = "";
 
-        if (!vigiangMatches.getFrontendMatches().isEmpty()) {
-            List<FileMatch> matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+        if (!vigiaMatches.frontendMatches().isEmpty()) {
+            List<FileMatch> matchesFiltered = vigiaMatches.frontendMatches().stream()
                     .filter(m -> m.getRelativeDir().contains("webviewer"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
@@ -221,7 +188,7 @@ public class UpdateProjectsByVersion {
                 result += "```\n\n";
             }
 
-            matchesFiltered = vigiangMatches.getFrontendMatches().stream()
+            matchesFiltered = vigiaMatches.frontendMatches().stream()
                     .filter(m -> m.getRelativeDir().contains("workflow"))
                     .collect(Collectors.toList());
             if (!matchesFiltered.isEmpty()) {
@@ -232,10 +199,10 @@ public class UpdateProjectsByVersion {
             }
         }
 
-        if (!vigiangMatches.getBackendMatches().isEmpty()) {
+        if (!vigiaMatches.backendMatches().isEmpty()) {
             result += "# backend:\n";
             result += "```\n";
-            result += getContentMd(vigiangMatches.getBackendMatches());
+            result += getContentMd(vigiaMatches.backendMatches());
             result += "```\n";
         }
 
@@ -245,39 +212,11 @@ public class UpdateProjectsByVersion {
         writeString(outputPath, result);
     }
 
-    private static void validateProjectDirectories(String workDir, String version) {
-        Path backendPath = Paths.get(workDir + "\\" + version + "\\back-" + version);
-        if (!Files.exists(backendPath) || !Files.isDirectory(backendPath)) {
-            throw new IllegalArgumentException("o diretorio backendPath nao existe ou nao eh um diretorio");
-        }
-
-        Path frontendPath = Paths.get(workDir + "\\" + version + "\\front-" + version);
-        if (!Files.exists(frontendPath) || !Files.isDirectory(frontendPath)) {
-            throw new IllegalArgumentException("o diretorio frontendPath nao existe ou nao eh um diretorio");
-        }
-
-        Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
-        if (!Files.exists(versionPath) || !Files.isDirectory(versionPath)) {
-            throw new IllegalArgumentException("o diretorio versionPath nao existe ou nao eh um diretorio");
-        }
-    }
-
 }
 
-@AllArgsConstructor
-@Getter
-class VigiangFileContents {
-    private final List<FileContent> backendFileContents;
-    private final List<FileContent> frontendFileContents;
-}
+record VigiaFileContents(List<FileContent> backendFileContents, List<FileContent> frontendFileContents) { }
 
-@AllArgsConstructor
-@Getter
-class VigiangMatches {
-    private final List<FileMatch> backendMatches;
-    private final List<FileMatch> frontendMatches;
-    private final VigiangMatchType type;
-}
+record VigiaMatches(List<FileMatch> backendMatches, List<FileMatch> frontendMatches, VigiangMatchType type) { }
 
 enum VigiangMatchType {
     CONFIGURATION, FEATURE, PRIVILEGE, ENVIRONMENT

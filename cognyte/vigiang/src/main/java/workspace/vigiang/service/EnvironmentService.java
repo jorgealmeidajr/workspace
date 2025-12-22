@@ -155,4 +155,21 @@ public class EnvironmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
     }
 
+    public static void validateProjectDirectories(String workDir, String version) {
+        Path backendPath = Paths.get(workDir + "\\" + version + "\\back-" + version);
+        if (!Files.exists(backendPath) || !Files.isDirectory(backendPath)) {
+            throw new IllegalArgumentException("o diretorio backendPath nao existe ou nao eh um diretorio");
+        }
+
+        Path frontendPath = Paths.get(workDir + "\\" + version + "\\front-" + version);
+        if (!Files.exists(frontendPath) || !Files.isDirectory(frontendPath)) {
+            throw new IllegalArgumentException("o diretorio frontendPath nao existe ou nao eh um diretorio");
+        }
+
+        Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
+        if (!Files.exists(versionPath) || !Files.isDirectory(versionPath)) {
+            throw new IllegalArgumentException("o diretorio versionPath nao existe ou nao eh um diretorio");
+        }
+    }
+
 }
