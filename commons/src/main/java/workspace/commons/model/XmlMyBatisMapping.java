@@ -1,23 +1,20 @@
 package workspace.commons.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
+import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-@Getter
-public class XmlMyBatisMapping {
-
-    private final String namespace;
-    private final String database;
-    private final List<XmlCallMapping> selects;
-    private final List<XmlCallMapping> inserts;
-    private final List<XmlCallMapping> updates;
-    private final List<XmlResultMap> resultMaps;
+public record XmlMyBatisMapping(
+        String project,
+        String namespace,
+        String database,
+        List<XmlCallMapping> selects,
+        List<XmlCallMapping> inserts,
+        List<XmlCallMapping> updates,
+        List<XmlResultMap> resultMaps
+    ) {
 
     public List<XmlCallMapping> getAllCalls() {
-        List<XmlCallMapping> allCalls = new java.util.ArrayList<>();
+        List<XmlCallMapping> allCalls = new ArrayList<>();
         allCalls.addAll(selects);
         allCalls.addAll(inserts);
         allCalls.addAll(updates);

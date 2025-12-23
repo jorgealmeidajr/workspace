@@ -101,7 +101,7 @@ public class MappersService {
         }
     }
 
-    public static XmlMyBatisMapping getXmlMappings(String content, String database) throws ParserConfigurationException, IOException, SAXException {
+    public static XmlMyBatisMapping getXmlMappings(String content, String database, String project) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(new InputSource(new StringReader(content)));
@@ -113,7 +113,7 @@ public class MappersService {
         List<XmlCallMapping> updates = getMappings(document, database, namespace, "update");
         var resultMaps = getResultMaps(document, database, namespace);
 
-        return new XmlMyBatisMapping(namespace, database, selects, inserts, updates, resultMaps);
+        return new XmlMyBatisMapping(project, namespace, database, selects, inserts, updates, resultMaps);
     }
 
     private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName) {

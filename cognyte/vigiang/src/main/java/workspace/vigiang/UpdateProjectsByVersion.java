@@ -46,6 +46,8 @@ public class UpdateProjectsByVersion {
                 e.printStackTrace();
             }
         }
+
+        UpdateMybatis.main(new String[] {});
     }
 
     private static void updateConfigurations(Path versionPath, VigiaFileContents vigiaFileContents) throws IOException {

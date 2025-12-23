@@ -26,6 +26,7 @@ public class UpdateMybatis {
 
         for (String version : EnvironmentService.getVersions()) {
             validateProjectDirectories(WORK_DIR, version);
+            System.out.println("VERSION: " + version);
             Path backendPath = Paths.get(WORK_DIR + "\\" + version + "\\back-" + version);
             Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
@@ -34,6 +35,7 @@ public class UpdateMybatis {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            System.out.println("---------");
         }
     }
 
@@ -57,7 +59,11 @@ public class UpdateMybatis {
                     database = "postgres";
                 }
 
-                var mapping = MappersService.getXmlMappings(backendFileContent.getContent(), database);
+                var relativeDirLower = backendFileContent.getRelativeDir();
+                var splitPath = relativeDirLower.split("\\\\");
+                var project = splitPath[0] + "_" +  splitPath[1];
+
+                XmlMyBatisMapping mapping = MappersService.getXmlMappings(backendFileContent.getContent(), database, project);
                 mappings.add(mapping);
             }
 
@@ -70,16 +76,17 @@ public class UpdateMybatis {
     private static void writeMappers(Path versionPath, List<XmlMyBatisMapping> mappings) throws IOException {
         List<XmlCallMapping> allCalls = mappings.stream()
                 .flatMap(mapping -> mapping.getAllCalls().stream())
-                .collect(Collectors.toList());
+                .toList();
 
         Set<XmlCallMapping> uniqueSet = new HashSet<>(allCalls);
         List<XmlCallMapping> listWithoutDuplicates = new ArrayList<>(uniqueSet); // TODO: ?
 
         writeMappersTxt(versionPath, listWithoutDuplicates);
 
-        var allResultMaps = mappings.stream()
-                .flatMap(mapping -> mapping.getResultMaps().stream())
+        List<XmlResultMap> allResultMaps = mappings.stream()
+                .flatMap(mapping -> mapping.resultMaps().stream())
                 .collect(Collectors.toList());
+
         writeMappersMd(versionPath, listWithoutDuplicates, allResultMaps);
     }
 

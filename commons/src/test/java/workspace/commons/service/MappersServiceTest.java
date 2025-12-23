@@ -380,13 +380,13 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.EmptyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.EmptyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -412,15 +412,15 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.suntech.vigiaNG.userservice.repository.UserMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(1, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.suntech.vigiaNG.userservice.repository.UserMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(1, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
 
-                XmlCallMapping select1 = result.getSelects().get(0);
+                XmlCallMapping select1 = result.selects().get(0);
                 assertEquals("listUser", select1.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -449,18 +449,18 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.MyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(2, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.MyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(2, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
 
-                XmlCallMapping select1 = result.getSelects().get(0);
+                XmlCallMapping select1 = result.selects().get(0);
                 assertEquals("getUser", select1.getId());
 
-                XmlCallMapping select2 = result.getSelects().get(1);
+                XmlCallMapping select2 = result.selects().get(1);
                 assertEquals("listUsers", select2.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -490,15 +490,15 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.MyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(1, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.MyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(1, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
 
-                XmlCallMapping insert1 = result.getInserts().get(0);
+                XmlCallMapping insert1 = result.inserts().get(0);
                 assertEquals("saveNoteUsers", insert1.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -525,18 +525,18 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.MyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(2, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.MyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(2, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
 
-                XmlCallMapping insert1 = result.getInserts().get(0);
+                XmlCallMapping insert1 = result.inserts().get(0);
                 assertEquals("insertOne", insert1.getId());
 
-                XmlCallMapping insert2 = result.getInserts().get(1);
+                XmlCallMapping insert2 = result.inserts().get(1);
                 assertEquals("insertTwo", insert2.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -563,15 +563,15 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.suntech.vigiaNG.configserver.repository.ConfigMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(1, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.suntech.vigiaNG.configserver.repository.ConfigMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(1, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
 
-                XmlCallMapping update1 = result.getUpdates().get(0);
+                XmlCallMapping update1 = result.updates().get(0);
                 assertEquals("updateConfiguration", update1.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -598,18 +598,18 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.MyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(2, result.getUpdates().size());
-                assertEquals(0, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.MyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(2, result.updates().size());
+                assertEquals(0, result.resultMaps().size());
 
-                XmlCallMapping update1 = result.getUpdates().get(0);
+                XmlCallMapping update1 = result.updates().get(0);
                 assertEquals("updateOne", update1.getId());
 
-                XmlCallMapping update2 = result.getUpdates().get(1);
+                XmlCallMapping update2 = result.updates().get(1);
                 assertEquals("updateTwo", update2.getId());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -631,15 +631,15 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.MyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(1, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.MyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(1, result.resultMaps().size());
 
-                XmlResultMap xmlResultMap1 = result.getResultMaps().get(0);
+                XmlResultMap xmlResultMap1 = result.resultMaps().get(0);
                 assertEquals("userResultMap", xmlResultMap1.getId());
                 assertEquals(2, xmlResultMap1.getResults().size());
             } catch (Exception e) {
@@ -665,19 +665,19 @@ public class MappersServiceTest {
 
             try {
                 String database = "oracle";
-                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database);
-                assertEquals("com.example.MyMapper", result.getNamespace());
-                assertEquals(database, result.getDatabase());
-                assertEquals(0, result.getSelects().size());
-                assertEquals(0, result.getInserts().size());
-                assertEquals(0, result.getUpdates().size());
-                assertEquals(2, result.getResultMaps().size());
+                XmlMyBatisMapping result = MappersService.getXmlMappings(content, database, "projectA");
+                assertEquals("com.example.MyMapper", result.namespace());
+                assertEquals(database, result.database());
+                assertEquals(0, result.selects().size());
+                assertEquals(0, result.inserts().size());
+                assertEquals(0, result.updates().size());
+                assertEquals(2, result.resultMaps().size());
 
-                XmlResultMap xmlResultMap1 = result.getResultMaps().get(0);
+                XmlResultMap xmlResultMap1 = result.resultMaps().get(0);
                 assertEquals("userResultMap", xmlResultMap1.getId());
                 assertEquals(1, xmlResultMap1.getResults().size());
 
-                XmlResultMap xmlResultMap2 = result.getResultMaps().get(1);
+                XmlResultMap xmlResultMap2 = result.resultMaps().get(1);
                 assertEquals("orderResultMap", xmlResultMap2.getId());
                 assertEquals(1, xmlResultMap2.getResults().size());
             } catch (Exception e) {
