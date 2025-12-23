@@ -27,7 +27,8 @@ public class UpdateMybatis {
 
         for (String version : EnvironmentService.getVersions()) {
             validateProjectDirectories(WORK_DIR, version);
-            System.out.println("VERSION: " + version);
+            String versionTitle = "VERSION: " + version;
+            System.out.println(versionTitle);
             Path backendPath = Paths.get(WORK_DIR + "\\" + version + "\\back-" + version);
             Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
@@ -36,7 +37,7 @@ public class UpdateMybatis {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            System.out.println("---------");
+            System.out.println("-".repeat(versionTitle.length()));
         }
     }
 

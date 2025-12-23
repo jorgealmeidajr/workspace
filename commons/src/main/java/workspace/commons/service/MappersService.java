@@ -108,15 +108,15 @@ public class MappersService {
 
         final String namespace = getNamespace(document);
 
-        List<XmlCallMapping> selects = getMappings(document, database, namespace, "select", project);
-        List<XmlCallMapping> inserts = getMappings(document, database, namespace, "insert", project);
-        List<XmlCallMapping> updates = getMappings(document, database, namespace, "update", project);
+        List<XmlCallMapping> selects = getMappings(document, database, namespace, "select");
+        List<XmlCallMapping> inserts = getMappings(document, database, namespace, "insert");
+        List<XmlCallMapping> updates = getMappings(document, database, namespace, "update");
         var resultMaps = getResultMaps(document, database, namespace);
 
         return new XmlMyBatisMapping(project, namespace, database, selects, inserts, updates, resultMaps);
     }
 
-    private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName, String project) {
+    private static List<XmlCallMapping> getMappings(Document document, String database, String namespace, String tagName) {
         NodeList nodeList = document.getElementsByTagName(tagName);
 
         var resultList = new ArrayList<XmlCallMapping>();
@@ -128,7 +128,7 @@ public class MappersService {
             List<String> functionParams = extractFunctionParams(content);
 
             String id = getId(node);
-            var temp = new XmlCallMapping(project, namespace, id, database, functionCall, functionParams);
+            var temp = new XmlCallMapping(namespace, id, database, functionCall, functionParams);
             resultList.add(temp);
         }
         return resultList;
