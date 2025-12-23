@@ -5,6 +5,7 @@ import workspace.commons.model.XmlCallMapping;
 import workspace.commons.model.XmlMyBatisMapping;
 import workspace.commons.model.XmlResultMap;
 import workspace.commons.service.MappersService;
+import workspace.commons.model.MyBatisMappings;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -66,6 +67,8 @@ public class UpdateMybatis {
                 XmlMyBatisMapping mapping = MappersService.getXmlMappings(backendFileContent.getContent(), database, project);
                 mappings.add(mapping);
             }
+
+            var test = new MyBatisMappings(mappings); // TODO: use this class
 
             writeMappers(versionPath, mappings);
         } catch (Exception e) {

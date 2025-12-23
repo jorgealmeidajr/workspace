@@ -11,6 +11,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class XmlCallMapping {
 
+    private final String project;
     private final String namespace;
     private final String id;
     private final String database;
