@@ -17,14 +17,4 @@ public class XmlCallMapping {
     private final String functionCall;
     private final List<String> functionParams;
 
-    @Override
-    public String toString() {
-        return "XmlCallMapping{" +
-                "namespace='" + namespace + '\'' +
-                ", id='" + id + '\'' +
-                ", database='" + database + '\'' +
-                ", functionCall='" + functionCall + '\'' +
-                '}';
-    }
-
 }
