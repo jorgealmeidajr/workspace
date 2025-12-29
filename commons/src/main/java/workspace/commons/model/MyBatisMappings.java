@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 public class MyBatisMappings {
 
-    private final List<XmlMyBatisMapping> mappings;
     private final Map<String, Project> projects;
+    private final List<String> databases;
 
     record Project (String name, List<XmlMyBatisMapping> mappings) {
         List<XmlCallMapping> getAllCalls() {
@@ -24,7 +24,12 @@ public class MyBatisMappings {
 
     public MyBatisMappings(List<XmlMyBatisMapping> mappings) {
         validateUniqueMappings(mappings);
-        this.mappings = sort(mappings);
+
+        this.databases = mappings.stream()
+            .map(XmlMyBatisMapping::database)
+            .distinct()
+            .sorted()
+            .toList();
 
         this.projects = new HashMap<>();
 
@@ -140,19 +145,14 @@ public class MyBatisMappings {
                         resultTxt += "  " + currentId + "():\n";
 
                         var byIdList = byId.get(currentId);
-                        var oracleCall = byIdList.stream().filter(r -> "oracle".equals(r.getDatabase())).findFirst().orElse(null);
-                        var postgresCall = byIdList.stream().filter(r -> "postgres".equals(r.getDatabase())).findFirst().orElse(null);
 
-                        if (oracleCall != null) {
-                            resultTxt += "    oracle: " + oracleCall.getFunctionCall() + "\n";
-                        } else {
-                            resultTxt += "    oracle: _UNDEFINED_\n";
-                        }
-
-                        if (postgresCall != null) {
-                            resultTxt += "    postgres: " + postgresCall.getFunctionCall() + "\n";
-                        } else {
-                            resultTxt += "    postgres: _UNDEFINED_\n";
+                        for (String database : databases) {
+                            var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
+                            if (call != null) {
+                                resultTxt += "    " + database + ": " + call.getFunctionCall() + "\n";
+                            } else {
+                                resultTxt += "    " + database + ": _UNDEFINED_\n";
+                            }
                         }
                     }
                 }
@@ -194,35 +194,23 @@ public class MyBatisMappings {
                         resultMd += currentId + "():\n";
 
                         var byIdList = byId.get(currentId);
-                        var oracleCall = byIdList.stream().filter(r -> "oracle".equals(r.getDatabase())).findFirst().orElse(null);
-                        var postgresCall = byIdList.stream().filter(r -> "postgres".equals(r.getDatabase())).findFirst().orElse(null);
 
-                        if (oracleCall != null) {
-                            resultMd += "  oracle: " + oracleCall.getFunctionCall() + "\n";
-                            if (!xmlCallMapping.getFunctionParams().isEmpty()) {
-                                resultMd += "    params:\n";
-                                for (String param : xmlCallMapping.getFunctionParams()) {
-                                    resultMd += "      - " + param + "\n";
+                        for (String database : databases) {
+                            var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
+
+                            if (call != null) {
+                                resultMd += "  " + database + ": " + call.getFunctionCall() + "\n";
+                                if (!xmlCallMapping.getFunctionParams().isEmpty()) {
+                                    resultMd += "    params:\n";
+                                    for (String param : xmlCallMapping.getFunctionParams()) {
+                                        resultMd += "      - " + param + "\n";
+                                    }
+                                    resultMd += "\n";
                                 }
+                            } else {
+                                resultMd += "  " + database + ": _UNDEFINED_\n";
                                 resultMd += "\n";
                             }
-                        } else {
-                            resultMd += "  oracle: _UNDEFINED_\n";
-                            resultMd += "\n";
-                        }
-
-                        if (postgresCall != null) {
-                            resultMd += "  postgres: " + postgresCall.getFunctionCall() + "\n";
-                            if (!xmlCallMapping.getFunctionParams().isEmpty()) {
-                                resultMd += "    params:\n";
-                                for (String param : xmlCallMapping.getFunctionParams()) {
-                                    resultMd += "      - " + param + "\n";
-                                }
-                                resultMd += "\n";
-                            }
-                        } else {
-                            resultMd += "  postgres: _UNDEFINED_\n";
-                            resultMd += "\n";
                         }
                     }
                 }
