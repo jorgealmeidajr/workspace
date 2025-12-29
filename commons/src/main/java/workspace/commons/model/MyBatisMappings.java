@@ -24,8 +24,7 @@ public class MyBatisMappings {
 
     public MyBatisMappings(List<XmlMyBatisMapping> mappings) {
         validateUniqueMappings(mappings);
-        sort(mappings);
-        this.mappings = mappings;
+        this.mappings = sort(mappings);
 
         this.projects = new HashMap<>();
 
@@ -35,7 +34,7 @@ public class MyBatisMappings {
         for (String projectName : byProject.keySet()) {
             List<XmlMyBatisMapping> projectMappings = byProject.get(projectName);
 
-            sort(projectMappings);
+            projectMappings = sort(projectMappings);
 
             List<XmlCallMapping> allCalls = projectMappings.stream()
                 .flatMap(mapping -> mapping.getAllCalls().stream())
@@ -49,14 +48,16 @@ public class MyBatisMappings {
         }
     }
 
-    private static void sort(List<XmlMyBatisMapping> mappings) {
-        mappings.sort((m1, m2) -> {
+    static List<XmlMyBatisMapping> sort(List<XmlMyBatisMapping> mappings) {
+        List<XmlMyBatisMapping> copy = new ArrayList<>(mappings);
+        copy.sort((m1, m2) -> {
             int projectCompare = m1.project().compareTo(m2.project());
             if (projectCompare != 0) return projectCompare;
             int namespaceCompare = m1.namespace().compareTo(m2.namespace());
             if (namespaceCompare != 0) return namespaceCompare;
             return m1.database().compareTo(m2.database());
         });
+        return copy;
     }
 
     private void validateUniqueMappings(List<XmlMyBatisMapping> mappings) {
@@ -93,7 +94,7 @@ public class MyBatisMappings {
         }
     }
 
-    private void validateCalls(List<XmlCallMapping> allCalls) {
+    static void validateCalls(List<XmlCallMapping> allCalls) {
         for (XmlCallMapping xmlCallMapping : allCalls) {
             if ("".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
                 throw new IllegalArgumentException(
@@ -105,7 +106,7 @@ public class MyBatisMappings {
         }
     }
 
-    private List<String> getProjectsKeys() {
+    List<String> getProjectsKeys() {
         List<String> projectKeys = new ArrayList<>(projects.keySet());
         Collections.sort(projectKeys);
         return projectKeys;
