@@ -133,7 +133,7 @@ public class MyBatisMappings {
                 result.sort(Comparator.comparing(XmlCallMapping::getId)
                     .thenComparing(XmlCallMapping::getDatabase));
 
-                Map<String, List<XmlCallMapping>> byId = project.getAllCalls().stream()
+                Map<String, List<XmlCallMapping>> byId = result.stream()
                     .collect(Collectors.groupingBy(XmlCallMapping::getId));
 
                 resultTxt += namespace + ":\n";
