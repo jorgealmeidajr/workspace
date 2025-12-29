@@ -959,19 +959,19 @@ public class MyBatisMappingsTest {
         @Test
         void shouldReturnSingleCallMapping() {
             List<XmlMyBatisMapping> mappings = List.of(
-                    new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                            List.of(new XmlCallMapping("namespace1", "call1", "oracle", "call1", new ArrayList<>())),
-                            new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
+                new XmlMyBatisMapping("project1", "namespace1", "oracle",
+                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "call1", new ArrayList<>())),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
             String result = myBatisMappings.getMappersTxt();
 
             String expected = """
-                    namespace1:
-                      call1():
-                        oracle: call1
-                    """;
+                namespace1:
+                  call1():
+                    oracle: call1
+                """;
 
             assertTrue(result.contains(expected));
         }
@@ -979,26 +979,26 @@ public class MyBatisMappingsTest {
         @Test
         void shouldSortNamespacesByAlphabeticalOrder() {
             List<XmlMyBatisMapping> mappings = List.of(
-                    new XmlMyBatisMapping("project1", "namespaceZ", "oracle",
-                            List.of(new XmlCallMapping("namespaceZ", "call1", "oracle", "SELECT * FROM Z", new ArrayList<>())),
-                            new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                    new XmlMyBatisMapping("project1", "namespaceA", "oracle",
-                            List.of(new XmlCallMapping("namespaceA", "call1", "oracle", "SELECT * FROM A", new ArrayList<>())),
-                            new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
+                new XmlMyBatisMapping("project1", "namespaceZ", "oracle",
+                    List.of(new XmlCallMapping("namespaceZ", "call1", "oracle", "SELECT * FROM Z", new ArrayList<>())),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
+                new XmlMyBatisMapping("project1", "namespaceA", "oracle",
+                    List.of(new XmlCallMapping("namespaceA", "call1", "oracle", "SELECT * FROM A", new ArrayList<>())),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
             String result = myBatisMappings.getMappersTxt();
 
             String expected = """
-                    namespaceA:
-                      call1():
-                        oracle: SELECT * FROM A
-                    
-                    namespaceZ:
-                      call1():
-                        oracle: SELECT * FROM Z
-                    """;
+                namespaceA:
+                  call1():
+                    oracle: SELECT * FROM A
+                
+                namespaceZ:
+                  call1():
+                    oracle: SELECT * FROM Z
+                """;
 
             assertTrue(result.contains(expected));
 
@@ -1011,12 +1011,12 @@ public class MyBatisMappingsTest {
         @Test
         void shouldSortCallIdsByAlphabeticalOrder() {
             List<XmlMyBatisMapping> mappings = List.of(
-                    new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                            List.of(
-                                    new XmlCallMapping("namespace1", "call2", "oracle", "SELECT * FROM table2", new ArrayList<>()),
-                                    new XmlCallMapping("namespace1", "call1", "oracle", "SELECT * FROM table1", new ArrayList<>())
-                            ),
-                            new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
+                new XmlMyBatisMapping("project1", "namespace1", "oracle",
+                    List.of(
+                        new XmlCallMapping("namespace1", "call2", "oracle", "SELECT * FROM table2", new ArrayList<>()),
+                        new XmlCallMapping("namespace1", "call1", "oracle", "SELECT * FROM table1", new ArrayList<>())
+                    ),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 

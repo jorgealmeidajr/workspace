@@ -123,13 +123,13 @@ public class MyBatisMappings {
         for (String projectKey : getProjectsKeys()) {
             Project project = projects.get(projectKey);
 
-            Map<String, List<XmlCallMapping>> byNamespace = project.getAllCalls().stream()
+            Map<String, List<XmlCallMapping>> callsByNamespace = project.getAllCalls().stream()
                 .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
-            List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
+            List<String> byNamespaceKeys = new ArrayList<>(callsByNamespace.keySet());
             Collections.sort(byNamespaceKeys);
 
             for (String namespace : byNamespaceKeys) {
-                List<XmlCallMapping> result = byNamespace.get(namespace);
+                List<XmlCallMapping> result = callsByNamespace.get(namespace);
                 result.sort(Comparator.comparing(XmlCallMapping::getId)
                     .thenComparing(XmlCallMapping::getDatabase));
 
@@ -174,68 +174,78 @@ public class MyBatisMappings {
             List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
             Collections.sort(byNamespaceKeys);
 
-            Map<String, List<XmlCallMapping>> byId = project.getAllCalls().stream()
-                .collect(Collectors.groupingBy(XmlCallMapping::getId));
-
             var resultsByNamespace = project.getAllResultMaps().stream()
                 .collect(Collectors.groupingBy(XmlResultMap::getNamespace));
 
             for (String key : byNamespaceKeys) {
-                List<XmlCallMapping> result = byNamespace.get(key);
-                result.sort(Comparator.comparing(XmlCallMapping::getId)
+                List<XmlCallMapping> callsByNamespace = byNamespace.get(key);
+                callsByNamespace.sort(Comparator.comparing(XmlCallMapping::getId)
                     .thenComparing(XmlCallMapping::getDatabase));
+
+                Map<String, List<XmlCallMapping>> callsById = callsByNamespace.stream()
+                    .collect(Collectors.groupingBy(XmlCallMapping::getId));
 
                 resultMd += "# " + key + ":\n";
                 resultMd += "```\n";
                 String currentId = null;
-                for (XmlCallMapping xmlCallMapping : result) {
+                for (XmlCallMapping xmlCallMapping : callsByNamespace) {
                     if (currentId == null || !currentId.equals(xmlCallMapping.getId())) {
                         currentId = xmlCallMapping.getId();
                         resultMd += currentId + "():\n";
 
-                        var byIdList = byId.get(currentId);
+                        var byIdList = callsById.get(currentId);
 
                         for (String database : databases) {
-                            var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
-
-                            if (call != null) {
-                                resultMd += "  " + database + ": " + call.getFunctionCall() + "\n";
-                                if (!xmlCallMapping.getFunctionParams().isEmpty()) {
-                                    resultMd += "    params:\n";
-                                    for (String param : xmlCallMapping.getFunctionParams()) {
-                                        resultMd += "      - " + param + "\n";
-                                    }
-                                    resultMd += "\n";
-                                }
-                            } else {
-                                resultMd += "  " + database + ": _UNDEFINED_\n";
-                                resultMd += "\n";
-                            }
+                            resultMd += getCallMd(xmlCallMapping, database, byIdList);
                         }
                     }
                 }
 
-                List<XmlResultMap> resultMapsForNamespace = resultsByNamespace.get(key);
-
-                if (resultMapsForNamespace != null) {
-                    resultMapsForNamespace.sort(
-                        Comparator.comparing(XmlResultMap::getId, Comparator.nullsLast(String::compareTo)));
-                    resultMd += "result_maps:\n".toUpperCase();
-
-                    for (XmlResultMap xmlResultMap : resultMapsForNamespace) {
-                        resultMd += "  " + xmlResultMap.getDatabase() + ": " + xmlResultMap.getId() + "\n";
-                        for (XmlResultMap.XmlResult xmlResult : xmlResultMap.getResults()) {
-                            resultMd += "    - property: " + xmlResult.getProperty() + ", column: " + xmlResult.getColumn() + "\n";
-                        }
-                        resultMd += "\n";
-                    }
-                }
-
+                resultMd += getResultMaps(key, resultsByNamespace);
                 resultMd += "```\n\n";
             }
         }
 
         return resultMd;
+    }
+
+    private static String getCallMd(XmlCallMapping xmlCallMapping, String database, List<XmlCallMapping> byIdList) {
+        var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
+        String result = "";
+
+        if (call != null) {
+            result += "  " + database + ": " + call.getFunctionCall() + "\n";
+            if (!xmlCallMapping.getFunctionParams().isEmpty()) {
+                result += "    params:\n";
+                for (String param : xmlCallMapping.getFunctionParams()) {
+                    result += "      - " + param + "\n";
+                }
+                result += "\n";
+            }
+        } else {
+            result += "  " + database + ": _UNDEFINED_\n";
+            result += "\n";
+        }
+        return result;
+    }
+
+    private static String getResultMaps(String key, Map<String, List<XmlResultMap>> resultsByNamespace) {
+        List<XmlResultMap> resultMapsForNamespace = resultsByNamespace.get(key);
+        String result = "";
+        if (resultMapsForNamespace != null && !resultMapsForNamespace.isEmpty()) {
+            resultMapsForNamespace.sort(
+                Comparator.comparing(XmlResultMap::getId, Comparator.nullsLast(String::compareTo)));
+            result += "result_maps:\n".toUpperCase();
+
+            for (XmlResultMap xmlResultMap : resultMapsForNamespace) {
+                result += "  " + xmlResultMap.getDatabase() + ": " + xmlResultMap.getId() + "\n";
+                for (XmlResultMap.XmlResult xmlResult : xmlResultMap.getResults()) {
+                    result += "    - property: " + xmlResult.getProperty() + ", column: " + xmlResult.getColumn() + "\n";
+                }
+                result += "\n";
+            }
+        }
+        return result;
     }
 
 }
