@@ -13,6 +13,18 @@ public record XmlMyBatisMapping(
         List<XmlResultMap> resultMaps
     ) {
 
+    public XmlMyBatisMapping {
+        if (project == null || project.isBlank()) {
+            throw new IllegalArgumentException("project cannot be null or empty");
+        }
+        if (namespace == null || namespace.isBlank()) {
+            throw new IllegalArgumentException("namespace cannot be null or empty");
+        }
+        if (database == null || database.isBlank()) {
+            throw new IllegalArgumentException("database cannot be null or empty");
+        }
+    }
+
     public List<XmlCallMapping> getAllCalls() {
         List<XmlCallMapping> allCalls = new ArrayList<>();
         allCalls.addAll(selects);

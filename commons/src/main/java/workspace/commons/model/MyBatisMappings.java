@@ -7,6 +7,7 @@ public class MyBatisMappings {
 
     private final Map<String, Project> projects;
     private final List<String> databases;
+    private final List<XmlMyBatisMapping> mappings;
 
     record Project (String name, List<XmlMyBatisMapping> mappings) {
         List<XmlCallMapping> getAllCalls() {
@@ -24,6 +25,7 @@ public class MyBatisMappings {
 
     public MyBatisMappings(List<XmlMyBatisMapping> mappings) {
         validateUniqueMappings(mappings);
+        this.mappings = mappings;
 
         this.databases = mappings.stream()
             .map(XmlMyBatisMapping::database)
@@ -118,6 +120,7 @@ public class MyBatisMappings {
     }
 
     public String getMappersTxt() {
+        if (mappings.isEmpty()) return "";
         String resultTxt = "";
 
         for (String projectKey : getProjectsKeys()) {
@@ -160,10 +163,11 @@ public class MyBatisMappings {
             }
         }
 
-        return resultTxt;
+        return resultTxt.trim() + "\n";
     }
 
     public String getMappersMd() {
+        if (mappings.isEmpty()) return "";
         String resultMd = "";
 
         for (String projectKey : getProjectsKeys()) {
@@ -206,7 +210,7 @@ public class MyBatisMappings {
             }
         }
 
-        return resultMd;
+        return resultMd.trim() + "\n";
     }
 
     private static String getCallMd(XmlCallMapping xmlCallMapping, String database, List<XmlCallMapping> byIdList) {
@@ -229,10 +233,12 @@ public class MyBatisMappings {
         return result;
     }
 
-    private static String getResultMaps(String key, Map<String, List<XmlResultMap>> resultsByNamespace) {
+    static String getResultMaps(String key, Map<String, List<XmlResultMap>> resultsByNamespace) {
         List<XmlResultMap> resultMapsForNamespace = resultsByNamespace.get(key);
         String result = "";
         if (resultMapsForNamespace != null && !resultMapsForNamespace.isEmpty()) {
+            // Create a copy to avoid modifying the original list
+            resultMapsForNamespace = new ArrayList<>(resultMapsForNamespace);
             resultMapsForNamespace.sort(
                 Comparator.comparing(XmlResultMap::getId, Comparator.nullsLast(String::compareTo)));
             result += "result_maps:\n".toUpperCase();

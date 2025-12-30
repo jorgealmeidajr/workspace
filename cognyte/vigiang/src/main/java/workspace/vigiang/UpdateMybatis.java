@@ -86,7 +86,6 @@ public class UpdateMybatis {
     }
 
     private static void writeContentToFile(String result, Path filePath, String fileName) throws IOException {
-        result = result.trim() + "\n";
         Path outputPath = Paths.get(filePath + fileName);
         writeString(outputPath, result);
     }
