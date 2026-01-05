@@ -213,7 +213,7 @@ public class MyBatisMappings {
         return resultMd.trim() + "\n";
     }
 
-    private static String getCallMd(XmlCallMapping xmlCallMapping, String database, List<XmlCallMapping> byIdList) {
+    static String getCallMd(XmlCallMapping xmlCallMapping, String database, List<XmlCallMapping> byIdList) {
         var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
         String result = "";
 

@@ -1402,4 +1402,93 @@ public class MyBatisMappingsTest {
         }
     }
 
+    @Nested
+    class GetCallMd {
+        @Test
+        void shouldReturnCallWithDatabaseAndFunctionWhenCallExists() {
+            XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
+            List<XmlCallMapping> byIdList = List.of(call);
+
+            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+
+            String expected = "  oracle: SELECT * FROM table\n";
+            assertEquals(expected, result);
+        }
+
+        @Test
+        void shouldReturnUndefinedWhenCallDoesNotExist() {
+            XmlCallMapping xmlCallMapping = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
+            List<XmlCallMapping> byIdList = new ArrayList<>();
+
+            String result = MyBatisMappings.getCallMd(xmlCallMapping, "oracle", byIdList);
+
+            String expected = "  oracle: _UNDEFINED_\n\n";
+            assertEquals(expected, result);
+        }
+
+        @Test
+        void shouldReturnUndefinedWhenDatabaseNotInList() {
+            XmlCallMapping oracleCall = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM oracle_table", new ArrayList<>());
+            List<XmlCallMapping> byIdList = List.of(oracleCall);
+
+            String result = MyBatisMappings.getCallMd(oracleCall, "postgres", byIdList);
+
+            assertTrue(result.contains("postgres: _UNDEFINED_"));
+        }
+
+        @Test
+        void shouldIncludeParamsWhenFunctionParamsArePresent() {
+            List<String> params = List.of("param1", "param2", "param3");
+            XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table WHERE id = ?", params);
+            List<XmlCallMapping> byIdList = List.of(call);
+
+            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+
+            assertTrue(result.contains("params:"));
+            assertTrue(result.contains("- param1"));
+            assertTrue(result.contains("- param2"));
+            assertTrue(result.contains("- param3"));
+        }
+
+        @Test
+        void shouldNotIncludeParamsWhenFunctionParamsAreEmpty() {
+            XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
+            List<XmlCallMapping> byIdList = List.of(call);
+
+            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+
+            assertFalse(result.contains("params:"));
+        }
+
+        @Test
+        void shouldFormatParamsCorrectly() {
+            List<String> params = List.of("userId", "status");
+            XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM users", params);
+            List<XmlCallMapping> byIdList = List.of(call);
+
+            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+
+            String expected = "  oracle: SELECT * FROM users\n" +
+                            "    params:\n" +
+                            "      - userId\n" +
+                            "      - status\n" +
+                            "\n";
+            assertEquals(expected, result);
+        }
+
+        @Test
+        void shouldFindCorrectCallFromMultipleCalls() {
+            XmlCallMapping oracleCall = new XmlCallMapping("namespace1", "id1", "oracle", "CALL oracle_func()", List.of());
+            XmlCallMapping postgresCall = new XmlCallMapping("namespace1", "id1", "postgres", "CALL postgres_func()", List.of());
+            XmlCallMapping mysqlCall = new XmlCallMapping("namespace1", "id1", "mysql", "CALL mysql_func()", List.of());
+            List<XmlCallMapping> byIdList = List.of(oracleCall, postgresCall, mysqlCall);
+
+            String result = MyBatisMappings.getCallMd(oracleCall, "postgres", byIdList);
+
+            assertTrue(result.contains("postgres: CALL postgres_func()"));
+            assertFalse(result.contains("oracle_func"));
+            assertFalse(result.contains("mysql_func"));
+        }
+    }
+
 }
