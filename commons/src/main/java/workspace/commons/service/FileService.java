@@ -37,7 +37,7 @@ public class FileService {
         writeString(outputPath, result);
     }
 
-    private static int calculateColumnWidth(String[] headers) {
+    static int calculateColumnWidth(String[] headers) {
         int maxValue = headers[0].length();
         for (String header : headers) {
             int headerLength = header.length();
@@ -48,7 +48,7 @@ public class FileService {
         return maxValue;
     }
 
-    private static String rightPad(String input, int length, String padStr) {
+    static String rightPad(String input, int length, String padStr) {
         if(input == null || padStr == null){
             return null;
         }
@@ -61,7 +61,12 @@ public class FileService {
 
         StringBuilder paddedString = new StringBuilder();
         paddedString.append(input);
-        paddedString.append(padStr.repeat(padLength));
+
+        // Calculate how many times to repeat padStr to ensure we have enough characters
+        int repetitions = (padLength / padStr.length()) + 1;
+        String padding = padStr.repeat(repetitions);
+        // Truncate to exact length needed
+        paddedString.append(padding.substring(0, padLength));
 
         return paddedString.toString();
     }
