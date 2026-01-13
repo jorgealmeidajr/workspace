@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class FileServiceTest {
 
     @Nested
@@ -213,6 +215,201 @@ public class FileServiceTest {
         void testLargeNumberOfHeaders() {
             String[] headers = {"A", "BB", "CCC", "DDDD", "EEEEE", "FFFFFF"};
             assertEquals(6, FileService.calculateColumnWidth(headers));
+        }
+    }
+
+    @Nested
+    class WriteData {
+        @Test
+        void testEmptyData() {
+            String[] columns = {"Name", "Age"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+
+            String result = FileService.writeData(columns, data);
+
+            assertEquals("", result);
+        }
+
+        @Test
+        void testSingleRowSingleColumn() {
+            String[] columns = {"Name"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John"});
+
+            String result = FileService.writeData(columns, data);
+
+            assertThat(result).startsWith("Name: John");
+        }
+
+        @Test
+        void testSingleRowMultipleColumns() {
+            String[] columns = {"Name", "Age", "City"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John", "25", "NYC"});
+
+            String result = FileService.writeData(columns, data);
+
+            String[] lines = getNonEmptyLines(result);
+            assertEquals(3, lines.length);
+            assertTrue(lines[0].startsWith("Name"));
+            assertTrue(lines[1].startsWith("Age"));
+            assertTrue(lines[2].startsWith("City"));
+        }
+
+        @Test
+        void testMultipleRowsSingleColumn() {
+            String[] columns = {"Name"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John"});
+            data.add(new String[]{"Jane"});
+            data.add(new String[]{"Bob"});
+
+            String result = FileService.writeData(columns, data);
+
+            String[] lines = getNonEmptyLines(result);
+            assertEquals(3, lines.length);
+            assertTrue(lines[0].contains("John"));
+            assertTrue(lines[1].contains("Jane"));
+            assertTrue(lines[2].contains("Bob"));
+        }
+
+        @Test
+        void testMultipleRowsMultipleColumns() {
+            String[] columns = {"Name", "Age"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John", "25"});
+            data.add(new String[]{"Jane", "30"});
+
+            String result = FileService.writeData(columns, data);
+
+            String[] lines = getNonEmptyLines(result);
+            assertEquals(4, lines.length);
+            assertTrue(lines[0].contains("Name"));
+            assertTrue(lines[1].contains("Age"));
+            assertTrue(lines[2].contains("Name"));
+            assertTrue(lines[3].contains("Age"));
+        }
+
+        String[] getNonEmptyLines(String input) {
+            return java.util.Arrays.stream(input.split(System.lineSeparator()))
+                    .filter(line -> !line.trim().isEmpty())
+                    .toArray(String[]::new);
+        }
+
+        @Test
+        void testColumnsPaddingWithDifferentLengths() {
+            String[] columns = {"FirstName", "A", "City"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John", "25", "NYC"});
+
+            String result = FileService.writeData(columns, data);
+
+            String[] lines = getNonEmptyLines(result);
+            assertTrue(lines[0].contains("FirstName:"));
+            assertTrue(lines[1].contains("A        :"));
+            assertTrue(lines[2].contains("City     :"));
+        }
+
+        @Test
+        void testEmptyStringDataValues() {
+            String[] columns = {"Name", "Age"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"", ""});
+
+            String result = FileService.writeData(columns, data);
+
+            String[] lines = getNonEmptyLines(result);
+            assertEquals(2, lines.length);
+            assertTrue(lines[0].startsWith("Name:"));
+            assertTrue(lines[1].startsWith("Age :"));
+        }
+
+        @Test
+        void testSpecialCharactersInData() {
+            String[] columns = {"Name", "Value"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John@Doe", "!@#$%"});
+
+            String result = FileService.writeData(columns, data);
+
+            assertTrue(result.contains("John@Doe"));
+            assertTrue(result.contains("!@#$%"));
+        }
+
+        @Test
+        void testNumbersAsStringData() {
+            String[] columns = {"ID", "Amount"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"1001", "9999.99"});
+
+            String result = FileService.writeData(columns, data);
+
+            assertTrue(result.contains("1001"));
+            assertTrue(result.contains("9999.99"));
+        }
+
+        @Test
+        void testWhitespaceInData() {
+            String[] columns = {"Name", "Description"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"  John  ", "  A test  "});
+
+            String result = FileService.writeData(columns, data);
+
+            assertTrue(result.contains("  John  "));
+            assertTrue(result.contains("  A test  "));
+        }
+
+        @Test
+        void testLongColumnNames() {
+            String[] columns = {"VeryLongFirstColumnName", "AnotherLongColumnName", "ShortName"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"Value1", "Value2", "Value3"});
+
+            String result = FileService.writeData(columns, data);
+
+            assertTrue(result.contains("VeryLongFirstColumnName"));
+            assertTrue(result.contains("AnotherLongColumnName"));
+            assertTrue(result.contains("ShortName"));
+        }
+
+        @Test
+        void testFormattingStructure() {
+            String[] columns = {"Name", "Age"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John", "25"});
+
+            String result = FileService.writeData(columns, data);
+
+            // Verify format includes column name, colon, and value
+            assertTrue(result.contains(": "));
+            assertTrue(result.contains("John"));
+            assertTrue(result.contains("25"));
+        }
+
+        @Test
+        void testManyRows() {
+            String[] columns = {"ID", "Name"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                data.add(new String[]{String.valueOf(i), "User" + i});
+            }
+
+            String result = FileService.writeData(columns, data);
+            String[] lines = getNonEmptyLines(result);
+
+            assertEquals(200, lines.length); // 2 columns per row * 100 rows
+        }
+
+        @Test
+        void testReturnTypeNotNull() {
+            String[] columns = {"Name"};
+            java.util.List<String[]> data = new java.util.ArrayList<>();
+            data.add(new String[]{"John"});
+
+            String result = FileService.writeData(columns, data);
+
+            assertNotNull(result);
         }
     }
 

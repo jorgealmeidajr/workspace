@@ -14,6 +14,18 @@ import java.util.List;
 public class FileService {
 
     public static void updateLocalFiles(String name, String fileName, String[] columns, List<String[]> data, Path outputFolderPath) throws IOException {
+        var result =
+            "# " + name + " | " + fileName + "\n" +
+            "```\n" +
+            writeData(columns, data) +
+            "```\n";
+
+        Path outputPath = Paths.get(outputFolderPath + "\\" + fileName + ".md");
+
+        writeString(outputPath, result);
+    }
+
+    static String writeData(String[] columns, List<String[]> data) {
         var finalLines = new ArrayList<String>();
         int columnWidth = calculateColumnWidth(columns);
 
@@ -21,20 +33,12 @@ public class FileService {
             String line = "";
             for (int i = 0; i < columns.length; i++) {
                 var column = rightPad(columns[i], columnWidth, " ");
-                line += column + ": " + row[i] + "\n";
+                line += column + ": " + row[i] + System.lineSeparator();
             }
             finalLines.add(line);
         }
 
-        var result =
-            "# " + name + " | " + fileName + "\n" +
-            "```\n" +
-            String.join(System.lineSeparator(), finalLines) +
-            "```\n";
-
-        Path outputPath = Paths.get(outputFolderPath + "\\" + fileName + ".md");
-
-        writeString(outputPath, result);
+        return String.join(System.lineSeparator(), finalLines);
     }
 
     static int calculateColumnWidth(String[] headers) {
