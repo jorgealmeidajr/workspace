@@ -83,6 +83,13 @@ public class FileService {
 
     public static void replaceRegion(Path file, String beginMarker, String endMarker, List<String> replacementLines) throws IOException {
         List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+
+        List<String> out = replaceLines(lines, beginMarker, endMarker, replacementLines);
+
+        Files.write(file, out, StandardCharsets.UTF_8);
+    }
+
+    static List<String> replaceLines(List<String> lines, String beginMarker, String endMarker, List<String> replacementLines) {
         int beginIdx = -1, endIdx = -1;
         for (int i = 0; i < lines.size(); i++) {
             if (lines.get(i).contains(beginMarker)) {
@@ -104,7 +111,7 @@ public class FileService {
         out.addAll(replacementLines);
         out.addAll(lines.subList(endIdx, lines.size()));
 
-        Files.write(file, out, StandardCharsets.UTF_8);
+        return out;
     }
 
     public static void writeMd(List<FileContent> fileContents, Path outputPath) throws IOException {

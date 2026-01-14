@@ -84,7 +84,7 @@ public class UpdateSchemasService {
         updateSchemaTxt(databaseSchemaPath, "tables", result.getTablesNames(), database);
         updateSchemaTxt(databaseSchemaPath, "views", result.getViewsNames(), database);
         updateSchemaTxt(databaseSchemaPath, "indexes", result.getIndexesNames(), database);
-        updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctionsNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctionsNames(), database); // TODO: not just the name, but the signature
         updateSchemaTxt(databaseSchemaPath, "procedures", result.getProceduresNames(), database);
         updateSchemaTxt(databaseSchemaPath, "packageBodies", result.getPackageBodiesNames(), database);
 

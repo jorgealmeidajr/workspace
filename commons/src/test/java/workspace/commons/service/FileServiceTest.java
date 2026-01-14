@@ -413,4 +413,306 @@ public class FileServiceTest {
         }
     }
 
+    @Nested
+    class ReplaceLines {
+        @Test
+        void testBasicReplacement() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN MARKER",
+                    "old content",
+                    "END MARKER",
+                    "line 5"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList(
+                    "new content 1",
+                    "new content 2"
+            );
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN MARKER", "END MARKER", replacementLines);
+
+            assertEquals(6, result.size());
+            assertEquals("line 1", result.get(0));
+            assertEquals("BEGIN MARKER", result.get(1));
+            assertEquals("new content 1", result.get(2));
+            assertEquals("new content 2", result.get(3));
+            assertEquals("END MARKER", result.get(4));
+            assertEquals("line 5", result.get(5));
+        }
+
+        @Test
+        void testReplaceWithEmptyContent() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN",
+                    "content to remove",
+                    "END",
+                    "line 5"
+            );
+            java.util.List<String> replacementLines = new java.util.ArrayList<>();
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(4, result.size());
+            assertEquals("line 1", result.get(0));
+            assertEquals("BEGIN", result.get(1));
+            assertEquals("END", result.get(2));
+            assertEquals("line 5", result.get(3));
+        }
+
+        @Test
+        void testReplaceMultipleLinesInMiddle() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN",
+                    "old1",
+                    "old2",
+                    "old3",
+                    "END",
+                    "line 7"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList(
+                    "new1",
+                    "new2"
+            );
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(6, result.size());
+            assertEquals("line 1", result.get(0));
+            assertEquals("BEGIN", result.get(1));
+            assertEquals("new1", result.get(2));
+            assertEquals("new2", result.get(3));
+            assertEquals("END", result.get(4));
+            assertEquals("line 7", result.get(5));
+        }
+
+        @Test
+        void testMarkerWithPartialMatch() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "// BEGIN REPLACEMENT",
+                    "old",
+                    "// END REPLACEMENT",
+                    "line 5"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(5, result.size());
+            assertEquals("// BEGIN REPLACEMENT", result.get(1));
+            assertEquals("new", result.get(2));
+            assertEquals("// END REPLACEMENT", result.get(3));
+        }
+
+        @Test
+        void testBeginMarkerNotFound() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "old content",
+                    "END MARKER",
+                    "line 4"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> FileService.replaceLines(lines, "BEGIN MARKER", "END MARKER", replacementLines)
+            );
+            assertTrue(exception.getMessage().contains("Begin marker not found"));
+        }
+
+        @Test
+        void testEndMarkerNotFound() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN MARKER",
+                    "old content",
+                    "line 4"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> FileService.replaceLines(lines, "BEGIN MARKER", "END MARKER", replacementLines)
+            );
+            assertTrue(exception.getMessage().contains("End marker not found after begin"));
+        }
+
+        @Test
+        void testEndMarkerBeforeBeginMarker() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "END MARKER",
+                    "BEGIN MARKER",
+                    "old content"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> FileService.replaceLines(lines, "BEGIN MARKER", "END MARKER", replacementLines)
+            );
+            assertTrue(exception.getMessage().contains("End marker not found after begin"));
+        }
+
+        @Test
+        void testConsecutiveMarkers() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN",
+                    "END",
+                    "line 4"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("replacement");
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(5, result.size());
+            assertEquals("BEGIN", result.get(1));
+            assertEquals("replacement", result.get(2));
+            assertEquals("END", result.get(3));
+        }
+
+        @Test
+        void testReplaceWithMoreLinesThanOriginal() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN",
+                    "old",
+                    "END",
+                    "line 5"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList(
+                    "new1",
+                    "new2",
+                    "new3",
+                    "new4",
+                    "new5"
+            );
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(9, result.size());
+            assertEquals("line 1", result.get(0));
+            assertEquals("BEGIN", result.get(1));
+            assertEquals("new1", result.get(2));
+            assertEquals("new5", result.get(6));
+            assertEquals("END", result.get(7));
+            assertEquals("line 5", result.get(8));
+        }
+
+        @Test
+        void testReplaceAtBeginningOfFile() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "BEGIN",
+                    "old content",
+                    "END",
+                    "line 4"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(4, result.size());
+            assertEquals("BEGIN", result.get(0));
+            assertEquals("new", result.get(1));
+            assertEquals("END", result.get(2));
+        }
+
+        @Test
+        void testReplaceAtEndOfFile() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "BEGIN",
+                    "old content",
+                    "END"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(4, result.size());
+            assertEquals("line 1", result.get(0));
+            assertEquals("BEGIN", result.get(1));
+            assertEquals("new", result.get(2));
+            assertEquals("END", result.get(3));
+        }
+
+        @Test
+        void testMultipleReplacements() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "BEGIN",
+                    "old",
+                    "END"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList(
+                    "new1",
+                    "new2",
+                    "new3"
+            );
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(5, result.size());
+            assertEquals("BEGIN", result.get(0));
+            assertEquals("new1", result.get(1));
+            assertEquals("new2", result.get(2));
+            assertEquals("new3", result.get(3));
+            assertEquals("END", result.get(4));
+        }
+
+        @Test
+        void testMarkerIsCaseSensitive() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "BEGIN",
+                    "old",
+                    "END"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> FileService.replaceLines(lines, "begin", "end", replacementLines)
+            );
+            assertTrue(exception.getMessage().contains("Begin marker not found"));
+        }
+
+        @Test
+        void testSingleContentLine() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "BEGIN",
+                    "content",
+                    "END"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new");
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN", "END", replacementLines);
+
+            assertEquals(3, result.size());
+            assertEquals("BEGIN", result.get(0));
+            assertEquals("new", result.get(1));
+            assertEquals("END", result.get(2));
+        }
+
+        @Test
+        void testWithSpecialCharactersInMarkers() {
+            java.util.List<String> lines = java.util.Arrays.asList(
+                    "line 1",
+                    "<!-- BEGIN BLOCK -->",
+                    "old content",
+                    "<!-- END BLOCK -->",
+                    "line 5"
+            );
+            java.util.List<String> replacementLines = java.util.Arrays.asList("new content");
+
+            java.util.List<String> result = FileService.replaceLines(lines, "BEGIN BLOCK", "END BLOCK", replacementLines);
+
+            assertEquals(5, result.size());
+            assertEquals("<!-- BEGIN BLOCK -->", result.get(1));
+            assertEquals("new content", result.get(2));
+            assertEquals("<!-- END BLOCK -->", result.get(3));
+        }
+    }
+
 }
