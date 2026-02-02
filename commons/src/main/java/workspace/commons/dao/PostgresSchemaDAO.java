@@ -47,7 +47,6 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<DbObjectDefinition> listTablesDefinitions(List<String> names) throws SQLException {
-        // TODO: postgres, create tables statements should be in create sql format
         String sql = """
             select table_schema, table_name
             from information_schema.tables
@@ -95,35 +94,39 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
         return result;
     }
 
-    @Deprecated
     private static String getTableDefinition(Connection conn, String tableSchema, String tableName) throws SQLException {
-        String result = "";
         String sql = """
-            select
-              table_schema, table_name, column_name, column_default, is_nullable, data_type,
-              character_maximum_length, udt_name
-            from information_schema.columns
-            where table_schema = '%s'
-              and table_name = '%s'
-            order by table_schema, table_name, ordinal_position
+            SELECT
+                n.nspname AS table_schema,
+                c.relname AS table_name,
+                a.attnum,
+                a.attname || ' ' ||
+                pg_catalog.format_type(a.atttypid, a.atttypmod) ||
+                CASE WHEN a.attnotnull THEN ' NOT NULL' ELSE '' END ||
+                CASE WHEN a.atthasdef THEN ' DEFAULT ' || pg_get_expr(d.adbin, d.adrelid) ELSE '' END\s
+                AS column_def
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            JOIN pg_attribute a ON a.attrelid = c.oid
+            LEFT JOIN pg_attrdef d ON d.adrelid = c.oid AND d.adnum = a.attnum
+            WHERE c.relkind = 'r'
+              and a.attnum > 0
+              and not a.attisdropped
+              and n.nspname = '%s'
+              and c.relname = '%s'
+            order by a.attnum
             """.formatted(tableSchema, tableName);
 
-        List<String[]> data = new ArrayList<>();
+        List<String> columns = new ArrayList<>();
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()) {
-                String[] row = new String[] {
-                    rs.getString("column_name"),
-                    (rs.getString("column_default") == null) ? "null" : rs.getString("column_default"),
-                    rs.getString("is_nullable"),
-                    rs.getString("data_type"),
-                    (rs.getString("character_maximum_length") == null) ? "null" : rs.getString("character_maximum_length"),
-                };
-                data.add(row);
+                columns.add(rs.getString("column_def"));
             }
         }
 
-        return result;
+        return "CREATE TABLE " + tableSchema + "." + tableName + " (\n    "
+                + String.join(",\n    ", columns) + "\n);";
     }
 
     @Override
