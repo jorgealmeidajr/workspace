@@ -84,6 +84,16 @@ public class OracleSchemaDAO implements DbSchemaDAO {
         return listObjectDefinitions(names, "PACKAGE_BODY");
     }
 
+    @Override
+    public List<String> listFunctionsSignatures() throws SQLException {
+        return listFunctionsNames();
+    }
+
+    @Override
+    public List<String> listProceduresSignatures() throws SQLException {
+        return listProceduresNames();
+    }
+
     private List<String> listOracleObjects(String objectType, String where) throws SQLException {
         return listOracleObjects(objectType, where, null);
     }

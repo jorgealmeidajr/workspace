@@ -84,8 +84,8 @@ public class UpdateSchemasService {
         updateSchemaTxt(databaseSchemaPath, "tables", result.getTablesNames(), database);
         updateSchemaTxt(databaseSchemaPath, "views", result.getViewsNames(), database);
         updateSchemaTxt(databaseSchemaPath, "indexes", result.getIndexesNames(), database);
-        updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctionsNames(), database); // TODO: not just the name, but the signature
-        updateSchemaTxt(databaseSchemaPath, "procedures", result.getProceduresNames(), database);
+        updateSchemaTxt(databaseSchemaPath, "functions", result.getFunctionsSignatures(), database);
+        updateSchemaTxt(databaseSchemaPath, "procedures", result.getProceduresSignatures(), database);
         updateSchemaTxt(databaseSchemaPath, "packageBodies", result.getPackageBodiesNames(), database);
 
         if (request.isUpdateTablesDefinitions()) {
@@ -203,6 +203,7 @@ public class UpdateSchemasService {
             }
 
             var functionsNames = dao.listFunctionsNames();
+            var functionsSignatures = dao.listFunctionsSignatures();
 
             List<DbObjectDefinition> functions = List.of();
             if (request.isUpdateFunctionsDefinitions()) {
@@ -225,6 +226,7 @@ public class UpdateSchemasService {
             }
 
             var proceduresNames = dao.listProceduresNames();
+            var proceduresSignatures = dao.listProceduresSignatures();
 
             List<DbObjectDefinition> procedures = List.of();
             if (request.isUpdateProceduresDefinitions()) {
@@ -253,10 +255,12 @@ public class UpdateSchemasService {
                     .viewsNames(viewsNames)
                     .views(views)
                     .functionsNames(functionsNames)
+                    .functionsSignatures(functionsSignatures)
                     .functions(functions)
                     .indexesNames(indexesNames)
                     .indexes(indexes)
                     .proceduresNames(proceduresNames)
+                    .proceduresSignatures(proceduresSignatures)
                     .procedures(procedures)
                     .packageBodiesNames(packageBodiesNames)
                     .packageBodies(packageBodies)

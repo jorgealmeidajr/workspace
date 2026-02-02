@@ -292,4 +292,54 @@ public class PostgresSchemaDAO implements DbSchemaDAO {
         return List.of();
     }
 
+    @Override
+    public List<String> listFunctionsSignatures() throws SQLException {
+        String sql = """            
+            SELECT
+              n.nspname AS routine_schema,
+              p.proname AS routine_name,
+              p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' AS full_signature
+            FROM pg_proc p
+            JOIN pg_namespace n ON (p.pronamespace = n.oid)
+            WHERE p.prokind IN ('f')
+            ORDER BY p.prokind, n.nspname, p.proname
+            """;
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var name = rs.getString("routine_schema") + "." + rs.getString("full_signature");
+                result.add(name);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> listProceduresSignatures() throws SQLException {
+        String sql = """            
+            SELECT
+              n.nspname AS routine_schema,
+              p.proname AS routine_name,
+              p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' AS full_signature
+            FROM pg_proc p
+            JOIN pg_namespace n ON (p.pronamespace = n.oid)
+            WHERE p.prokind IN ('p')
+            ORDER BY p.prokind, n.nspname, p.proname
+            """;
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var name = rs.getString("routine_schema") + "." + rs.getString("full_signature");
+                result.add(name);
+            }
+        }
+        return result;
+    }
+
 }

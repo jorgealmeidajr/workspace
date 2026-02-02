@@ -18,6 +18,9 @@ public class SchemaResult {
     private List<String> proceduresNames;
     private List<String> packageBodiesNames;
 
+    private List<String> functionsSignatures;
+    private List<String> proceduresSignatures;
+
     private List<DbObjectDefinition> tables;
     private List<DbObjectDefinition> views;
     private List<DbObjectDefinition> functions;

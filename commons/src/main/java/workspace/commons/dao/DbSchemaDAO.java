@@ -31,4 +31,8 @@ public interface DbSchemaDAO {
 
     List<DbObjectDefinition> listPackageBodiesDefinitions(List<String> names) throws SQLException;
 
+    List<String> listFunctionsSignatures() throws SQLException;
+
+    List<String> listProceduresSignatures() throws SQLException;
+
 }
