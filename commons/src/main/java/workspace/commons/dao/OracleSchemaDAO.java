@@ -86,12 +86,56 @@ public class OracleSchemaDAO implements DbSchemaDAO {
 
     @Override
     public List<String> listFunctionsSignatures() throws SQLException {
-        return listFunctionsNames();
+        String sql = """
+            select ao.owner, ao.object_name, ao.OBJECT_ID, ao.OBJECT_TYPE,
+              '(' || NVL(LISTAGG(aa.ARGUMENT_NAME || ' ' || aa.DATA_TYPE, ', ') WITHIN GROUP (ORDER BY aa.POSITION), '') || ')' as signature
+            from all_objects ao
+            left join all_arguments aa on ao.owner = aa.owner
+                                       and ao.object_name = aa.object_name
+                                       and aa.POSITION > 0
+            where ao.owner like '%s'
+              and ao.object_type = 'FUNCTION'
+            group by ao.owner, ao.object_name, ao.OBJECT_ID, ao.OBJECT_TYPE
+            order by ao.owner, ao.object_name
+            """.formatted(databaseCredentials.getUsername());
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var functionSignature = rs.getString("object_name") + rs.getString("signature");
+                result.add(functionSignature);
+            }
+        }
+        return result;
     }
 
     @Override
     public List<String> listProceduresSignatures() throws SQLException {
-        return listProceduresNames();
+        String sql = """
+            select ao.owner, ao.object_name, ao.OBJECT_ID, ao.OBJECT_TYPE,
+              '(' || NVL(LISTAGG(aa.ARGUMENT_NAME || ' ' || aa.DATA_TYPE, ', ') WITHIN GROUP (ORDER BY aa.POSITION), '') || ')' as signature
+            from all_objects ao
+            left join all_arguments aa on ao.owner = aa.owner\s
+                                       and ao.object_name = aa.object_name
+                                       and aa.POSITION > 0  -- exclude return value (position 0)
+            where ao.owner like '%s'
+            and ao.object_type = 'PROCEDURE'
+            group by ao.owner, ao.object_name, ao.OBJECT_ID, ao.OBJECT_TYPE
+            order by ao.owner, ao.object_name
+            """.formatted(databaseCredentials.getUsername());
+
+        List<String> result = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentials);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                var functionSignature = rs.getString("object_name") + rs.getString("signature");
+                result.add(functionSignature);
+            }
+        }
+        return result;
     }
 
     private List<String> listOracleObjects(String objectType, String where) throws SQLException {
