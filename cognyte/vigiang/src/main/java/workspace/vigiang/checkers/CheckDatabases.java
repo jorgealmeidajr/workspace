@@ -30,6 +30,7 @@ public class CheckDatabases {
 
                 updateLocalFeatureFiles(databaseCredentialsVigiaNG, dao);
                 updateLocalConfigurationFiles(databaseCredentialsVigiaNG, dao);
+                updateLocalPrivateConfigurationFiles(databaseCredentialsVigiaNG, dao);
 
                 updateLocalPrivilegeFiles(databaseCredentialsVigiaNG, dao);
                 updateLocalProfileFiles(databaseCredentialsVigiaNG, dao);
@@ -67,6 +68,13 @@ public class CheckDatabases {
                 .map(Configuration::toArray)
                 .collect(Collectors.toList());
 
+        Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
+        FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
+    }
+
+    private static void updateLocalPrivateConfigurationFiles(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG, VigiaNgDAO dao) throws IOException, SQLException {
+        var fileConfig = FileConfigRegistry.getConfig("privateConfiguration", databaseCredentialsVigiaNG.getDatabase());
+        List<String[]> data = dao.listPrivateConfigurations();
         Path databaseDataPath = EnvironmentService.getDatabaseDataPath(databaseCredentialsVigiaNG);
         FileService.updateLocalFiles(databaseCredentialsVigiaNG.getName(), fileConfig.getFileName(), fileConfig.getColumns(), data, databaseDataPath);
     }

@@ -22,6 +22,15 @@ public class FileConfigRegistry {
             Database.POSTGRES, new FileConfig("conf.site", new String[] { "carrier_id", "parameter_id", "parameter_description", "value" })
         ));
 
+        configurations.put("privateConfiguration", Map.of(
+                Database.ORACLE, new FileConfig("CFG_PARAMETRO", new String[] {
+                    "CD_PARAMETRO", "ID_PARAMETRO", "DE_PARAMETRO", "VL_PARAMETRO"
+                }),
+                Database.POSTGRES, new FileConfig("conf.parameter", new String[] {
+                    "id", "parameter", "description", "value"
+                })
+        ));
+
         configurations.put("privilege", Map.of(
             Database.ORACLE, new FileConfig("SEG_PRIVILEGIO", new String[] { "CD_PRIVILEGIO", "ID_PRIVILEGIO", "NM_PRIVILEGIO" }),
             Database.POSTGRES, new FileConfig("sec.privilege", new String[] { "id", "privilegeid", "name" })

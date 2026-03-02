@@ -75,6 +75,33 @@ public class OracleVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
+    public List<String[]> listPrivateConfigurations() throws SQLException {
+        String sql =
+            """
+            select CD_PARAMETRO, ID_PARAMETRO, DE_PARAMETRO, VL_PARAMETRO
+            from CFG_PARAMETRO
+            order by CD_PARAMETRO desc
+            """;
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                Integer code = rs.getInt("CD_PARAMETRO");
+                String[] row = new String[] {
+                    code.toString(),
+                    rs.getString("ID_PARAMETRO"),
+                    rs.getString("DE_PARAMETRO"),
+                    rs.getString("VL_PARAMETRO")
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    @Override
     public List<String[]> listPrivileges() throws SQLException {
         String sql =
             "select t1.CD_PRIVILEGIO, t1.ID_PRIVILEGIO, t1.NM_PRIVILEGIO\n" +

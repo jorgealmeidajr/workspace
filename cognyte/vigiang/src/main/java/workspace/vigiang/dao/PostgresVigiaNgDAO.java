@@ -74,6 +74,33 @@ public class PostgresVigiaNgDAO implements VigiaNgDAO {
     }
 
     @Override
+    public List<String[]> listPrivateConfigurations() throws SQLException {
+        String sql =
+            """
+            select id, "parameter", description, value
+            from conf.parameter
+            order by id desc
+            """;
+
+        List<String[]> data = new ArrayList<>();
+        try (Connection conn = getConnection(databaseCredentialsVigiaNG);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while(rs.next()) {
+                Integer id = rs.getInt("id");
+                String[] row = new String[] {
+                    id.toString(),
+                    rs.getString("parameter"),
+                    rs.getString("description"),
+                    rs.getString("value"),
+                };
+                data.add(row);
+            }
+        }
+        return data;
+    }
+
+    @Override
     public List<String[]> listPrivileges() throws SQLException {
         String sql =
             "select t1.id, t1.privilegeid, t1.\"name\"\n" +

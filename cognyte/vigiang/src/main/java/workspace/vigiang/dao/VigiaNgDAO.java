@@ -14,6 +14,8 @@ public interface VigiaNgDAO {
 
     List<Configuration> listConfigurationValues() throws SQLException;
 
+    List<String[]> listPrivateConfigurations() throws SQLException;
+
     List<String[]> listPrivileges() throws SQLException;
 
     List<String[]> listProfiles() throws SQLException;
