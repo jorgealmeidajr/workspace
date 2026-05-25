@@ -13,6 +13,7 @@ public enum Carrier {
     TRANSATEL,
     VIVO,
     VTAL,
+    WMS,
     WOM,
     VERO
 }
