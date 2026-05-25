@@ -24,7 +24,7 @@ import static workspace.vigiang.service.EnvironmentService.validateProjectDirect
 public class UpdateProjectsByVersion {
 
     public static void main(String[] args) {
-        var WORK_DIR = "C:\\work\\vigiang";
+        var WORK_DIR = EnvironmentService.getWorkVigiaDir();
 
         for (String version : EnvironmentService.getVersions()) {
             validateProjectDirectories(WORK_DIR, version);

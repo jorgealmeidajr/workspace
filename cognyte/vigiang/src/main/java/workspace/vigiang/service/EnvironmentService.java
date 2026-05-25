@@ -181,4 +181,8 @@ public class EnvironmentService {
         }
     }
 
+    public static String getWorkVigiaDir() {
+        return WORK_PATH_STR + "\\vigiang";
+    }
+
 }
