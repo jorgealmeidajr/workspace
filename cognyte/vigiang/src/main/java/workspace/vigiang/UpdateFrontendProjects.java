@@ -20,15 +20,15 @@ import static workspace.commons.service.FileService.writeString;
 
 public class UpdateFrontendProjects {
 
-    public static void run(Path frontendPath, Path versionPath) throws IOException {
+    public static void run(Path frontendPath, Path outputPath) throws IOException {
         List<FileContent> frontendFileContents = getFileContentsByExtensions(
                 frontendPath, List.of("js", "tsx"), List.of("node_modules", "json-server", "tests"));
 
-        updateConfigurations(versionPath, frontendFileContents);
-        updateFeatures(versionPath, frontendFileContents);
-        updatePrivileges(versionPath, frontendFileContents);
-        updateEnvironment(versionPath, frontendFileContents);
-        updateSetup(frontendPath, versionPath);
+        updateConfigurations(outputPath, frontendFileContents);
+        updateFeatures(outputPath, frontendFileContents);
+        updatePrivileges(outputPath, frontendFileContents);
+        updateEnvironment(outputPath, frontendFileContents);
+        updateSetup(frontendPath, outputPath);
     }
 
     private static void updateConfigurations(Path versionPath, List<FileContent> frontendFileContents) throws IOException {

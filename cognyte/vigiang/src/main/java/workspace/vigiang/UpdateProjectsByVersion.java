@@ -2,6 +2,7 @@ package workspace.vigiang;
 
 import workspace.vigiang.service.EnvironmentService;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -19,9 +20,20 @@ public class UpdateProjectsByVersion {
             Path frontendPath = Paths.get(WORK_DIR + "\\" + version + "\\front-" + version);
             Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
+            Path backendOutputPath = Paths.get(versionPath + "\\back");
+            Path frontendOutputPath = Paths.get(versionPath + "\\front");
+
             try {
-                UpdateFrontendProjects.run(frontendPath, versionPath);
-                UpdateBackendProjects.run(backendPath, versionPath);
+                if (!Files.exists(backendOutputPath)) {
+                    Files.createDirectories(backendOutputPath);
+                }
+
+                if (!Files.exists(frontendOutputPath)) {
+                    Files.createDirectories(frontendOutputPath);
+                }
+
+                UpdateBackendProjects.run(backendPath, backendOutputPath);
+                UpdateFrontendProjects.run(frontendPath, frontendOutputPath);
             } catch (Exception e) {
                 e.printStackTrace();
             }
