@@ -1,4 +1,5 @@
 # $ pip install -r requirements.txt
+# $ pip list
 urllib3
 python-gitlab
 python-dotenv
