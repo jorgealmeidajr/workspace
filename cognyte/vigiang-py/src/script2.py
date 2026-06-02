@@ -3,6 +3,7 @@ import urllib3
 import os
 from dataclasses import dataclass
 from dotenv import load_dotenv
+from vigiang import get_project_names
 
 
 def connect_gitlab() -> gitlab.Gitlab:
@@ -91,34 +92,7 @@ def main() -> None:
     BRANCH_A = "version-2.3.0"  # Source branch (commits to send FROM)
     BRANCH_B = "version-3.1.0"  # Target branch (commits to send TO)
 
-    PROJECT_NAMES = [
-        # cloud-control:
-        "auth-service",
-        "config-server",
-        "eureka-server",
-        "user-service",
-        "zuul-server",
-
-        # cloud-vigiang:
-        "block-service",
-        "carrier-service",
-        "dashboard-service",
-        "data-retention-service",
-        "event-service",
-        "interception-service",
-        "log-service",
-        "message-service",
-        "operation-service",
-        "portability-service",
-        "process-service",
-        "report-service",
-        "scheduler-service",
-        "sittel-service",
-        "system-service",
-        "tracking-service",
-        "voucher-service",
-        "warrant-service",
-    ]
+    PROJECT_NAMES = get_project_names(BRANCH_A)
     # ─────────────────────────────────────────────────────────────────────────
 
     load_dotenv()
