@@ -43,19 +43,27 @@ def write_branch_md(branch: str, project_mrs: dict, output_path: Path) -> None:
     lines = [f"# {branch}\n"]
     for project_name, mrs in project_mrs.items():
         lines.append(f"\n## {project_name}\n")
+        lines.append("```\n")
+
         if not mrs:
-            lines.append("_No merged requests found._\n")
+            lines.append("No merged requests found.\n")
+            lines.append("```\n")
             continue
-        for mr in sorted(mrs, key=lambda m: m.merged_at or ""):
+
+        for mr in sorted(mrs, key=lambda m: m.merged_at or "", reverse=True):
             iid = mr.iid
             date = (mr.merged_at or "")[:10]
-            author = mr.author.get("name", "") if isinstance(mr.author, dict) else str(mr.author)
             title = mr.title
-            lines.append(f"- [!{iid}] {date} {author} — {title}\n")
+            lines.append(f"[!{iid}] {date} - {title}\n")
+
             for commit in get_mr_commits(mr):
                 short_id = commit.short_id
                 commit_title = commit.title
-                lines.append(f"  - [{short_id}] {commit_title}\n")
+                commit_date = (commit.authored_date or "")[:10]
+                lines.append(f"  [{short_id}] {commit_date} - {commit_title}\n")
+            lines.append("\n")
+
+        lines.append("```\n")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("".join(lines), encoding="utf-8")
@@ -67,7 +75,7 @@ def main() -> None:
 
     BRANCHES_FOLDER = Path(get_vigia_ng_path()) / "branches"
 
-    BRANCHES = ["version-2.3.0"]  # "version-3.0.0", "version-3.1.0", "version-3.2.0"
+    BRANCHES = ["version-2.3.0", "version-3.0.0", "version-3.1.0"] # "version-3.2.0"
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
