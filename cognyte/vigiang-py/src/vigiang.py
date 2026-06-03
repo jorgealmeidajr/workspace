@@ -1,9 +1,16 @@
 def get_project_names(branch: str) -> list[str]:
-    shared = [
-        # frontend:
-        "vigia_ng_webviewer",
-        "vigia_ng_workflow",
+    return sorted(set(get_front_project_names()) | set(get_back_project_names(branch)))
 
+
+def get_front_project_names() -> list[str]:
+    return sorted([
+        "vigia_ng_webviewer",
+        "vigia_ng_workflow"
+    ])
+
+
+def get_back_project_names(branch: str) -> list[str]:
+    shared = [
         # cloud-control:
         "auth-service",
         "config-server",
@@ -33,13 +40,13 @@ def get_project_names(branch: str) -> list[str]:
     ]
 
     if branch.startswith("version-2."):
-        return shared.copy()
+        return sorted(shared)
     elif branch.startswith("version-3."):
-        return shared + [
+        return sorted(shared + [
             # cloud-vigiang:
             "websocket-service",
             "wms-service",
-        ]
+        ])
     else:
         raise ValueError(f"Unsupported branch prefix: '{branch}'. Expected 'version-2.' or 'version-3.'.")
 

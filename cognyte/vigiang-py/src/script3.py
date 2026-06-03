@@ -3,8 +3,10 @@ import urllib3
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from gitlab import Gitlab
+
 from environment import get_vigia_ng_path
-from vigiang import get_project_names
+from vigiang import get_front_project_names, get_back_project_names
 
 
 def connect_gitlab() -> gitlab.Gitlab:
@@ -67,45 +69,54 @@ def write_branch_md(branch: str, project_mrs: dict, output_path: Path) -> None:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("".join(lines), encoding="utf-8")
-    print(f"  ✅  Written: {output_path}")
+    print(f"  ✅  Written: {output_path}\n")
 
 
 def main() -> None:
     print("Starting script3: update commits history log.\n")
 
-    BRANCHES_FOLDER = Path(get_vigia_ng_path()) / "branches"
-
-    BRANCHES = ["version-2.3.0", "version-3.0.0", "version-3.1.0"] # "version-3.2.0"
+    tasks_folder = Path(get_vigia_ng_path()) / "tasks"
+    branches = ["version-2.3.0", "version-3.1.0", "version-3.2.0"]
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     gl = connect_gitlab()
 
-    for BRANCH in BRANCHES:
+    for branch in branches:
         print(f"\n{'─' * 60}")
-        print(f"Branch: {BRANCH}")
+        print(f"Branch: {branch}")
 
-        PROJECT_NAMES = get_project_names(BRANCH)
-        project_mrs: dict = {}
+        version = ".".join(branch.replace("version-", "").split(".")[:2])
+        version_path = tasks_folder / version
+        version_path.mkdir(parents=True, exist_ok=True)
 
-        for project_name in PROJECT_NAMES:
-            try:
-                project = get_project(gl, project_name)
-            except ValueError as e:
-                print(f"  ❌  {e}")
-                project_mrs[project_name] = []
-                continue
+        project_names = get_front_project_names()
+        md_path = version_path / f"{version}.mrs.front.md"
+        write_mrs(branch, project_names, gl, md_path)
 
-            print(f"  Fetching merged requests for '{project_name}'...")
-            mrs = get_merged_requests(project, BRANCH)
-            project_mrs[project_name] = mrs
-            print(f"    → {len(mrs)} merged request(s)")
-
-        md_path = BRANCHES_FOLDER / f"{BRANCH}.md"
-        write_branch_md(BRANCH, project_mrs, md_path)
+        project_names = get_back_project_names(branch)
+        md_path = version_path / f"{version}.mrs.back.md"
+        write_mrs(branch, project_names, gl, md_path)
 
     print("\nEnding script3.")
+
+
+def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
+    project_mrs: dict = {}
+    for project_name in project_names:
+        try:
+            project = get_project(gl, project_name)
+        except ValueError as e:
+            print(f"  ❌  {e}")
+            project_mrs[project_name] = []
+            continue
+
+        print(f"  Fetching merged requests for '{project_name}'...")
+        mrs = get_merged_requests(project, branch)
+        project_mrs[project_name] = mrs
+
+    write_branch_md(branch, project_mrs, md_path)
 
 
 if __name__ == "__main__":
