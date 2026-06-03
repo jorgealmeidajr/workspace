@@ -1,5 +1,8 @@
 def get_project_names(branch: str) -> list[str]:
-    return sorted(set(get_front_project_names()) | set(get_back_project_names(branch)))
+    projects = []
+    projects += get_front_project_names()
+    projects += get_back_project_names(branch)
+    return projects
 
 
 def get_front_project_names() -> list[str]:

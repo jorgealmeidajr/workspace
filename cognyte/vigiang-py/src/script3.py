@@ -25,10 +25,10 @@ def get_mr_commits(mr) -> list:
         return []
 
 
-def write_branch_md(branch: str, project_mrs: dict, output_path: Path) -> None:
-    lines = [f"# {branch}\n"]
+def write_branch_md(project_mrs: dict, output_path: Path) -> None:
+    lines = []
     for project_name, mrs in project_mrs.items():
-        lines.append(f"\n## {project_name}\n")
+        lines.append(f"\n# {project_name}\n")
         lines.append("```\n")
 
         if not mrs:
@@ -100,7 +100,7 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
         mrs = get_merged_requests(project, branch)
         project_mrs[project_name] = mrs
 
-    write_branch_md(branch, project_mrs, md_path)
+    write_branch_md(project_mrs, md_path)
 
 
 if __name__ == "__main__":
