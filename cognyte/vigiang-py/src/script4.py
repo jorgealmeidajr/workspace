@@ -2,9 +2,10 @@ import urllib3
 from pathlib import Path
 from dotenv import load_dotenv
 import gitlab
+from gitlab import Gitlab
 
 from environment import get_vigia_ng_path
-from vigiang import get_project_names
+from src.vigiang import get_front_project_names, get_back_project_names
 from shared import connect_gitlab, get_project
 
 
@@ -13,7 +14,7 @@ def get_branch_commits(project: gitlab.v4.objects.Project, branch: str) -> list:
     try:
         return project.commits.list(ref_name=branch, all=True)
     except gitlab.exceptions.GitlabListError as e:
-        print(f"  ⚠️  Could not fetch commits for '{branch}' in '{project.name}': {e}")
+        print(f"  ⚠️ Could not fetch commits for '{branch}' in '{project.name}': {e}")
         return []
 
 
@@ -23,7 +24,7 @@ def get_version_tags(project: gitlab.v4.objects.Project, version_prefix: str) ->
         all_tags = project.tags.list(all=True)
         return [t for t in all_tags if t.name.startswith(version_prefix)]
     except gitlab.exceptions.GitlabListError as e:
-        print(f"  ⚠️  Could not fetch tags for '{project.name}': {e}")
+        print(f"  ⚠️ Could not fetch tags for '{project.name}': {e}")
         return []
 
 
@@ -70,7 +71,7 @@ def write_tags_md(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("".join(lines), encoding="utf-8")
-    print(f"  ✅  Written: {output_path}\n")
+    print(f"  ✅ Written: {output_path}\n")
 
 
 def process_project(
@@ -96,7 +97,7 @@ def process_project(
             oldest_tag_index = i  # keep updating; last hit is the oldest tag
 
     if oldest_tag_index is None:
-        print(f"  ℹ️  No version tags found for '{project.name}' — skipping.")
+        print(f"  ℹ️ No version tags found for '{project.name}' — skipping.")
         return {"commits": [], "tag_map": {}}
     else:
         sliced = commits[: oldest_tag_index + 1]
@@ -136,6 +137,7 @@ def print_untagged_new_commits(project_data: dict) -> None:
         for commit in untagged:
             date = (commit.authored_date or "")[:10]
             print(f"  [{commit.short_id}] {date} - {commit.title}")
+
         # Print the boundary tagged commit for context
         tag_names = tag_map.get(context_commit.id, [])
         tag_suffix = " 🏷️ " + ", ".join(sorted(tag_names)) if tag_names else ""
@@ -158,33 +160,44 @@ def main() -> None:
     gl = connect_gitlab()
 
     for branch in branches:
-        print(f"\n{'─' * 60}")
+        print(f"\n{'─' * 120}")
         print(f"Branch: {branch}")
-
-        project_names = get_project_names(branch)
 
         version = ".".join(branch.replace("version-", "").split(".")[:2])
         version_path = tasks_folder / version
         version_path.mkdir(parents=True, exist_ok=True)
 
-        md_path = version_path / f"{version}.tags.md"
+        project_names = get_front_project_names()
+        md_path = version_path / f"{version}.tags.front.md"
 
-        project_data: dict = {}
-        for project_name in project_names:
-            print(f"  Processing '{project_name}'...")
-            try:
-                project = get_project(gl, project_name)
-            except ValueError as e:
-                print(f"  ❌  {e}")
-                project_data[project_name] = {"commits": [], "tag_map": {}}
-                continue
+        projects_data = get_projects_data(branch, gl, project_names, version)
+        write_tags_md(projects_data, md_path)
+        print_untagged_new_commits(projects_data)
+        print("\n")
 
-            project_data[project_name] = process_project(project, branch, version)
+        project_names = get_back_project_names(branch)
+        md_path = version_path / f"{version}.tags.back.md"
 
-        write_tags_md(project_data, md_path)
-        print_untagged_new_commits(project_data)
+        projects_data = get_projects_data(branch, gl, project_names, version)
+        write_tags_md(projects_data, md_path)
+        print_untagged_new_commits(projects_data)
 
     print("\nEnding script4.")
+
+
+def get_projects_data(branch: str, gl: Gitlab, project_names: list[str], version: str) -> dict:
+    project_data: dict = {}
+    for project_name in project_names:
+        print(f"  Processing '{project_name}'...")
+        try:
+            project = get_project(gl, project_name)
+        except ValueError as e:
+            print(f"  ❌ {e}")
+            project_data[project_name] = {"commits": [], "tag_map": {}}
+            continue
+
+        project_data[project_name] = process_project(project, branch, version)
+    return project_data
 
 
 if __name__ == "__main__":
