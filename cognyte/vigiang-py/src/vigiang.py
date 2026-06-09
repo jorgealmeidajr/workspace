@@ -53,3 +53,7 @@ def get_back_project_names(branch: str) -> list[str]:
     else:
         raise ValueError(f"Unsupported branch prefix: '{branch}'. Expected 'version-2.' or 'version-3.'.")
 
+
+def get_current_branches() -> list[str]:
+    return ["version-2.3.0", "version-3.1.0", "version-3.2.0"]
+

@@ -5,7 +5,7 @@ import gitlab
 from gitlab import Gitlab
 
 from environment import get_vigia_ng_path
-from src.vigiang import get_front_project_names, get_back_project_names
+from vigiang import get_front_project_names, get_back_project_names, get_current_branches
 from shared import connect_gitlab, get_project
 
 
@@ -152,7 +152,7 @@ def main() -> None:
     print("Starting script4: read tags.\n")
 
     tasks_folder = Path(get_vigia_ng_path()) / "tasks"
-    branches = ["version-2.3.0", "version-3.1.0", "version-3.2.0"]
+    branches = get_current_branches()
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
