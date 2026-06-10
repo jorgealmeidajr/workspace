@@ -123,7 +123,6 @@ def print_untagged_new_commits(project_data: dict) -> None:
             # No tags at all, or HEAD itself is tagged → no untagged new commits
             continue
 
-        untagged = commits[:first_tagged_index]
         # Also include the first tagged commit as context (like the example)
         context_commit = commits[first_tagged_index]
 
@@ -133,16 +132,9 @@ def print_untagged_new_commits(project_data: dict) -> None:
             print(f"{'═' * 60}")
             found_any = True
 
-        print(f"\n📦 {project_name}")
-        for commit in untagged:
-            date = (commit.authored_date or "")[:10]
-            print(f"  [{commit.short_id}] {date} - {commit.title}")
-
-        # Print the boundary tagged commit for context
         tag_names = tag_map.get(context_commit.id, [])
-        tag_suffix = " 🏷️ " + ", ".join(sorted(tag_names)) if tag_names else ""
-        date = (context_commit.authored_date or "")[:10]
-        print(f"  [{context_commit.short_id}] {date} - {context_commit.title}{tag_suffix}")
+        tag_suffix = "🏷️ " + ", ".join(sorted(tag_names)) if tag_names else ""
+        print(f"\n📦 {project_name} {tag_suffix}")
 
     if not found_any:
         print("\n✅ No projects have untagged new commits.")
@@ -167,6 +159,7 @@ def main() -> None:
         version_path = tasks_folder / version
         version_path.mkdir(parents=True, exist_ok=True)
 
+        print("  Processing front projects...")
         project_names = get_front_project_names()
         md_path = version_path / f"{version}.tags.front.md"
 
@@ -175,6 +168,7 @@ def main() -> None:
         print_untagged_new_commits(projects_data)
         print("\n")
 
+        print("  Processing back projects...")
         project_names = get_back_project_names(branch)
         md_path = version_path / f"{version}.tags.back.md"
 
@@ -188,10 +182,10 @@ def main() -> None:
 def get_projects_data(branch: str, gl: Gitlab, project_names: list[str], version: str) -> dict:
     project_data: dict = {}
     for project_name in project_names:
-        print(f"  Processing '{project_name}'...")
         try:
             project = get_project(gl, project_name)
         except ValueError as e:
+            print(f"  Error processing project: '{project_name}'...")
             print(f"  ❌ {e}")
             project_data[project_name] = {"commits": [], "tag_map": {}}
             continue
