@@ -28,6 +28,7 @@ public class UpdateMybatis {
             validateProjectDirectories(WORK_DIR, version);
             String versionTitle = "VERSION: " + version;
             System.out.println(versionTitle);
+
             Path backendPath = Paths.get(WORK_DIR + "\\" + version + "\\back-" + version);
             Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
 
@@ -36,6 +37,7 @@ public class UpdateMybatis {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             System.out.println("-".repeat(versionTitle.length()));
         }
     }
@@ -47,7 +49,15 @@ public class UpdateMybatis {
 
         updateMappers(versionPath, fileContents);
 
-        writeMd(fileContents, Paths.get(versionPath + "\\mybatis.md"));
+        var oracleFiles = fileContents.stream()
+                .filter(f -> f.getRelativeDir().endsWith("\\oracle"))
+                .collect(Collectors.toList());
+        writeMd(oracleFiles, Paths.get(versionPath + "\\back\\mybatis.oracle.md"));
+
+        var postgresFiles = fileContents.stream()
+                .filter(f -> f.getRelativeDir().endsWith("\\postgres"))
+                .collect(Collectors.toList());
+        writeMd(postgresFiles, Paths.get(versionPath + "\\back\\mybatis.pg.md"));
     }
 
     private static void updateMappers(Path versionPath, List<FileContent> backendFileContents) {
