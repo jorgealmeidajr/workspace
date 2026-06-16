@@ -195,5 +195,6 @@ def get_projects_data(branch: str, gl: Gitlab, project_names: list[str], version
 
 
 if __name__ == "__main__":
+    # todo: split the print untagged commits into a separate script, since it's not needed for the md files
     main()
 

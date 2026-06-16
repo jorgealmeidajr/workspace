@@ -123,4 +123,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # todo: pass version param, get projects to tag, change deploy hosts, generate tags
+    # front you have to play deploy
+    # save the projects you alter the deploy hosts in a file
+    # other script will reset deploy hosts
     main()

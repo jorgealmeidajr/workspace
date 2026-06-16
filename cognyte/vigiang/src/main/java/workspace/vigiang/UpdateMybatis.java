@@ -88,9 +88,11 @@ public class UpdateMybatis {
     }
 
     private static void writeMappers(Path versionPath, MyBatisMappings myBatisMappings) throws IOException {
+        // todo: split in postgres and oracle
         String resultTxt = myBatisMappings.getMappersTxt();
         writeContentToFile(resultTxt, versionPath, "\\mappers.txt");
 
+        // todo: split in postgres and oracle
         String resultMd = myBatisMappings.getMappersMd();
         writeContentToFile(resultMd, versionPath, "\\mappers.md");
     }

@@ -73,6 +73,8 @@ def main() -> None:
     print("Starting script2: compare branches for missing commits.\n")
 
     # ── Configuration ────────────────────────────────────────────────────────
+    # todo: use the array of branches
+    # rules: the array must have at least 2 elements, and versions must be in order asc
     BRANCH_A = "version-2.3.0"  # Source branch (commits to send FROM)
     BRANCH_B = "version-3.1.0"  # Target branch (commits to send TO)
 

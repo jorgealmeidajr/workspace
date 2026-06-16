@@ -104,4 +104,5 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
 
 
 if __name__ == "__main__":
+    # todo: reduce the logging
     main()
