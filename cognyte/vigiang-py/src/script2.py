@@ -14,6 +14,49 @@ class BranchCompareResult:
     missing_commits: list  # commits in branch_a not yet in branch_b
 
 
+def parse_version(branch: str) -> tuple[int, ...]:
+    """Extract a version tuple from a branch name like 'version-3.1.0'."""
+    parts = branch.split("-", 1)
+    raw = parts[-1] if len(parts) > 1 else parts[0]
+    try:
+        return tuple(int(x) for x in raw.split("."))
+    except ValueError:
+        raise ValueError(f"Cannot parse a version from branch name '{branch}'.")
+
+
+def validate_target_branches(branches: list[str]) -> None:
+    """
+    Validate that target_branches has at least 2 elements and each element
+    is a strictly higher version than the one that follows it (descending order).
+    """
+    if len(branches) < 2:
+        raise ValueError(
+            f"target_branches must contain at least 2 elements, got {len(branches)}."
+        )
+    for i in range(len(branches) - 1):
+        v_current = parse_version(branches[i])
+        v_next = parse_version(branches[i + 1])
+        if v_current <= v_next:
+            raise ValueError(
+                f"target_branches must be in strictly descending version order, "
+                f"but '{branches[i]}' {v_current} is not higher than '{branches[i + 1]}' {v_next}."
+            )
+
+
+def validate_source_branch(source: str, target_branches: list[str]) -> None:
+    """
+    Validate that source_branch is a strictly lower version than the first
+    (highest) element of target_branches.
+    """
+    v_source = parse_version(source)
+    v_first_target = parse_version(target_branches[0])
+    if v_source >= v_first_target:
+        raise ValueError(
+            f"source_branch '{source}' {v_source} must be a lower version than "
+            f"the first target branch '{target_branches[0]}' {v_first_target}."
+        )
+
+
 def branch_exists(project: gitlab.v4.objects.Project, branch: str) -> bool:
     try:
         project.branches.get(branch)
@@ -73,12 +116,13 @@ def main() -> None:
     print("Starting script2: compare branches for missing commits.\n")
 
     # ── Configuration ────────────────────────────────────────────────────────
-    # todo: use the array of branches
-    # rules: the array must have at least 2 elements, and versions must be in order asc
-    BRANCH_A = "version-2.3.0"  # Source branch (commits to send FROM)
-    BRANCH_B = "version-3.1.0"  # Target branch (commits to send TO)
+    source_branch = "version-2.3.0"  # Source branch (commits to send FROM)
+    target_branches = ["version-3.1.0", "version-3.0.0"]  # Target branches (commits to send TO), first existing one is used
 
-    PROJECT_NAMES = get_project_names(BRANCH_A)
+    validate_target_branches(target_branches)
+    validate_source_branch(source_branch, target_branches)
+
+    project_names = get_project_names(source_branch)
     # ─────────────────────────────────────────────────────────────────────────
 
     load_dotenv()
@@ -86,14 +130,23 @@ def main() -> None:
 
     gl = connect_gitlab()
 
-    for project_name in PROJECT_NAMES:
+    for project_name in project_names:
         print(f"\n{'─' * 60}")
         try:
             project = get_project(gl, project_name)
         except ValueError as e:
             print(f"❌  {e}")
             continue
-        result = compare_branches(project, BRANCH_A, BRANCH_B)
+
+        branch_b = next(
+            (b for b in target_branches if branch_exists(project, b)),
+            None,
+        )
+        if branch_b is None:
+            print(f"❌ None of the target branches {target_branches} exist in project '{project_name}'. Skipping.")
+            continue
+
+        result = compare_branches(project, source_branch, branch_b)
         if result is not None:
             print_result(result)
 
