@@ -25,6 +25,14 @@ def get_mr_commits(mr) -> list:
         return []
 
 
+def get_mr_changed_files(mr) -> list:
+    try:
+        return mr.changes()["changes"]
+    except Exception as e:
+        print(f"  ⚠️  Could not fetch changed files for MR !{mr.iid}: {e}")
+        return []
+
+
 def write_branch_md(project_mrs: dict, output_path: Path) -> None:
     lines = []
     for project_name, mrs in project_mrs.items():
@@ -40,13 +48,21 @@ def write_branch_md(project_mrs: dict, output_path: Path) -> None:
             iid = mr.iid
             date = (mr.merged_at or "")[:10]
             title = mr.title
-            lines.append(f"[!{iid}] {date} - {title}\n")
+            author = mr.author.get("name", "") if mr.author else ""
+            lines.append(f"[!{iid}] {date} - {author} - {title}\n")
 
+            lines.append("[commits]:\n")
             for commit in get_mr_commits(mr):
                 short_id = commit.short_id
                 commit_title = commit.title
                 commit_date = (commit.authored_date or "")[:10]
-                lines.append(f"  [{short_id}] {commit_date} - {commit_title}\n")
+                commit_author = commit.author_name or ""
+                lines.append(f"  [{short_id}] {commit_date} - {commit_author} - {commit_title}\n")
+
+            lines.append("[files]:\n")
+            for change in get_mr_changed_files(mr):
+                lines.append(f"  📄 {change['new_path']}\n")
+
             lines.append("\n")
 
         lines.append("```\n")
@@ -106,3 +122,4 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
 if __name__ == "__main__":
     # todo: reduce the logging
     main()
+
