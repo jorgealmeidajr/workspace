@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List
 import git
+
+from environment import get_vigia_ng_path
 
 
 ###################################################################################################
@@ -20,6 +23,7 @@ class CommitChanges:
     sha: str
     title: str
     author: str
+    date: str
     files: List[FileChange] = field(default_factory=list)
 
 
@@ -82,50 +86,40 @@ def get_commit_changes(
             sha=commit.hexsha,
             title=commit.summary,
             author=str(commit.author),
+            date=commit.committed_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             files=files,
         ))
     return result
 
 
-def print_file_diff(diff: str) -> None:
-    """Print a unified diff with clear markers for added/removed/context lines."""
-    for line in diff.splitlines():
-        if line.startswith("@@"):
-            print(f"    \033[36m{line}\033[0m") # cyan  — hunk header
-        elif line.startswith("+"):
-            print(f"    \033[32m{line}\033[0m") # green — added
-        elif line.startswith("-"):
-            print(f"    \033[31m{line}\033[0m") # red   — removed
-        else:
-            print(f"    {line}")                # white — context
-
-
-def print_commit_changes(commit_changes: List[CommitChanges]) -> None:
-    for cc in commit_changes:
-        print(f"\n{'='*80}")
-        print(f"Commit : {cc.sha}")
-        print(f"Title  : {cc.title}")
-        print(f"Author : {cc.author}")
-        print(f"Files changed: {len(cc.files)}")
-        for fc in cc.files:
-            label = (
-                "[NEW]"     if fc.new_file     else
-                "[DELETED]" if fc.deleted_file else
-                "[RENAMED]" if fc.renamed_file else
-                "[MODIFIED]"
-            )
-            print(f"\n  {label} {fc.new_path}")
-            if fc.diff:
-                print_file_diff(fc.diff)
-            else:
-                print("    (no diff available)")
+def write_commit_changes_md(commit_changes: List[CommitChanges], output_path: Path) -> None:
+    """Write commit changes to a markdown file."""
+    with open(output_path, "w", encoding="utf-8") as f:
+        for cc in commit_changes:
+            f.write(f"# [{cc.sha[:8]}]\n")
+            f.write(f"- {cc.date}\n")
+            f.write(f"- {cc.author}\n")
+            f.write(f"- {cc.title}\n")
+            for fc in cc.files:
+                label = (
+                    "[NEW]"      if fc.new_file     else
+                    "[DELETED]"  if fc.deleted_file else
+                    "[RENAMED]"  if fc.renamed_file else
+                    "[MODIFIED]"
+                )
+                f.write(f"\n## {fc.new_path} {label}\n")
+                f.write("```\n")
+                f.write(fc.diff if fc.diff else "(no diff available)")
+                f.write("\n```\n")
+            f.write("\n\n")
+    print(f"[INFO] Written to {output_path}")
 
 
 ###################################################################################################
 
 
 def main() -> None:
-    print("starting script6: get commits and changes from a local repository.")
+    print("starting script5: get commits and changes from a local repository.")
 
     REPO_PATH  = r"C:\work\vigiang\2.3\front-2.3\vigia_ng_workflow"
     BRANCH     = "version-2.3.0"
@@ -133,10 +127,22 @@ def main() -> None:
 
     repo = git.Repo(REPO_PATH)
 
-    commit_changes = get_commit_changes(repo, BRANCH, START_HASH)
-    print_commit_changes(commit_changes)
+    tasks_path = Path(get_vigia_ng_path()) / "tasks"
 
-    print("\nending script6.")
+    version = ".".join(BRANCH.replace("version-", "").split(".")[:2])
+    version_path = tasks_path / version
+    version_path.mkdir(parents=True, exist_ok=True)
+
+    commits_path = version_path / "commits"
+    commits_path.mkdir(parents=True, exist_ok=True)
+
+    project_name = Path(REPO_PATH).name
+    output_file = commits_path / f"{project_name}.commits.md"
+
+    commit_changes = get_commit_changes(repo, BRANCH, START_HASH)
+    write_commit_changes_md(commit_changes, output_file)
+
+    print("\nending script5.")
 
 
 if __name__ == "__main__":
