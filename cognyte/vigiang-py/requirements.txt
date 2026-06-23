@@ -3,3 +3,4 @@
 urllib3
 python-gitlab
 python-dotenv
+gitpython
