@@ -1,11 +1,11 @@
 import gitlab
 import urllib3
-import os
 from dotenv import load_dotenv
 from dataclasses import dataclass
 from typing import List
 
-from environment import get_laboratories_vigia_ng
+from shared.environment import get_laboratories_vigia_ng
+from shared import connect_gitlab
 
 
 def get_projects(gl: gitlab.Gitlab) -> list[gitlab.v4.objects.Project]:
@@ -23,12 +23,6 @@ def get_tags(project: gitlab.v4.objects.Project, version: str) -> list:
     return [t for t in tags if version in t.name]
 
 
-def connect_gitlab() -> gitlab.Gitlab:
-    private_token = os.getenv('GITLAB_PRIVATE_TOKEN')
-    gitlab_url = os.getenv('GITLAB_URL')
-    gl = gitlab.Gitlab(gitlab_url, private_token=private_token, ssl_verify=False)
-    print(f"connected with gitlab {gitlab_url}")
-    return gl
 
 ###################################################################################################
 @dataclass

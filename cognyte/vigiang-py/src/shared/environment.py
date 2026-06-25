@@ -15,3 +15,4 @@ def get_laboratories_vigia_ng():
     with open(input_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data
+

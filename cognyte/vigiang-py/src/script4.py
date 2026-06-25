@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 import gitlab
 from gitlab import Gitlab
 
-from environment import get_vigia_ng_path
-from vigiang import get_front_project_names, get_back_project_names, get_current_branches
+from shared.environment import get_vigia_ng_path
+from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
 from shared import connect_gitlab, get_project
 
 

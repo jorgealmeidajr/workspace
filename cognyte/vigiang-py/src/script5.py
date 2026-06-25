@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 import git
 
-from environment import get_vigia_ng_path
+from shared.environment import get_vigia_ng_path
 
 
 ###################################################################################################
@@ -121,9 +121,10 @@ def write_commit_changes_md(commit_changes: List[CommitChanges], output_path: Pa
 def main() -> None:
     print("starting script5: get commits and changes from a local repository.")
 
-    REPO_PATH  = r"C:\work\vigiang\2.3\front-2.3\vigia_ng_workflow"
-    BRANCH     = "version-2.3.0"
-    START_HASH = "a13eef69"
+    # todo: create a setup json
+    REPO_PATH  = r"C:\work\vigiang\3.1\front-3.1\vigia_ng_webviewer"
+    BRANCH     = "version-3.1.0"
+    START_HASH = "8f1e099a"
 
     repo = git.Repo(REPO_PATH)
 

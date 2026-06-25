@@ -2,7 +2,7 @@ import gitlab
 import urllib3
 from dataclasses import dataclass
 from dotenv import load_dotenv
-from vigiang import get_project_names
+from shared.vigiang import get_project_names
 from shared import connect_gitlab, get_project
 
 
