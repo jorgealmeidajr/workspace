@@ -135,3 +135,34 @@ def get_projects_data(branch: str, gl: gitlab.Gitlab, project_names: list[str], 
     return project_data
 
 
+def find_untagged_projects(project_data: dict) -> list[dict]:
+    """
+    Return the projects that have new commits (newest) ahead of their latest
+    version tag.
+
+    For each such project, the entry contains the project name and the raw tag
+    names of the first (newest) tagged commit found behind the new commits:
+        {"project_name": str, "tags": list[str]}
+    """
+    untagged: list[dict] = []
+    for project_name, data in project_data.items():
+        commits = data["commits"]
+        tag_map = data["tag_map"]
+
+        # Find the index of the first (newest) tagged commit
+        first_tagged_index = None
+        for i, commit in enumerate(commits):
+            if commit.id in tag_map:
+                first_tagged_index = i
+                break
+
+        if first_tagged_index is None or first_tagged_index == 0:
+            # No tags at all, or HEAD itself is tagged → no untagged new commits
+            continue
+
+        context_commit = commits[first_tagged_index]
+        tags = sorted(tag_map.get(context_commit.id, []))
+        untagged.append({"project_name": project_name, "tags": tags})
+
+    return untagged
+

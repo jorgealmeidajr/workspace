@@ -2,42 +2,24 @@ import urllib3
 from dotenv import load_dotenv
 
 from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
-from shared import connect_gitlab, get_projects_data
+from shared import connect_gitlab, get_projects_data, find_untagged_projects
 
 
 def print_untagged_new_commits(project_data: dict) -> None:
     """Print projects that have new commits (newest) with no version tag."""
-    found_any = False
-    for project_name, data in project_data.items():
-        commits = data["commits"]
-        tag_map = data["tag_map"]
+    untagged_projects = find_untagged_projects(project_data)
 
-        # Find the index of the first (newest) tagged commit
-        first_tagged_index = None
-        for i, commit in enumerate(commits):
-            if commit.id in tag_map:
-                first_tagged_index = i
-                break
-
-        if first_tagged_index is None or first_tagged_index == 0:
-            # No tags at all, or HEAD itself is tagged → no untagged new commits
-            continue
-
-        # Also include the first tagged commit as context (like the example)
-        context_commit = commits[first_tagged_index]
-
-        if not found_any:
-            print(f"\n{'═' * 60}")
-            print("Projects with new commits ahead of latest tag:")
-            print(f"{'═' * 60}")
-            found_any = True
-
-        tag_names = tag_map.get(context_commit.id, [])
-        tag_suffix = "🏷️ " + ", ".join(sorted(tag_names)) if tag_names else ""
-        print(f"\n📦 {project_name} {tag_suffix}")
-
-    if not found_any:
+    if not untagged_projects:
         print("\n✅ No projects have untagged new commits.")
+        return
+
+    print(f"\n{'═' * 60}")
+    print("Projects with new commits ahead of latest tag:")
+    print(f"{'═' * 60}")
+    for entry in untagged_projects:
+        tags = entry["tags"]
+        tag_suffix = "🏷️ " + ", ".join(tags) if tags else ""
+        print(f"\n📦 {entry['project_name']} {tag_suffix}")
 
 
 def main() -> None:

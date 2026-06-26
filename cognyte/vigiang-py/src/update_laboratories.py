@@ -12,7 +12,7 @@ from shared import (
     validate_laboratory_tasks,
     check_laboratories_up,
 )
-from shared import get_front_project_names, get_back_project_names
+from shared import get_front_project_names, get_back_project_names, get_projects_data, find_untagged_projects
 
 
 def get_active_laboratories() -> list[dict]:
@@ -44,9 +44,29 @@ def main() -> None:
     print("Checking laboratories are reachable over SSH...")
     check_laboratories_up(task_laboratories_to_update, active_laboratories)
 
-    project_names = get_front_project_names()
+    version = ".".join(SOURCE_BRANCH.replace("version-", "").split(".")[:2])
 
-    project_names = get_back_project_names(SOURCE_BRANCH)
+    print("Processing FRONT projects...")
+    front_project_names = get_front_project_names()
+    front_projects_data = get_projects_data(SOURCE_BRANCH, gl, front_project_names, version)
+    front_untagged = find_untagged_projects(front_projects_data)
+
+    print("Processing BACK projects...")
+    back_project_names = get_back_project_names(SOURCE_BRANCH)
+    back_projects_data = get_projects_data(SOURCE_BRANCH, gl, back_project_names, version)
+    back_untagged = find_untagged_projects(back_projects_data)
+
+    untagged_projects = front_untagged + back_untagged
+
+    print(f"\n{'═' * 60}")
+    print("Projects with new commits ahead of latest tag:")
+    print(f"{'═' * 60}")
+    if untagged_projects:
+        for entry in untagged_projects:
+            tag_suffix = ", ".join(entry["tags"]) if entry["tags"] else ""
+            print(f"📦 {entry['project_name']} {tag_suffix}".rstrip())
+    else:
+        print("✅ No projects have untagged new commits.")
 
     print("\nEnding script.")
 
