@@ -6,7 +6,7 @@ from gitlab import Gitlab
 
 from shared.environment import get_vigia_ng_path
 from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
-from shared import connect_gitlab, get_project
+from shared import connect_gitlab, get_project, write_content
 
 
 def get_branch_commits(project: gitlab.v4.objects.Project, branch: str) -> list:
@@ -69,9 +69,7 @@ def write_tags_md(
 
         lines.append("```\n")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text("".join(lines), encoding="utf-8")
-    print(f"  ✅ Written: {output_path}\n")
+    write_content(output_path, "".join(lines))
 
 
 def process_project(
@@ -141,7 +139,7 @@ def print_untagged_new_commits(project_data: dict) -> None:
 
 
 def main() -> None:
-    print("Starting script4: read tags.\n")
+    print("Starting to write the TAGS...")
 
     tasks_folder = Path(get_vigia_ng_path()) / "tasks"
     branches = get_current_branches()
@@ -176,7 +174,7 @@ def main() -> None:
         write_tags_md(projects_data, md_path)
         print_untagged_new_commits(projects_data)
 
-    print("\nEnding script4.")
+    print("\nEnding script.")
 
 
 def get_projects_data(branch: str, gl: Gitlab, project_names: list[str], version: str) -> dict:

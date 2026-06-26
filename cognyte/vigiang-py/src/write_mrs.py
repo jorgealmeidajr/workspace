@@ -6,7 +6,7 @@ from gitlab import Gitlab
 
 from shared.environment import get_vigia_ng_path
 from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
-from shared import connect_gitlab, get_project
+from shared import connect_gitlab, get_project, write_content
 
 
 def get_merged_requests(project: gitlab.v4.objects.Project, branch: str) -> list:
@@ -67,13 +67,11 @@ def write_branch_md(project_mrs: dict, output_path: Path) -> None:
 
         lines.append("```\n")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text("".join(lines), encoding="utf-8")
-    print(f"  ✅  Written: {output_path}\n")
+    write_content(output_path, "".join(lines))
 
 
 def main() -> None:
-    print("Starting script3: update commits history log...")
+    print("Starting to write the MERGE REQUESTS...")
 
     tasks_folder = Path(get_vigia_ng_path()) / "tasks"
     branches = get_current_branches()
@@ -99,7 +97,7 @@ def main() -> None:
         md_path = version_path / f"{version}.mrs.back.md"
         write_mrs(branch, project_names, gl, md_path, "BACK")
 
-    print("\nEnding script3.")
+    print("\nEnding script.")
 
 
 def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path, label: str):
