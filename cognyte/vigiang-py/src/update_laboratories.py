@@ -3,14 +3,16 @@ from dotenv import load_dotenv
 
 from shared.environment import (
     get_laboratories_vigia_ng,
-    get_tasks_laboratories_vigia_ng,
+    get_branch_laboratories_vigia_ng,
 )
 from shared import (
     connect_gitlab,
     validate_previous_branches,
     validate_source_branch,
     validate_laboratory_tasks,
+    check_laboratories_up,
 )
+from shared import get_front_project_names, get_back_project_names
 
 
 def get_active_laboratories() -> list[dict]:
@@ -33,11 +35,18 @@ def main() -> None:
 
     gl = connect_gitlab()
 
-    laboratories = get_active_laboratories()
+    active_laboratories = get_active_laboratories()
 
-    tasks = get_tasks_laboratories_vigia_ng()
-    task_laboratories = validate_laboratory_tasks(SOURCE_BRANCH, laboratories, tasks)
-    print(f"Laboratories to update for branch '{SOURCE_BRANCH}': {task_laboratories}")
+    branch_laboratories = get_branch_laboratories_vigia_ng()
+    task_laboratories_to_update = validate_laboratory_tasks(SOURCE_BRANCH, active_laboratories, branch_laboratories)
+    print(f"Laboratories to update for branch '{SOURCE_BRANCH}': {task_laboratories_to_update}")
+
+    print("Checking laboratories are reachable over SSH...")
+    check_laboratories_up(task_laboratories_to_update, active_laboratories)
+
+    project_names = get_front_project_names()
+
+    project_names = get_back_project_names(SOURCE_BRANCH)
 
     print("\nEnding script.")
 

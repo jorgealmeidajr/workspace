@@ -1,3 +1,8 @@
+import paramiko
+
+SSH_TIMEOUT_SECONDS = 10
+
+
 def get_project_names(branch: str) -> list[str]:
     projects = []
     projects += get_front_project_names()
@@ -92,4 +97,61 @@ def validate_laboratory_tasks(
         )
 
     return requested
+
+
+def check_laboratory_ssh(laboratory: dict) -> None:
+    """
+    Open an SSH connection to the given laboratory to verify it is reachable.
+
+    Uses the laboratory's 'sshHost', 'sshPort', 'sshUsername' and 'sshPassword'
+    fields. Raises an exception if the connection cannot be established.
+    """
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(
+            hostname=laboratory.get("sshHost"),
+            port=laboratory.get("sshPort", 22),
+            username=laboratory.get("sshUsername"),
+            password=laboratory.get("sshPassword"),
+            timeout=SSH_TIMEOUT_SECONDS,
+            banner_timeout=SSH_TIMEOUT_SECONDS,
+            auth_timeout=SSH_TIMEOUT_SECONDS,
+        )
+    finally:
+        client.close()
+
+
+def check_laboratories_up(
+    task_names: list[str],
+    active_laboratories: list[dict],
+) -> None:
+    """
+    Verify every laboratory in 'task_names' is reachable over SSH, using the
+    connection data found in 'active_laboratories' matched by the 'name' field.
+
+    Prints a per-laboratory confirmation on success, collects all failures and
+    raises a single RuntimeError listing every laboratory that did not respond.
+    """
+    labs_by_name = {lab.get("name"): lab for lab in active_laboratories}
+
+    failures: list[str] = []
+    for name in task_names:
+        laboratory = labs_by_name.get(name)
+        if laboratory is None:
+            failures.append(f"{name}: not found among active laboratories")
+            continue
+
+        try:
+            check_laboratory_ssh(laboratory)
+            print(f"Laboratory '{name}' ({laboratory.get('sshHost')}) is reachable.")
+        except Exception as error:
+            failures.append(f"{name} ({laboratory.get('sshHost')}): {error}")
+
+    if failures:
+        details = "\n  - ".join(failures)
+        raise RuntimeError(
+            f"The following laboratories did not respond over SSH:\n  - {details}"
+        )
+
 

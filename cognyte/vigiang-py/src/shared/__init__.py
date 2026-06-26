@@ -10,7 +10,7 @@ from .gitlab_client import (
     validate_previous_branches,
     validate_source_branch,
 )
-from .vigiang import get_project_names, get_front_project_names, get_back_project_names, get_current_branches, validate_laboratory_tasks
+from .vigiang import get_project_names, get_front_project_names, get_back_project_names, get_current_branches, validate_laboratory_tasks, check_laboratory_ssh, check_laboratories_up
 from .files import write_content
 
 __all__ = [
@@ -31,6 +31,8 @@ __all__ = [
     "get_back_project_names",
     "get_current_branches",
     "validate_laboratory_tasks",
+    "check_laboratory_ssh",
+    "check_laboratories_up",
     # files
     "write_content",
 ]
