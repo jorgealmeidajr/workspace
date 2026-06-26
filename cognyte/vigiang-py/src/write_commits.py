@@ -6,8 +6,6 @@ import git
 from shared.environment import get_vigia_ng_path
 
 
-###################################################################################################
-
 @dataclass
 class FileChange:
     old_path: str
@@ -119,7 +117,7 @@ def write_commit_changes_md(commit_changes: List[CommitChanges], output_path: Pa
 
 
 def main() -> None:
-    print("starting script5: get commits and changes from a local repository.")
+    print("Starting to get commits and changes from a local repository...")
 
     # todo: create a setup json
     REPO_PATH  = r"C:\work\vigiang\3.1\front-3.1\vigia_ng_webviewer"
@@ -143,7 +141,7 @@ def main() -> None:
     commit_changes = get_commit_changes(repo, BRANCH, START_HASH)
     write_commit_changes_md(commit_changes, output_file)
 
-    print("\nending script5.")
+    print("\nEnding script.")
 
 
 if __name__ == "__main__":
