@@ -73,7 +73,7 @@ def write_branch_md(project_mrs: dict, output_path: Path) -> None:
 
 
 def main() -> None:
-    print("Starting script3: update commits history log.\n")
+    print("Starting script3: update commits history log...")
 
     tasks_folder = Path(get_vigia_ng_path()) / "tasks"
     branches = get_current_branches()
@@ -84,7 +84,7 @@ def main() -> None:
     gl = connect_gitlab()
 
     for branch in branches:
-        print(f"\n{'─' * 60}")
+        print(f"{'─' * 60}")
         print(f"Branch: {branch}")
 
         version = ".".join(branch.replace("version-", "").split(".")[:2])
@@ -93,16 +93,17 @@ def main() -> None:
 
         project_names = get_front_project_names()
         md_path = version_path / f"{version}.mrs.front.md"
-        write_mrs(branch, project_names, gl, md_path)
+        write_mrs(branch, project_names, gl, md_path, "FRONT")
 
         project_names = get_back_project_names(branch)
         md_path = version_path / f"{version}.mrs.back.md"
-        write_mrs(branch, project_names, gl, md_path)
+        write_mrs(branch, project_names, gl, md_path, "BACK")
 
     print("\nEnding script3.")
 
 
-def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
+def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path, label: str):
+    print(f"  Fetching merged requests for {label} projects...")
     project_mrs: dict = {}
     for project_name in project_names:
         try:
@@ -112,7 +113,6 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
             project_mrs[project_name] = []
             continue
 
-        print(f"  Fetching merged requests for '{project_name}'...")
         mrs = get_merged_requests(project, branch)
         project_mrs[project_name] = mrs
 
@@ -120,6 +120,5 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path):
 
 
 if __name__ == "__main__":
-    # todo: reduce the logging
     main()
 
