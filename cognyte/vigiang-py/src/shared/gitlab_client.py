@@ -17,3 +17,78 @@ def get_project(gl: gitlab.Gitlab, project_name: str) -> gitlab.v4.objects.Proje
         raise ValueError(f"Project '{project_name}' not found.")
     return match
 
+
+def get_branch_commits(project: gitlab.v4.objects.Project, branch: str) -> list:
+    """Return all commits on a branch, ordered newest → oldest (GitLab default)."""
+    try:
+        return project.commits.list(ref_name=branch, all=True)
+    except gitlab.exceptions.GitlabListError as e:
+        print(f"  ⚠️ Could not fetch commits for '{branch}' in '{project.name}': {e}")
+        return []
+
+
+def get_version_tags(project: gitlab.v4.objects.Project, version_prefix: str) -> list:
+    """Return tags whose name starts with version_prefix."""
+    try:
+        all_tags = project.tags.list(all=True)
+        return [t for t in all_tags if t.name.startswith(version_prefix)]
+    except gitlab.exceptions.GitlabListError as e:
+        print(f"  ⚠️ Could not fetch tags for '{project.name}': {e}")
+        return []
+
+
+def build_tag_map(tags: list) -> dict:
+    """Build a dict mapping commit SHA → list of tag names."""
+    tag_map: dict[str, list[str]] = {}
+    for tag in tags:
+        sha = tag.commit["id"]
+        tag_map.setdefault(sha, []).append(tag.name)
+    return tag_map
+
+
+def process_project(
+    project: gitlab.v4.objects.Project,
+    branch: str,
+    version_prefix: str,
+) -> dict:
+    """
+    Fetch commits & version tags for a project, then return the slice of commits
+    starting from the oldest tagged commit (inclusive) up to HEAD.
+    """
+    commits = get_branch_commits(project, branch)
+    tags = get_version_tags(project, version_prefix)
+    tag_map = build_tag_map(tags)
+
+    if not commits:
+        return {"commits": [], "tag_map": {}}
+
+    # commits are newest→oldest; find the last tagged commit (= oldest tag)
+    oldest_tag_index = None
+    for i, commit in enumerate(commits):
+        if commit.id in tag_map:
+            oldest_tag_index = i  # keep updating; last hit is the oldest tag
+
+    if oldest_tag_index is None:
+        print(f"  ℹ️ No version tags found for '{project.name}' — skipping.")
+        return {"commits": [], "tag_map": {}}
+    else:
+        sliced = commits[: oldest_tag_index + 1]
+
+    return {"commits": sliced, "tag_map": tag_map}
+
+
+def get_projects_data(branch: str, gl: gitlab.Gitlab, project_names: list[str], version: str) -> dict:
+    project_data: dict = {}
+    for project_name in project_names:
+        try:
+            project = get_project(gl, project_name)
+        except ValueError as e:
+            print(f"  Error processing project: '{project_name}'...")
+            print(f"  ❌ {e}")
+            project_data[project_name] = {"commits": [], "tag_map": {}}
+            continue
+
+        project_data[project_name] = process_project(project, branch, version)
+    return project_data
+
+
