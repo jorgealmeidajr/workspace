@@ -2,6 +2,49 @@ import os
 import gitlab
 
 
+def parse_version(branch: str) -> tuple[int, ...]:
+    """Extract a version tuple from a branch name like 'version-3.1.0'."""
+    parts = branch.split("-", 1)
+    raw = parts[-1] if len(parts) > 1 else parts[0]
+    try:
+        return tuple(int(x) for x in raw.split("."))
+    except ValueError:
+        raise ValueError(f"Cannot parse a version from branch name '{branch}'.")
+
+
+def validate_previous_branches(branches: list[str]) -> None:
+    """
+    Validate that previous_branches has at least 1 element and each element
+    is a strictly higher version than the one that follows it (descending order).
+    """
+    if len(branches) < 1:
+        raise ValueError(
+            f"previous_branches must contain at least 1 element, got {len(branches)}."
+        )
+    for i in range(len(branches) - 1):
+        v_current = parse_version(branches[i])
+        v_next = parse_version(branches[i + 1])
+        if v_current <= v_next:
+            raise ValueError(
+                f"previous_branches must be in strictly descending version order, "
+                f"but '{branches[i]}' {v_current} is not higher than '{branches[i + 1]}' {v_next}."
+            )
+
+
+def validate_source_branch(source: str, previous_branches: list[str]) -> None:
+    """
+    Validate that source_branch is a strictly higher version than the first
+    (highest) element of previous_branches.
+    """
+    v_source = parse_version(source)
+    v_first_previous = parse_version(previous_branches[0])
+    if v_source <= v_first_previous:
+        raise ValueError(
+            f"source_branch '{source}' {v_source} must be a higher version than "
+            f"the first previous branch '{previous_branches[0]}' {v_first_previous}."
+        )
+
+
 def connect_gitlab() -> gitlab.Gitlab:
     private_token = os.getenv('GITLAB_PRIVATE_TOKEN')
     gitlab_url = os.getenv('GITLAB_URL')

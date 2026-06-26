@@ -2,7 +2,7 @@ import urllib3
 from dotenv import load_dotenv
 
 from shared.environment import get_laboratories_vigia_ng
-from shared import connect_gitlab
+from shared import connect_gitlab, validate_previous_branches, validate_source_branch
 
 
 def get_active_laboratories() -> list[dict]:
@@ -14,8 +14,11 @@ def get_active_laboratories() -> list[dict]:
 def main() -> None:
     print("Starting to update LABORATORIES...")
 
-    CURRENT_BRANCH = "version-3.1.0"
+    SOURCE_BRANCH = "version-3.1.0"
     PREVIOUS_BRANCHES = ["version-3.0.0"]
+
+    validate_previous_branches(PREVIOUS_BRANCHES)
+    validate_source_branch(SOURCE_BRANCH, PREVIOUS_BRANCHES)
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

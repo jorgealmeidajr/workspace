@@ -6,6 +6,9 @@ from .gitlab_client import (
     build_tag_map,
     process_project,
     get_projects_data,
+    parse_version,
+    validate_previous_branches,
+    validate_source_branch,
 )
 from .vigiang import get_project_names, get_front_project_names, get_back_project_names, get_current_branches
 from .files import write_content
@@ -20,6 +23,9 @@ __all__ = [
     "process_project",
     "get_projects_data",
     "get_project_names",
+    "parse_version",
+    "validate_previous_branches",
+    "validate_source_branch",
     # vigiang
     "get_front_project_names",
     "get_back_project_names",

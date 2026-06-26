@@ -3,7 +3,7 @@ import urllib3
 from dataclasses import dataclass
 from dotenv import load_dotenv
 from shared.vigiang import get_project_names
-from shared import connect_gitlab, get_project
+from shared import connect_gitlab, get_project, parse_version
 
 
 @dataclass
@@ -12,16 +12,6 @@ class BranchCompareResult:
     branch_a: str
     branch_b: str
     missing_commits: list  # commits in branch_a not yet in branch_b
-
-
-def parse_version(branch: str) -> tuple[int, ...]:
-    """Extract a version tuple from a branch name like 'version-3.1.0'."""
-    parts = branch.split("-", 1)
-    raw = parts[-1] if len(parts) > 1 else parts[0]
-    try:
-        return tuple(int(x) for x in raw.split("."))
-    except ValueError:
-        raise ValueError(f"Cannot parse a version from branch name '{branch}'.")
 
 
 def validate_target_branches(branches: list[str]) -> None:
