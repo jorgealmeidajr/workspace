@@ -113,7 +113,7 @@ def print_result(result: BranchCompareResult) -> None:
 
 
 def main() -> None:
-    print("Starting script2: compare branches for missing commits.\n")
+    print("Starting to compare branches looking for missing commits...")
 
     # ── Configuration ────────────────────────────────────────────────────────
     source_branch = "version-2.3.0"  # Source branch (commits to send FROM)
@@ -131,7 +131,7 @@ def main() -> None:
     gl = connect_gitlab()
 
     for project_name in project_names:
-        print(f"\n{'─' * 60}")
+        print(f"{'─' * 60}")
         try:
             project = get_project(gl, project_name)
         except ValueError as e:
@@ -150,7 +150,7 @@ def main() -> None:
         if result is not None:
             print_result(result)
 
-    print("\nEnding script2: compare branches for missing commits.")
+    print("\nEnding script.")
 
 
 if __name__ == "__main__":
