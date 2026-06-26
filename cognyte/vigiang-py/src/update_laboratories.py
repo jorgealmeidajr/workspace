@@ -1,8 +1,16 @@
 import urllib3
 from dotenv import load_dotenv
 
-from shared.environment import get_laboratories_vigia_ng
-from shared import connect_gitlab, validate_previous_branches, validate_source_branch
+from shared.environment import (
+    get_laboratories_vigia_ng,
+    get_tasks_laboratories_vigia_ng,
+)
+from shared import (
+    connect_gitlab,
+    validate_previous_branches,
+    validate_source_branch,
+    validate_laboratory_tasks,
+)
 
 
 def get_active_laboratories() -> list[dict]:
@@ -26,6 +34,10 @@ def main() -> None:
     gl = connect_gitlab()
 
     laboratories = get_active_laboratories()
+
+    tasks = get_tasks_laboratories_vigia_ng()
+    task_laboratories = validate_laboratory_tasks(SOURCE_BRANCH, laboratories, tasks)
+    print(f"Laboratories to update for branch '{SOURCE_BRANCH}': {task_laboratories}")
 
     print("\nEnding script.")
 
