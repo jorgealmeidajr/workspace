@@ -33,7 +33,7 @@ def main() -> None:
 
     SOURCE_BRANCH = "version-3.1.0"
     PREVIOUS_BRANCHES = ["version-3.0.0"]
-    NEXT_TAG = "3.1.2"
+    NEXT_TAG = ""
 
     validate_previous_branches(PREVIOUS_BRANCHES)
     validate_source_branch(SOURCE_BRANCH, PREVIOUS_BRANCHES)
@@ -107,6 +107,23 @@ def main() -> None:
 
     for tag in tags_to_create:
         print(f"📦 {tag['project_name']}: {tag['current_tag']} → {tag['next_tag']}")
+
+    answer = input("\nDo you want to create the new tags? yes(y) or no(n)? ").strip().lower()
+    if answer in {"y", "yes"}:
+        print("Tags will be created...")
+
+        front_names = set(front_project_names)
+        back_names = set(back_project_names)
+        for tag in tags_to_create:
+            project_name = tag["project_name"]
+            if project_name in front_names:
+                origin = "front"
+            elif project_name in back_names:
+                origin = "back"
+            else:
+                raise ValueError(f"Unknown origin for project '{project_name}': not found in front or back project names")
+
+            print(f"[{origin}] {project_name}: {tag['current_tag']} → {tag['next_tag']}")
 
     print("\nEnding script.")
 
