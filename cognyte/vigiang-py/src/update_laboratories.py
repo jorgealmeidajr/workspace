@@ -13,7 +13,13 @@ from shared import (
     check_laboratories_up,
 )
 from shared import get_front_project_names, get_back_project_names, get_projects_data, find_untagged_projects
-from shared import parse_rc_tag, select_current_rc_tag, increment_rc_tag
+from shared import (
+    parse_rc_tag,
+    select_current_rc_tag,
+    increment_rc_tag,
+    compose_rc_tag_with_base,
+    BASE_VERSION_PATTERN,
+)
 
 
 def get_active_laboratories() -> list[dict]:
@@ -27,7 +33,7 @@ def main() -> None:
 
     SOURCE_BRANCH = "version-3.1.0"
     PREVIOUS_BRANCHES = ["version-3.0.0"]
-    NEXT_TAG = "" #"3.1.2"
+    NEXT_TAG = "3.1.2"
 
     validate_previous_branches(PREVIOUS_BRANCHES)
     validate_source_branch(SOURCE_BRANCH, PREVIOUS_BRANCHES)
@@ -73,25 +79,27 @@ def main() -> None:
             continue
 
         if NEXT_TAG:
-            current_parsed = parse_rc_tag(current_tag)
-            next_parsed = parse_rc_tag(NEXT_TAG)
-            if next_parsed is None:
+            current_base, _ = parse_rc_tag(current_tag)
+            if BASE_VERSION_PATTERN.match(NEXT_TAG) is None:
                 print(
                     f"⚠️ Skipping {project_name}: NEXT_TAG '{NEXT_TAG}' is not a "
-                    f"valid '<x.y.z>.rc<N>' tag"
+                    f"valid '<x.y.z>' version"
                 )
                 continue
-            current_base, current_rc = current_parsed
-            next_base, next_rc = next_parsed
-            current_key = (tuple(int(x) for x in current_base.split(".")), current_rc)
-            next_key = (tuple(int(x) for x in next_base.split(".")), next_rc)
-            if next_key <= current_key:
+            current_base_key = tuple(int(x) for x in current_base.split("."))
+            next_base_key = tuple(int(x) for x in NEXT_TAG.split("."))
+            if next_base_key < current_base_key:
                 print(
-                    f"⚠️ Skipping {project_name}: NEXT_TAG '{NEXT_TAG}' is not higher "
-                    f"than current tag '{current_tag}'"
+                    f"⚠️ Skipping {project_name}: NEXT_TAG '{NEXT_TAG}' is lower "
+                    f"than current base '{current_base}'"
                 )
                 continue
-            next_tag = NEXT_TAG
+            elif next_base_key == current_base_key:
+                # Same base → bump the rc number (e.g. 3.1.2.rc01 -> 3.1.2.rc02)
+                next_tag = increment_rc_tag(current_tag)
+            else:
+                # Higher base → keep current rc suffix (e.g. 3.1.0.rc01 -> 3.1.2.rc01)
+                next_tag = compose_rc_tag_with_base(current_tag, NEXT_TAG)
         else:
             next_tag = increment_rc_tag(current_tag)
 

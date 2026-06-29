@@ -3,6 +3,7 @@ import re
 import gitlab
 
 RC_TAG_PATTERN = re.compile(r"^(?P<base>\d+\.\d+\.\d+)\.rc(?P<rc>\d+)$")
+BASE_VERSION_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 def parse_rc_tag(tag: str) -> tuple[str, int] | None:
@@ -53,6 +54,29 @@ def increment_rc_tag(current_tag: str) -> str:
     # Preserve the original zero-padding width (e.g. 'rc01' -> 'rc02').
     width = len(rc_raw)
     return f"{base}.rc{next_rc:0{width}d}"
+
+
+def compose_rc_tag_with_base(current_tag: str, new_base: str) -> str:
+    """
+    Build the first RC tag for 'new_base', resetting the rc number to 1 while
+    preserving the zero-padding width from 'current_tag'.
+
+    Example: compose_rc_tag_with_base('3.1.1.rc10', '3.1.2') -> '3.1.2.rc01'.
+    Raises ValueError if 'current_tag' is not an '<x.y.z>.rc<N>' tag or if
+    'new_base' is not an '<x.y.z>' version.
+    """
+    match = RC_TAG_PATTERN.match(current_tag)
+    if match is None:
+        raise ValueError(
+            f"Tag '{current_tag}' does not match the expected '<x.y.z>.rc<N>' pattern."
+        )
+    if BASE_VERSION_PATTERN.match(new_base) is None:
+        raise ValueError(
+            f"Base version '{new_base}' does not match the expected '<x.y.z>' pattern."
+        )
+    # First RC of a new base resets to 1, keeping the current padding width.
+    width = len(match.group("rc"))
+    return f"{new_base}.rc{1:0{width}d}"
 
 
 def parse_version(branch: str) -> tuple[int, ...]:
@@ -218,4 +242,3 @@ def find_untagged_projects(project_data: dict) -> list[dict]:
         untagged.append({"project_name": project_name, "tags": tags})
 
     return untagged
-

@@ -11,6 +11,8 @@ from .gitlab_client import (
     parse_rc_tag,
     select_current_rc_tag,
     increment_rc_tag,
+    compose_rc_tag_with_base,
+    BASE_VERSION_PATTERN,
     validate_previous_branches,
     validate_source_branch,
 )
@@ -32,6 +34,8 @@ __all__ = [
     "parse_rc_tag",
     "select_current_rc_tag",
     "increment_rc_tag",
+    "compose_rc_tag_with_base",
+    "BASE_VERSION_PATTERN",
     "validate_previous_branches",
     "validate_source_branch",
     # vigiang
