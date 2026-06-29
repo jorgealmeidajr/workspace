@@ -1,5 +1,58 @@
 import os
+import re
 import gitlab
+
+RC_TAG_PATTERN = re.compile(r"^(?P<base>\d+\.\d+\.\d+)\.rc(?P<rc>\d+)$")
+
+
+def parse_rc_tag(tag: str) -> tuple[str, int] | None:
+    """
+    Parse an RC tag of the form '<x.y.z>.rc<N>'.
+
+    Returns a (base, rc_number) tuple, or None if the tag does not match.
+    """
+    match = RC_TAG_PATTERN.match(tag)
+    if match is None:
+        return None
+    return match.group("base"), int(match.group("rc"))
+
+
+def select_current_rc_tag(tags: list[str]) -> str | None:
+    """
+    Return the tag with the highest 'rc' number from a list of RC tags.
+
+    Tags that do not match the '<x.y.z>.rc<N>' pattern are ignored.
+    Returns None when no valid RC tag is present.
+    """
+    candidates = [(tag, parse_rc_tag(tag)) for tag in tags]
+    valid = [(tag, parsed) for tag, parsed in candidates if parsed is not None]
+    if not valid:
+        return None
+    # Sort by (base version tuple, rc number); pick the highest.
+    valid.sort(key=lambda item: (tuple(int(x) for x in item[1][0].split(".")), item[1][1]))
+    return valid[-1][0]
+
+
+def increment_rc_tag(current_tag: str) -> str:
+    """
+    Increment the 'rc' number of an RC tag, preserving zero-padding width.
+
+    Examples:
+        '3.1.1.rc10' -> '3.1.1.rc11'
+        '3.1.0.rc01' -> '3.1.0.rc02'
+    Raises ValueError if the tag does not match the '<x.y.z>.rc<N>' pattern.
+    """
+    match = RC_TAG_PATTERN.match(current_tag)
+    if match is None:
+        raise ValueError(
+            f"Tag '{current_tag}' does not match the expected '<x.y.z>.rc<N>' pattern."
+        )
+    base = match.group("base")
+    rc_raw = match.group("rc")
+    next_rc = int(rc_raw) + 1
+    # Preserve the original zero-padding width (e.g. 'rc01' -> 'rc02').
+    width = len(rc_raw)
+    return f"{base}.rc{next_rc:0{width}d}"
 
 
 def parse_version(branch: str) -> tuple[int, ...]:
