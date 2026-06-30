@@ -5,4 +5,5 @@ python-gitlab
 python-dotenv
 gitpython
 paramiko
+PyYAML
 pytest

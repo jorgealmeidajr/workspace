@@ -1,4 +1,5 @@
 import paramiko
+import yaml
 
 SSH_TIMEOUT_SECONDS = 10
 
@@ -153,5 +154,70 @@ def check_laboratories_up(
         raise RuntimeError(
             f"The following laboratories did not respond over SSH:\n  - {details}"
         )
+
+
+def run_laboratory_ssh_command(laboratory: dict, command: str) -> str:
+    """
+    Open an SSH connection to the given laboratory, run 'command' and return its
+    standard output as text.
+
+    Uses the laboratory's 'sshHost', 'sshPort', 'sshUsername' and 'sshPassword'
+    fields. Raises a RuntimeError if the command exits with a non-zero status,
+    or any underlying exception if the connection cannot be established.
+    """
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(
+            hostname=laboratory.get("sshHost"),
+            port=laboratory.get("sshPort", 22),
+            username=laboratory.get("sshUsername"),
+            password=laboratory.get("sshPassword"),
+            timeout=SSH_TIMEOUT_SECONDS,
+            banner_timeout=SSH_TIMEOUT_SECONDS,
+            auth_timeout=SSH_TIMEOUT_SECONDS,
+        )
+        _stdin, stdout, stderr = client.exec_command(command, timeout=SSH_TIMEOUT_SECONDS)
+        exit_status = stdout.channel.recv_exit_status()
+        output = stdout.read().decode("utf-8", errors="replace")
+        error_output = stderr.read().decode("utf-8", errors="replace")
+        if exit_status != 0:
+            raise RuntimeError(
+                f"Command '{command}' failed with exit status {exit_status}: "
+                f"{error_output.strip()}"
+            )
+        return output
+    finally:
+        client.close()
+
+
+def extract_backend_images(compose_text: str, back_project_names: list[str]) -> list[str]:
+    """
+    Parse a docker-compose YAML document and return the list of service image
+    references whose image name matches one of 'back_project_names'.
+
+    Matching is done by substring: an image is kept when any backend project
+    name appears within the image string (e.g. 'event-service' matches
+    'registry/vigiang/event-service:3.1.0.rc01').
+    """
+    document = yaml.safe_load(compose_text)
+    if not isinstance(document, dict):
+        raise ValueError("Invalid docker-compose content: expected a mapping at the root.")
+
+    services = document.get("services") or {}
+    if not isinstance(services, dict):
+        raise ValueError("Invalid docker-compose content: 'services' is not a mapping.")
+
+    images: list[str] = []
+    for service in services.values():
+        if not isinstance(service, dict):
+            continue
+        image = service.get("image")
+        if not image:
+            continue
+        if any(name in image for name in back_project_names):
+            images.append(image)
+
+    return images
 
 
