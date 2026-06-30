@@ -81,6 +81,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # first you should execute write_mrs.py and check if you see any changes
     main()
 

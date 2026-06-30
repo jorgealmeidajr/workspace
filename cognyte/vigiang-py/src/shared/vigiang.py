@@ -182,10 +182,7 @@ def run_laboratory_ssh_command(laboratory: dict, command: str) -> str:
         output = stdout.read().decode("utf-8", errors="replace")
         error_output = stderr.read().decode("utf-8", errors="replace")
         if exit_status != 0:
-            raise RuntimeError(
-                f"Command '{command}' failed with exit status {exit_status}: "
-                f"{error_output.strip()}"
-            )
+            raise RuntimeError(f"Command '{command}' failed with exit status {exit_status}: {error_output.strip()}")
         return output
     finally:
         client.close()
@@ -219,5 +216,4 @@ def extract_backend_images(compose_text: str, back_project_names: list[str]) -> 
             images.append(image)
 
     return images
-
 

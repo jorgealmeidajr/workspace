@@ -118,6 +118,5 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path, 
 
 
 if __name__ == "__main__":
-    # if you see any changes in MRs, then execute write_tags.py
     main()
 

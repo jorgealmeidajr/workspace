@@ -113,9 +113,6 @@ def write_commit_changes_md(commit_changes: List[CommitChanges], output_path: Pa
     print(f"[INFO] Written to {output_path}")
 
 
-###################################################################################################
-
-
 def main() -> None:
     print("Starting to get commits and changes from a local repository...")
 
