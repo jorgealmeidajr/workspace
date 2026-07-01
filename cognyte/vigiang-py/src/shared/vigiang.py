@@ -64,10 +64,10 @@ def get_current_branches() -> list[str]:
     return ["version-2.3.0", "version-3.1.0", "version-3.2.0"]
 
 
-def validate_laboratory_tasks(
+def validate_laboratories_from_branch(
     source_branch: str,
     active_laboratories: list[dict],
-    tasks: list[dict],
+    branch_laboratory_map: list[dict],
 ) -> list[str]:
     """
     Find the task entry whose 'branch' matches source_branch and validate that
@@ -77,7 +77,7 @@ def validate_laboratory_tasks(
     Raises ValueError if no/multiple matching entries are found, or if any
     listed laboratory is missing from the active laboratories.
     """
-    matches = [task for task in tasks if task.get("branch") == source_branch]
+    matches = [task for task in branch_laboratory_map if task.get("branch") == source_branch]
     if len(matches) == 0:
         raise ValueError(
             f"No laboratory task entry found for branch '{source_branch}'."
