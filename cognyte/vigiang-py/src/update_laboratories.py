@@ -6,7 +6,6 @@ from shared.environment import (
     get_branch_laboratories_vigia_ng,
 )
 from shared import (
-    connect_gitlab,
     validate_laboratory_tasks,
     check_laboratories_up,
     run_laboratory_ssh_command,
@@ -30,12 +29,10 @@ def main() -> None:
     #NEXT_TAG = ""
     CURRENT_BRANCH = "version-3.2.0"
 
-    UpdateLaboratoriesController.validate_branch(SOURCE_BRANCH, PREVIOUS_BRANCHES)
-
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    gl = connect_gitlab()
+    controller = UpdateLaboratoriesController(SOURCE_BRANCH, PREVIOUS_BRANCHES)
 
     active_laboratories = get_active_laboratories()
 
@@ -52,12 +49,12 @@ def main() -> None:
 
     print("Processing FRONT projects...")
     front_project_names = get_front_project_names()
-    front_projects_data = get_projects_data(SOURCE_BRANCH, gl, front_project_names, version)
+    front_projects_data = get_projects_data(SOURCE_BRANCH, controller.gl, front_project_names, version)
     front_untagged = find_untagged_projects(front_projects_data)
 
     print("Processing BACK projects...")
     back_project_names = get_back_project_names(SOURCE_BRANCH)
-    back_projects_data = get_projects_data(SOURCE_BRANCH, gl, back_project_names, version)
+    back_projects_data = get_projects_data(SOURCE_BRANCH, controller.gl, back_project_names, version)
     back_untagged = find_untagged_projects(back_projects_data)
 
     untagged_projects = front_untagged + back_untagged
