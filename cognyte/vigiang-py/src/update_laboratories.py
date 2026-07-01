@@ -7,14 +7,13 @@ from shared.environment import (
 )
 from shared import (
     connect_gitlab,
-    validate_previous_branches,
-    validate_source_branch,
     validate_laboratory_tasks,
     check_laboratories_up,
     run_laboratory_ssh_command,
     extract_backend_images,
 )
 from shared import get_front_project_names, get_back_project_names, get_projects_data, find_untagged_projects
+from controller import UpdateLaboratoriesController
 
 
 def get_active_laboratories() -> list[dict]:
@@ -31,8 +30,7 @@ def main() -> None:
     #NEXT_TAG = ""
     CURRENT_BRANCH = "version-3.2.0"
 
-    validate_previous_branches(PREVIOUS_BRANCHES)
-    validate_source_branch(SOURCE_BRANCH, PREVIOUS_BRANCHES)
+    UpdateLaboratoriesController.validate_branch(SOURCE_BRANCH, PREVIOUS_BRANCHES)
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
