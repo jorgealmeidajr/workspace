@@ -152,41 +152,66 @@ def _tag_version_key(tag: str) -> tuple[int, ...]:
     return tuple(numbers)
 
 
+def _branch_version_prefix(branch: str) -> str:
+    """
+    Build the version prefix used to match tags from a branch name.
+
+    'version-3.1.0' -> '3.1', 'version-3.1' -> '3.1'.
+    """
+    raw = branch.split("-", 1)[-1]
+    return ".".join(raw.split(".")[:2])
+
+
+def _highest_tag_for_branch(
+    project: gitlab.v4.objects.Project, branch: str
+) -> str | None:
+    """
+    Return the highest version tag on 'project' matching 'branch' version
+    prefix, or None when the project has no such tag.
+    """
+    version_prefix = _branch_version_prefix(branch)
+    tags = get_version_tags(project, version_prefix)
+    tag_names = [tag.name for tag in tags]
+    if not tag_names:
+        return None
+    return max(tag_names, key=_tag_version_key)
+
+
 def find_projects_last_tag(
-    project_data: dict,
-    version: str,
+    gl: gitlab.Gitlab,
+    project_names: list[str],
+    source_branch: str,
     previous_branches: list[str],
 ) -> list[dict]:
     """
     Determine the highest ("last") version tag for every project.
 
-    For each project the tag is chosen among the tags collected in its
-    'tag_map' that match the current 'version' prefix, picking the highest one.
-    When a project has no matching tag, the highest previous branch version is
-    used as the fallback (previous_branches is expected in descending order, so
-    the first element is the highest).
+    For each project name the highest tag matching the 'source_branch' version
+    is chosen. When the project has no tag matching the source branch (either
+    the branch/tag is missing), fall back through 'previous_branches' (expected
+    in descending order, so the highest version is tried first) and use the
+    highest tag found there.
 
     Returns a list of {"name": project_name, "last_tag": tag} entries. The
-    'last_tag' is None when neither a matching tag nor a previous branch exists.
+    'last_tag' is None when neither the source branch nor any previous branch
+    yields a matching tag.
     """
-    fallback_tag = (
-        previous_branches[0].split("-", 1)[-1] if previous_branches else None
-    )
-
     results: list[dict] = []
-    for project_name, data in project_data.items():
-        tag_map = data.get("tag_map", {})
-        matching_tags = [
-            tag
-            for tags in tag_map.values()
-            for tag in tags
-            if tag.startswith(version)
-        ]
+    for project_name in project_names:
+        try:
+            project = get_project(gl, project_name)
+        except ValueError as e:
+            print(f"  ❌ {e}")
+            results.append({"name": project_name, "last_tag": None})
+            continue
 
-        if matching_tags:
-            last_tag = max(matching_tags, key=_tag_version_key)
-        else:
-            last_tag = fallback_tag
+        last_tag = _highest_tag_for_branch(project, source_branch)
+
+        if last_tag is None:
+            for previous_branch in previous_branches:
+                last_tag = _highest_tag_for_branch(project, previous_branch)
+                if last_tag is not None:
+                    break
 
         results.append({"name": project_name, "last_tag": last_tag})
 

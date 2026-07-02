@@ -24,6 +24,9 @@ class UpdateLaboratoriesController:
         self.previous_branches = previous_branches
         self._validate_branches()
         self.gl: gitlab.Gitlab = connect_gitlab()
+        self.back_project_names: list[str] = []
+        self.back_projects_last_tag: list[dict] = []
+        self.lab_backend_images: dict[str, list[str]] = {}
 
 
     def _validate_branches(self) -> None:
@@ -52,12 +55,10 @@ class UpdateLaboratoriesController:
         print("Checking laboratories are reachable over SSH...")
         check_laboratories_up(branch_laboratory_names, branch_laboratories)
 
-        version = ".".join(self.source_branch.replace("version-", "").split(".")[:2])
-
         print("Processing BACK projects...")
         back_project_names = get_back_project_names(self.source_branch)
-        back_projects_data = get_projects_data(self.source_branch, self.gl, back_project_names, version)
-        self.back_projects_last_tag = find_projects_last_tag(back_projects_data, version, self.previous_branches)
+        self.back_project_names = back_project_names
+        self.back_projects_last_tag = find_projects_last_tag(self.gl, back_project_names, self.source_branch, self.previous_branches)
 
         print("Reading backend images from laboratories' docker-compose...")
         for laboratory in branch_laboratories:
@@ -74,6 +75,44 @@ class UpdateLaboratoriesController:
             self.lab_backend_images[lab_name] = backend_images
 
 
+    def _match_project_name(self, image: str) -> str | None:
+        for name in self.back_project_names:
+            if name in image:
+                return name
+        return None
+
+
     def execute(self) -> None:
         print("Updating laboratories...")
+
+        expected_tags = {
+            entry.get("name"): entry.get("last_tag")
+            for entry in self.back_projects_last_tag
+        }
+
+        for lab_name, images in self.lab_backend_images.items():
+            print(f"\nLaboratory '{lab_name}':")
+            mismatches: list[str] = []
+
+            for image in images:
+                project_name = self._match_project_name(image)
+                if project_name is None:
+                    print(f"  ⚠️  No matching BACK project for image '{image}'")
+                    continue
+
+                deployed_tag = image.rsplit(":", 1)[-1] if ":" in image else ""
+                expected_tag = expected_tags.get(project_name)
+                if expected_tag is None:
+                    print(f"  ⚠️  No expected tag for project '{project_name}'")
+                    continue
+
+                if deployed_tag != expected_tag:
+                    mismatches.append(
+                        f"  {project_name}: expected {expected_tag}, got {deployed_tag}"
+                    )
+
+            if mismatches:
+                print("\n".join(mismatches))
+            else:
+                print(f"  ✅ {lab_name} is up to date")
 
