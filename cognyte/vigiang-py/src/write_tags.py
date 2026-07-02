@@ -81,5 +81,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # todo: improve the logging
     main()
 

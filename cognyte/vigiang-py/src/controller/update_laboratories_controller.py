@@ -12,7 +12,6 @@ from shared import (
     check_laboratories_up,
     run_laboratory_ssh_command,
     extract_backend_images,
-    get_front_project_names,
     get_back_project_names,
     get_projects_data,
 )
@@ -36,7 +35,7 @@ class UpdateLaboratoriesController:
         return [lab for lab in laboratories if lab.get("active")]
 
 
-    def execute(self) -> dict:
+    def load_data(self) -> dict:
         active_laboratories = self._get_active_laboratories()
 
         branch_laboratory_map = get_branch_laboratories_vigia_ng()
@@ -53,11 +52,6 @@ class UpdateLaboratoriesController:
         check_laboratories_up(branch_laboratory_names, branch_laboratories)
 
         version = ".".join(self.source_branch.replace("version-", "").split(".")[:2])
-
-        print("Processing FRONT projects...")
-        front_project_names = get_front_project_names()
-        front_projects_data = get_projects_data(self.source_branch, self.gl, front_project_names, version)
-        #front_untagged = find_untagged_projects(front_projects_data)
 
         print("Processing BACK projects...")
         back_project_names = get_back_project_names(self.source_branch)
@@ -85,10 +79,12 @@ class UpdateLaboratoriesController:
 
         return {
             "branch_laboratories": branch_laboratories,
-            "front_project_names": front_project_names,
-            "front_projects_data": front_projects_data,
             "back_project_names": back_project_names,
             "back_projects_data": back_projects_data,
             "lab_backend_images": lab_backend_images,
         }
+
+
+    def execute(self) -> None:
+        print("Updating laboratories...")
 

@@ -112,6 +112,7 @@ def process_project(
             oldest_tag_index = i  # keep updating; last hit is the oldest tag
 
     if oldest_tag_index is None:
+        # todo: no tag found, check latest tag from previous branch...
         print(f"  ℹ️ No version tags found for '{project.name}' — skipping.")
         return {"commits": [], "tag_map": {}}
     else:
