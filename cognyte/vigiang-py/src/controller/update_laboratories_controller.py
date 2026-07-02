@@ -14,6 +14,7 @@ from shared import (
     extract_backend_images,
     get_back_project_names,
     get_projects_data,
+    find_projects_last_tag,
 )
 
 
@@ -35,7 +36,7 @@ class UpdateLaboratoriesController:
         return [lab for lab in laboratories if lab.get("active")]
 
 
-    def load_data(self) -> dict:
+    def load_data(self) -> None:
         active_laboratories = self._get_active_laboratories()
 
         branch_laboratory_map = get_branch_laboratories_vigia_ng()
@@ -56,33 +57,21 @@ class UpdateLaboratoriesController:
         print("Processing BACK projects...")
         back_project_names = get_back_project_names(self.source_branch)
         back_projects_data = get_projects_data(self.source_branch, self.gl, back_project_names, version)
-        #back_untagged = find_untagged_projects(back_projects_data)
+        self.back_projects_last_tag = find_projects_last_tag(back_projects_data, version, self.previous_branches)
 
         print("Reading backend images from laboratories' docker-compose...")
-        lab_backend_images: dict[str, list[str]] = {}
-        docker_compose_path = "/opt/vigiang/scripts/docker-compose.yml"
         for laboratory in branch_laboratories:
             lab_name = laboratory.get("name")
             try:
                 compose_text = run_laboratory_ssh_command(
-                    laboratory, f"cat {docker_compose_path}"
+                    laboratory, f"cat /opt/vigiang/scripts/docker-compose.yml"
                 )
                 backend_images = extract_backend_images(compose_text, back_project_names)
             except Exception as error:
                 print(f"❌ Failed to read backend images from '{lab_name}': {error}")
                 raise
 
-            lab_backend_images[lab_name] = backend_images
-            print(f"\nBackend images for laboratory '{lab_name}':")
-            for image in backend_images:
-                print(f"  - {image}")
-
-        return {
-            "branch_laboratories": branch_laboratories,
-            "back_project_names": back_project_names,
-            "back_projects_data": back_projects_data,
-            "lab_backend_images": lab_backend_images,
-        }
+            self.lab_backend_images[lab_name] = backend_images
 
 
     def execute(self) -> None:

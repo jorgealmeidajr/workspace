@@ -17,7 +17,7 @@ def main() -> None:
 
     controller = UpdateLaboratoriesController(SOURCE_BRANCH, PREVIOUS_BRANCHES)
 
-    result_data = controller.load_data()
+    controller.load_data()
 
     answer = input("\nDo you want to create the new tags? yes(y) or no(n)? ").strip().lower()
     if answer in {"y", "yes"}:

@@ -136,6 +136,63 @@ def get_projects_data(branch: str, gl: gitlab.Gitlab, project_names: list[str], 
     return project_data
 
 
+def _tag_version_key(tag: str) -> tuple[int, ...]:
+    """
+    Build a sortable version tuple from the leading numeric parts of a tag.
+
+    Non-numeric suffixes (e.g. 'rc01' in '3.1.0.rc01') are ignored so tags can
+    still be compared: '3.1.0.rc01' -> (3, 1, 0).
+    """
+    numbers: list[int] = []
+    for part in tag.split("."):
+        if part.isdigit():
+            numbers.append(int(part))
+        else:
+            break
+    return tuple(numbers)
+
+
+def find_projects_last_tag(
+    project_data: dict,
+    version: str,
+    previous_branches: list[str],
+) -> list[dict]:
+    """
+    Determine the highest ("last") version tag for every project.
+
+    For each project the tag is chosen among the tags collected in its
+    'tag_map' that match the current 'version' prefix, picking the highest one.
+    When a project has no matching tag, the highest previous branch version is
+    used as the fallback (previous_branches is expected in descending order, so
+    the first element is the highest).
+
+    Returns a list of {"name": project_name, "last_tag": tag} entries. The
+    'last_tag' is None when neither a matching tag nor a previous branch exists.
+    """
+    fallback_tag = (
+        previous_branches[0].split("-", 1)[-1] if previous_branches else None
+    )
+
+    results: list[dict] = []
+    for project_name, data in project_data.items():
+        tag_map = data.get("tag_map", {})
+        matching_tags = [
+            tag
+            for tags in tag_map.values()
+            for tag in tags
+            if tag.startswith(version)
+        ]
+
+        if matching_tags:
+            last_tag = max(matching_tags, key=_tag_version_key)
+        else:
+            last_tag = fallback_tag
+
+        results.append({"name": project_name, "last_tag": last_tag})
+
+    return results
+
+
 def find_untagged_projects(project_data: dict) -> list[dict]:
     """
     Return the projects that have new commits (newest) ahead of their latest
