@@ -14,14 +14,19 @@ class BranchCompareResult:
     missing_commits: list  # commits in branch_a not yet in branch_b
 
 
-def validate_target_branches(branches: list[str]) -> None:
+def validate_target_branches(branches: list[str], require_multiple: bool = False) -> None:
     """
-    Validate that target_branches has at least 2 elements and each element
-    is a strictly higher version than the one that follows it (descending order).
+    Validate that target_branches has the required number of elements and each
+    element is a strictly higher version than the one that follows it
+    (descending order).
+
+    By default, at least 1 element is required. Pass ``require_multiple=True`` to
+    require at least 2 elements.
     """
-    if len(branches) < 2:
+    minimum = 2 if require_multiple else 1
+    if len(branches) < minimum:
         raise ValueError(
-            f"target_branches must contain at least 2 elements, got {len(branches)}."
+            f"target_branches must contain at least {minimum} element(s), got {len(branches)}."
         )
     for i in range(len(branches) - 1):
         v_current = parse_version(branches[i])
@@ -69,7 +74,7 @@ def compare_branches(
     missing_branches = [b for b in (branch_a, branch_b) if not branch_exists(project, b)]
     if missing_branches:
         for b in missing_branches:
-            print(f"❌  Branch '{b}' does not exist in project '{project.name}'. Skipping comparison.")
+            print(f"❌ Branch '{b}' does not exist in project '{project.name}'. Skipping comparison.")
         return None
 
     # GitLab compare: from=branch_b, to=branch_a  →  gives commits in A not in B
@@ -105,15 +110,20 @@ def print_result(result: BranchCompareResult) -> None:
 def main() -> None:
     print("Starting to compare branches looking for missing commits...")
 
-    # ── Configuration ────────────────────────────────────────────────────────
-    source_branch = "version-2.3.0"  # Source branch (commits to send FROM)
-    target_branches = ["version-3.1.0", "version-3.0.0"]  # Target branches (commits to send TO), first existing one is used
+    # ----------------------------------------------------------------
+    # Source branch (commits to send FROM)
+    # Target branches (commits to send TO), first existing one is used
+    # source_branch = "version-2.3.0"
+    # target_branches = ["version-3.1.0", "version-3.0.0"]
+
+    source_branch = "version-3.1.0"
+    target_branches = ["version-3.2.0"]
+    # ----------------------------------------------------------------
 
     validate_target_branches(target_branches)
     validate_source_branch(source_branch, target_branches)
 
     project_names = get_project_names(source_branch)
-    # ─────────────────────────────────────────────────────────────────────────
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

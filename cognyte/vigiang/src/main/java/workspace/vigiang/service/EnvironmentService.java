@@ -29,8 +29,6 @@ public class EnvironmentService {
 
     public static List<String> getVersions() {
         return List.of(
-            "2.0",
-            "2.1",
             "2.2",
             "2.3",
             "3.0",
