@@ -10,16 +10,14 @@ def print_untagged_new_commits(project_data: dict) -> None:
     untagged_projects = find_untagged_projects(project_data)
 
     if not untagged_projects:
-        print("\n✅ No projects have untagged new commits.")
+        print("✅ No projects have untagged new commits.")
         return
 
-    print(f"\n{'═' * 60}")
     print("Projects with new commits ahead of latest tag:")
-    print(f"{'═' * 60}")
     for entry in untagged_projects:
         tags = entry["tags"]
         tag_suffix = "🏷️ " + ", ".join(tags) if tags else ""
-        print(f"\n📦 {entry['project_name']} {tag_suffix}")
+        print(f"📦 {entry['project_name']} {tag_suffix}")
 
 
 def main() -> None:
@@ -33,18 +31,17 @@ def main() -> None:
     gl = connect_gitlab()
 
     for branch in branches:
-        print(f"{'─' * 120}")
-        print(f"Branch: {branch}")
+        print(f"{'─' * 60}")
+        print(f"# Branch: {branch}")
 
         version = ".".join(branch.replace("version-", "").split(".")[:2])
 
-        print("  Processing front projects...")
+        print("## Processing front projects...")
         project_names = get_front_project_names()
         projects_data = get_projects_data(branch, gl, project_names, version)
         print_untagged_new_commits(projects_data)
-        print("\n")
 
-        print("  Processing back projects...")
+        print("## Processing back projects...")
         project_names = get_back_project_names(branch)
         projects_data = get_projects_data(branch, gl, project_names, version)
         print_untagged_new_commits(projects_data)
@@ -53,6 +50,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # todo: improve the logging
     main()
 

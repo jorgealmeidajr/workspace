@@ -97,22 +97,22 @@ class UpdateLaboratoriesController:
             for image in images:
                 project_name = self._match_project_name(image)
                 if project_name is None:
-                    print(f"  ⚠️  No matching BACK project for image '{image}'")
+                    print(f"⚠️ No matching BACK project for image '{image}'")
                     continue
 
                 deployed_tag = image.rsplit(":", 1)[-1] if ":" in image else ""
                 expected_tag = expected_tags.get(project_name)
                 if expected_tag is None:
-                    print(f"  ⚠️  No expected tag for project '{project_name}'")
+                    print(f"⚠️ No expected tag for project '{project_name}'")
                     continue
 
                 if deployed_tag != expected_tag:
                     mismatches.append(
-                        f"  {project_name}: expected {expected_tag}, got {deployed_tag}"
+                        f"{project_name}: expected {expected_tag}, got {deployed_tag}"
                     )
 
             if mismatches:
                 print("\n".join(mismatches))
             else:
-                print(f"  ✅ {lab_name} is up to date")
+                print(f"✅ {lab_name} is up to date")
 

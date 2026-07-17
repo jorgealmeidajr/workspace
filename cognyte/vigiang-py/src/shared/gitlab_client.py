@@ -113,7 +113,7 @@ def process_project(
 
     if oldest_tag_index is None:
         # todo: no tag found, check latest tag from previous branch...
-        print(f"  ℹ️ No version tags found for '{project.name}' — skipping.")
+        print(f"ℹ️ No version tags found for '{project.name}' — skipping.")
         return {"commits": [], "tag_map": {}}
     else:
         sliced = commits[: oldest_tag_index + 1]

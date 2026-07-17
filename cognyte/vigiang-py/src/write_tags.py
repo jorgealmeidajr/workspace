@@ -55,22 +55,21 @@ def main() -> None:
     gl = connect_gitlab()
 
     for branch in branches:
-        print(f"{'─' * 120}")
-        print(f"Branch: {branch}")
+        print(f"{'─' * 60}")
+        print(f"# Branch: {branch}")
 
         version = ".".join(branch.replace("version-", "").split(".")[:2])
         version_path = tasks_folder / version
         version_path.mkdir(parents=True, exist_ok=True)
 
-        print("  Processing front projects...")
+        print("## Processing front projects...")
         project_names = get_front_project_names()
         md_path = version_path / f"{version}.tags.front.md"
 
         projects_data = get_projects_data(branch, gl, project_names, version)
         write_tags_md(projects_data, md_path)
-        print("\n")
 
-        print("  Processing back projects...")
+        print("## Processing back projects...")
         project_names = get_back_project_names(branch)
         md_path = version_path / f"{version}.tags.back.md"
 
@@ -81,6 +80,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # todo: improve the logging
     main()
 

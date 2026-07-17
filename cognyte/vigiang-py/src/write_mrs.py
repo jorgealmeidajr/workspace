@@ -13,7 +13,7 @@ def get_merged_requests(project: gitlab.v4.objects.Project, branch: str) -> list
     try:
         return project.mergerequests.list(state='merged', target_branch=branch, all=True)
     except gitlab.exceptions.GitlabListError as e:
-        print(f"  ⚠️  Could not fetch merge requests for '{branch}' in '{project.name}': {e}")
+        print(f"⚠️ Could not fetch merge requests for '{branch}' in '{project.name}': {e}")
         return []
 
 
@@ -21,7 +21,7 @@ def get_mr_commits(mr) -> list:
     try:
         return mr.commits()
     except Exception as e:
-        print(f"  ⚠️  Could not fetch commits for MR !{mr.iid}: {e}")
+        print(f"⚠️ Could not fetch commits for MR !{mr.iid}: {e}")
         return []
 
 
@@ -29,7 +29,7 @@ def get_mr_changed_files(mr) -> list:
     try:
         return mr.changes()["changes"]
     except Exception as e:
-        print(f"  ⚠️  Could not fetch changed files for MR !{mr.iid}: {e}")
+        print(f"⚠️ Could not fetch changed files for MR !{mr.iid}: {e}")
         return []
 
 
@@ -83,7 +83,7 @@ def main() -> None:
 
     for branch in branches:
         print(f"{'─' * 60}")
-        print(f"Branch: {branch}")
+        print(f"# Branch: {branch}")
 
         version = ".".join(branch.replace("version-", "").split(".")[:2])
         version_path = tasks_folder / version
@@ -101,13 +101,13 @@ def main() -> None:
 
 
 def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path, label: str):
-    print(f"  Fetching merged requests for {label} projects...")
+    print(f"## Fetching merged requests for {label} projects...")
     project_mrs: dict = {}
     for project_name in project_names:
         try:
             project = get_project(gl, project_name)
         except ValueError as e:
-            print(f"  ❌  {e}")
+            print(f"❌ {e}")
             project_mrs[project_name] = []
             continue
 

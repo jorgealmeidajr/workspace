@@ -9,10 +9,10 @@ def write_content(output_path: Path, content: str) -> bool:
         if current_content == content:
             return False
         output_path.write_text(content, encoding="utf-8")
-        print(f"  ✏️ Modified: {output_path}\n")
+        print(f"✏️ Modified: {output_path}\n")
         return True
 
     output_path.write_text(content, encoding="utf-8")
-    print(f"  ✅ Created: {output_path}\n")
+    print(f"✅ Created: {output_path}\n")
     return True
 

@@ -9,8 +9,6 @@ def main() -> None:
 
     SOURCE_BRANCH = "version-3.1.0"
     PREVIOUS_BRANCHES = ["version-3.0.0"]
-    #NEXT_TAG = ""
-    CURRENT_BRANCH = "version-3.2.0"
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -19,9 +17,8 @@ def main() -> None:
 
     controller.load_data()
 
-    answer = input("\nDo you want to create the new tags? yes(y) or no(n)? ").strip().lower()
+    answer = input("\nDo you want to update the laboratories? yes(y) or no(n)? ").strip().lower()
     if answer in {"y", "yes"}:
-        print("Tags will be created...")
         controller.execute()
 
     print("\nEnding script.")
