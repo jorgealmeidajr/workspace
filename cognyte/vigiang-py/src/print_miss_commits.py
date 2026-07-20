@@ -89,15 +89,15 @@ def compare_branches(
 
 
 def print_result(result: BranchCompareResult) -> None:
-    print(f"\nProject : {result.project_name}")
+    print(f"Project : {result.project_name}")
     print(f"Source  : {result.branch_a}")
     print(f"Target  : {result.branch_b}")
 
     if not result.missing_commits:
-        print("✅  No missing commits — branches are in sync.")
+        print("✅ No missing commits — branches are in sync.")
         return
 
-    print(f"⚠️  {len(result.missing_commits)} commit(s) in '{result.branch_a}' "
+    print(f"⚠️ {len(result.missing_commits)} commit(s) in '{result.branch_a}' "
           f"not yet in '{result.branch_b}':\n")
     for commit in result.missing_commits:
         short_id = commit.get("short_id", commit.get("id", "?")[:8])
@@ -107,35 +107,26 @@ def print_result(result: BranchCompareResult) -> None:
         print(f"  [{short_id}] {date} {author} — {title}")
 
 
-def main() -> None:
-    print("Starting to compare branches looking for missing commits...")
-
-    # ----------------------------------------------------------------
-    # Source branch (commits to send FROM)
-    # Target branches (commits to send TO), first existing one is used
-    # source_branch = "version-2.3.0"
-    # target_branches = ["version-3.1.0", "version-3.0.0"]
-
-    source_branch = "version-3.1.0"
-    target_branches = ["version-3.2.0"]
-    # ----------------------------------------------------------------
-
-    validate_target_branches(target_branches)
-    validate_source_branch(source_branch, target_branches)
+def process_source_branch(
+    gl: gitlab.Gitlab,
+    source_branch: str,
+    target_branches: list[str],
+) -> None:
+    """
+    Compare a single source branch against its target branches across every
+    relevant project, printing the missing commits for each.
+    """
+    print(f"{'─' * 120}")
+    print(f"Comparing source '{source_branch}' → targets {target_branches}")
 
     project_names = get_project_names(source_branch)
-
-    load_dotenv()
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-    gl = connect_gitlab()
 
     for project_name in project_names:
         print(f"{'─' * 60}")
         try:
             project = get_project(gl, project_name)
         except ValueError as e:
-            print(f"❌  {e}")
+            print(f"❌ {e}")
             continue
 
         branch_b = next(
@@ -149,6 +140,34 @@ def main() -> None:
         result = compare_branches(project, source_branch, branch_b)
         if result is not None:
             print_result(result)
+
+
+def main() -> None:
+    print("Starting to compare branches looking for missing commits...")
+
+    # ----------------------------------------------------------------
+    # Each entry maps a source branch (commits to send FROM) to its target
+    # branches (commits to send TO); the first existing target is used.
+    configs: list[tuple[str, list[str]]] = [
+        ("version-2.2.0", ["version-2.3.0"]),
+        ("version-2.3.0", ["version-3.1.0", "version-3.0.0"]),
+        ("version-3.1.0", ["version-3.2.0"]),
+    ]
+    # ----------------------------------------------------------------
+
+    # Validate every config upfront so an invalid entry stops the run before
+    # any GitLab work begins.
+    for source_branch, target_branches in configs:
+        validate_target_branches(target_branches)
+        validate_source_branch(source_branch, target_branches)
+
+    load_dotenv()
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    gl = connect_gitlab()
+
+    for source_branch, target_branches in configs:
+        process_source_branch(gl, source_branch, target_branches)
 
     print("\nEnding script.")
 
