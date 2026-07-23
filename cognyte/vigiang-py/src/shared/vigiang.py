@@ -61,7 +61,7 @@ def get_back_project_names(branch: str) -> list[str]:
 
 
 def get_current_branches() -> list[str]:
-    return ["version-2.3.0", "version-3.1.0", "version-3.2.0"]
+    return ["version-2.2.0", "version-2.3.0", "version-3.1.0", "version-3.2.0"]
 
 
 def validate_laboratories_from_branch(
