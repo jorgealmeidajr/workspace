@@ -6,4 +6,5 @@ python-dotenv
 gitpython
 paramiko
 PyYAML
+requests
 pytest
