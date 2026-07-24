@@ -7,4 +7,5 @@ gitpython
 paramiko
 PyYAML
 requests
+jira
 pytest

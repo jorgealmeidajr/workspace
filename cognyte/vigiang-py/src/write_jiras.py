@@ -1,11 +1,11 @@
 import os
 import re
 import urllib3
-import requests
 import gitlab
 from pathlib import Path
 from dotenv import load_dotenv
 from gitlab import Gitlab
+from jira import JIRA
 
 from shared.environment import get_vigia_ng_path
 from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
@@ -15,46 +15,38 @@ from shared import connect_gitlab, get_project, write_content
 JIRA_KEY_PATTERN = re.compile(r"\b([A-Z][A-Z0-9]+-\d+)\b")
 
 
-def connect_jira() -> tuple[str, requests.Session]:
+def connect_jira() -> JIRA:
     """
-    Build a Jira REST session using JIRA_URL and JIRA_TOKEN from the environment.
+    Build a Jira client using JIRA_URL and JIRA_TOKEN from the environment.
 
-    Returns a tuple of (base_url, session). The session is preconfigured with the
-    bearer token so callers can query the Jira REST API directly.
+    Returns a configured ``JIRA`` client (Jira Server/Data Center personal
+    access token auth) so callers can query the Jira REST API directly.
     """
     base_url = (os.getenv("JIRA_URL") or "").rstrip("/")
     token = os.getenv("JIRA_TOKEN")
 
-    session = requests.Session()
-    session.headers.update({
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/json",
-    })
-    session.verify = False
+    client = JIRA(server=base_url, token_auth=token, options={"verify": False})
 
     print(f"Connected to Jira: {base_url}")
-    return base_url, session
+    return client
 
 
-def get_jira_issue(base_url: str, session: requests.Session, key: str) -> dict:
+def get_jira_issue(client: JIRA, key: str) -> dict | None:
     """
     Fetch a Jira issue's title (summary) and status by its key.
 
-    On any failure (network error, missing issue, no access) the failure is
-    logged and an entry with empty title/status is returned so the run continues.
+    On any failure (network error, missing/invalid issue, no access) the failure
+    is logged and ``None`` is returned so callers can skip the invalid key.
     """
-    url = f"{base_url}/rest/api/2/issue/{key}?fields=summary,status"
-    jira_url = f"{base_url}/browse/{key}"
+    jira_url = f"{client.server_url}/browse/{key}"
     try:
-        response = session.get(url, timeout=15)
-        response.raise_for_status()
-        fields = response.json().get("fields", {})
-        title = fields.get("summary", "")
-        status = (fields.get("status") or {}).get("name", "")
+        issue = client.issue(key, fields="summary,status")
+        title = getattr(issue.fields, "summary", "") or ""
+        status = getattr(getattr(issue.fields, "status", None), "name", "") or ""
         return {"key": key, "url": jira_url, "title": title, "status": status}
     except Exception as e:
-        print(f"⚠️ Could not fetch Jira issue '{key}': {e}")
-        return {"key": key, "url": jira_url, "title": "", "status": ""}
+        print(f"⚠️ Could not fetch Jira issue '{key}', skipping: {e}")
+        return None
 
 
 def extract_jira_keys(text: str) -> list[str]:
@@ -84,16 +76,21 @@ def get_mr_commits(mr) -> list:
         return []
 
 
-def collect_mr_jiras(project: gitlab.v4.objects.Project, branch: str) -> dict:
+def collect_mr_jiras(project: gitlab.v4.objects.Project, branch: str) -> list:
     """
     Scan every merged MR (and its commit messages) for Jira keys.
 
-    Returns a dict mapping the MR web URL → list of unique Jira keys found in the
-    MR title and its commit messages.
+    Returns a list of dicts, one per MR, each holding the MR ``web_url``,
+    ``merged_at`` date, ``author`` name and the list of unique Jira keys found
+    in the MR title and its commit messages.
     """
-    mr_jiras: dict = {}
+    mr_jiras: list = []
     for mr in get_merged_requests(project, branch):
         keys = extract_jira_keys(mr.title)
+
+        # todo: from mr, get gitlab issue link and get jira keys from this issue(title and description)
+        # Related to #31
+        # Closes #27
 
         for commit in get_mr_commits(mr):
             message = getattr(commit, "message", "") or commit.title
@@ -101,33 +98,49 @@ def collect_mr_jiras(project: gitlab.v4.objects.Project, branch: str) -> dict:
                 if key not in keys:
                     keys.append(key)
 
-        mr_jiras[mr.web_url] = keys
+        mr_jiras.append({
+            "web_url": mr.web_url,
+            "mr_title": mr.title,
+            "merged_at": (mr.merged_at or "")[:10],
+            "author": mr.author.get("name", "") if mr.author else "",
+            "keys": keys,
+        })
 
     return mr_jiras
 
 
 def write_jiras_md(
-    project_data: dict,  # project_name → {mr_web_url: [jira keys]}
-    base_url: str,
-    session: requests.Session,
+    project_data: dict,  # project_name → [{web_url, merged_at, author, keys}]
+    client: JIRA,
     output_path: Path,
 ) -> None:
     lines = []
     for project_name, mr_jiras in project_data.items():
         project_lines = []
-        for mr_url, keys in mr_jiras.items():
+        for mr in mr_jiras:
+            keys = mr["keys"]
             if not keys:
                 continue
-            project_lines.append(f"{mr_url}\n")
-            for key in keys:
-                issue = get_jira_issue(base_url, session, key)
+
+            issues = [issue for key in keys if (issue := get_jira_issue(client, key)) is not None]
+            if not issues:
+                continue
+
+            project_lines.append(f"[{mr['merged_at']}] [{mr['author']}]\n")
+            project_lines.append(f"{mr['mr_title']}\n")
+            project_lines.append(f"{mr['web_url']}\n")
+
+            for issue in issues:
                 status = issue["status"]
                 if status.strip().lower() == "done":
                     status = "✅ DONE"
                 project_lines.append(
+                    f"  [{issue['key']}] [{status}]\n"
+                    f"  {issue['title'].strip()}\n"
                     f"  {issue['url']}\n"
-                    f"    [{status}] {issue['title']}\n"
+                    f"\n"
                 )
+            project_lines.append("\n")
 
         if not project_lines:
             continue
@@ -148,7 +161,7 @@ def collect_jiras(branch: str, project_names: list[str], gl: Gitlab, label: str)
             project = get_project(gl, project_name)
         except ValueError as e:
             print(f"❌ {e}")
-            project_data[project_name] = {}
+            project_data[project_name] = []
             continue
 
         project_data[project_name] = collect_mr_jiras(project, branch)
@@ -166,7 +179,7 @@ def main() -> None:
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     gl = connect_gitlab()
-    base_url, session = connect_jira()
+    client = connect_jira()
 
     for branch in branches:
         print(f"{'─' * 60}")
@@ -181,7 +194,7 @@ def main() -> None:
         project_data.update(collect_jiras(branch, get_back_project_names(branch), gl, "BACK"))
 
         md_path = version_path / f"{version}.jiras.md"
-        write_jiras_md(project_data, base_url, session, md_path)
+        write_jiras_md(project_data, client, md_path)
 
     print("\nEnding script.")
 
