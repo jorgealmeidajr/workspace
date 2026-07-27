@@ -1,4 +1,3 @@
-import gitlab
 import urllib3
 from pathlib import Path
 from dotenv import load_dotenv
@@ -6,23 +5,7 @@ from gitlab import Gitlab
 
 from shared.environment import get_vigia_ng_path
 from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
-from shared import connect_gitlab, get_project, write_content
-
-
-def get_merged_requests(project: gitlab.v4.objects.Project, branch: str) -> list:
-    try:
-        return project.mergerequests.list(state='merged', target_branch=branch, all=True)
-    except gitlab.exceptions.GitlabListError as e:
-        print(f"⚠️ Could not fetch merge requests for '{branch}' in '{project.name}': {e}")
-        return []
-
-
-def get_mr_commits(mr) -> list:
-    try:
-        return mr.commits()
-    except Exception as e:
-        print(f"⚠️ Could not fetch commits for MR !{mr.iid}: {e}")
-        return []
+from shared import connect_gitlab, get_project, write_content, get_merged_requests, get_mr_commits
 
 
 def get_mr_changed_files(mr) -> list:

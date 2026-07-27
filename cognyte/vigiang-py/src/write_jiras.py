@@ -5,11 +5,11 @@ import gitlab
 from pathlib import Path
 from dotenv import load_dotenv
 from gitlab import Gitlab
-from jira import JIRA
+from jira import JIRA, JIRAError
 
 from shared.environment import get_vigia_ng_path
 from shared.vigiang import get_front_project_names, get_back_project_names, get_current_branches
-from shared import connect_gitlab, get_project, write_content
+from shared import connect_gitlab, get_project, write_content, get_merged_requests, get_mr_commits
 
 
 JIRA_KEY_PATTERN = re.compile(r"\b([A-Z][A-Z0-9]+-\d+)\b")
@@ -46,6 +46,10 @@ def get_jira_issue(client: JIRA, key: str) -> dict | None:
         title = getattr(issue.fields, "summary", "") or ""
         status = getattr(getattr(issue.fields, "status", None), "name", "") or ""
         return {"key": key, "url": jira_url, "title": title, "status": status}
+    except JIRAError as e:
+        message = (e.text or "").strip() or str(e)
+        print(f"⚠️ Could not fetch Jira issue '{key}', skipping: HTTP {e.status_code}: {message}")
+        return None
     except Exception as e:
         print(f"⚠️ Could not fetch Jira issue '{key}', skipping: {e}")
         return None
@@ -89,22 +93,6 @@ def get_gitlab_issue(project: gitlab.v4.objects.Project, iid: int):
     except Exception as e:
         print(f"⚠️ Could not fetch GitLab issue #{iid} in '{project.name}', skipping: {e}")
         return None
-
-
-def get_merged_requests(project: gitlab.v4.objects.Project, branch: str) -> list:
-    try:
-        return project.mergerequests.list(state='merged', target_branch=branch, all=True)
-    except gitlab.exceptions.GitlabListError as e:
-        print(f"⚠️ Could not fetch merge requests for '{branch}' in '{project.name}': {e}")
-        return []
-
-
-def get_mr_commits(mr) -> list:
-    try:
-        return mr.commits()
-    except Exception as e:
-        print(f"⚠️ Could not fetch commits for MR !{mr.iid}: {e}")
-        return []
 
 
 def collect_mr_jiras(project: gitlab.v4.objects.Project, branch: str) -> list:

@@ -70,6 +70,22 @@ def get_branch_commits(project: gitlab.v4.objects.Project, branch: str) -> list:
         return []
 
 
+def get_merged_requests(project: gitlab.v4.objects.Project, branch: str) -> list:
+    try:
+        return project.mergerequests.list(state='merged', target_branch=branch, all=True)
+    except gitlab.exceptions.GitlabListError as e:
+        print(f"⚠️ Could not fetch merge requests for '{branch}' in '{project.name}': {e}")
+        return []
+
+
+def get_mr_commits(mr) -> list:
+    try:
+        return mr.commits()
+    except Exception as e:
+        print(f"⚠️ Could not fetch commits for MR !{mr.iid}: {e}")
+        return []
+
+
 def get_version_tags(project: gitlab.v4.objects.Project, version_prefix: str) -> list:
     """Return tags whose name starts with version_prefix."""
     try:
