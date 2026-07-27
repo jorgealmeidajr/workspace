@@ -14,6 +14,8 @@ from shared import connect_gitlab, get_project, write_content
 
 JIRA_KEY_PATTERN = re.compile(r"\b([A-Z][A-Z0-9]+-\d+)\b")
 
+GITLAB_ISSUE_PATTERN = re.compile(r"(?:Closes|Related to)\s+#(\d+)", re.IGNORECASE)
+
 
 def connect_jira() -> JIRA:
     """
@@ -60,6 +62,35 @@ def extract_jira_keys(text: str) -> list[str]:
     return keys
 
 
+def extract_issue_ids(text: str) -> list[int]:
+    """
+    Return the unique GitLab issue IIDs referenced via "Closes"/"Related to"
+    in a piece of text (order preserved).
+    """
+    if not text:
+        return []
+    ids: list[int] = []
+    for match in GITLAB_ISSUE_PATTERN.findall(text):
+        iid = int(match)
+        if iid not in ids:
+            ids.append(iid)
+    return ids
+
+
+def get_gitlab_issue(project: gitlab.v4.objects.Project, iid: int):
+    """
+    Fetch a GitLab issue by its IID.
+
+    On any failure (missing issue, no access, network error) the failure is
+    logged and ``None`` is returned so callers can skip the reference.
+    """
+    try:
+        return project.issues.get(iid)
+    except Exception as e:
+        print(f"⚠️ Could not fetch GitLab issue #{iid} in '{project.name}', skipping: {e}")
+        return None
+
+
 def get_merged_requests(project: gitlab.v4.objects.Project, branch: str) -> list:
     try:
         return project.mergerequests.list(state='merged', target_branch=branch, all=True)
@@ -85,12 +116,11 @@ def collect_mr_jiras(project: gitlab.v4.objects.Project, branch: str) -> list:
     in the MR title and its commit messages.
     """
     mr_jiras: list = []
+    issue_cache: dict[int, object] = {}
     for mr in get_merged_requests(project, branch):
         keys = extract_jira_keys(mr.title)
 
-        # todo: from mr, get gitlab issue link and get jira keys from this issue(title and description)
-        # Related to #31
-        # Closes #27
+        extract_jira_keys_from_mr(issue_cache, keys, mr, project)
 
         for commit in get_mr_commits(mr):
             message = getattr(commit, "message", "") or commit.title
@@ -107,6 +137,19 @@ def collect_mr_jiras(project: gitlab.v4.objects.Project, branch: str) -> list:
         })
 
     return mr_jiras
+
+
+def extract_jira_keys_from_mr(issue_cache: dict[int, object], keys: list[str], mr, project):
+    for iid in extract_issue_ids(getattr(mr, "description", "") or ""):
+        if iid not in issue_cache:
+            issue_cache[iid] = get_gitlab_issue(project, iid)
+        issue = issue_cache[iid]
+        if issue is None:
+            continue
+        issue_text = f"{getattr(issue, 'title', '') or ''}\n{getattr(issue, 'description', '') or ''}"
+        for key in extract_jira_keys(issue_text):
+            if key not in keys:
+                keys.append(key)
 
 
 def write_jiras_md(
