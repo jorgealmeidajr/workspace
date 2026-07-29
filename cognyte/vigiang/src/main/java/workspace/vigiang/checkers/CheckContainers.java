@@ -1,14 +1,10 @@
 package workspace.vigiang.checkers;
 
-import workspace.commons.service.DockerComposeService;
 import workspace.commons.service.SshService;
 import workspace.vigiang.model.LaboratoryVigiaNg;
 import workspace.vigiang.service.ContainersService;
 import workspace.vigiang.service.EnvironmentService;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,7 +25,6 @@ public class CheckContainers {
 
                 updateContainersFile(laboratoryPath, laboratoryVigiaNg);
                 updateDockerComposeFile(laboratoryPath, laboratoryVigiaNg);
-                updateEnvironmentFile(laboratoryPath);
                 updateFrontendScriptFiles(laboratoryPath, laboratoryVigiaNg);
 
                 System.out.println();
@@ -50,15 +45,6 @@ public class CheckContainers {
                 laboratoryVigiaNg.getSshPort());
 
         writeString(outputPath, result);
-    }
-
-    private static void updateEnvironmentFile(Path laboratoryPath) throws IOException {
-        Path dockerComposePath = Paths.get(laboratoryPath + "\\docker-compose.yml");
-        String dockerComposeContent = new String(Files.readAllBytes(dockerComposePath));
-
-        String environmentContent = DockerComposeService.parseDockerCompose(dockerComposeContent);
-        Path environmentPath = Paths.get(laboratoryPath + "\\docker-compose.env.txt");
-        Files.writeString(environmentPath, environmentContent, StandardCharsets.UTF_8);
     }
 
     private static void updateContainersFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
