@@ -14,7 +14,6 @@ import static workspace.commons.model.FileMatch.getContentMd;
 import static workspace.commons.model.FileMatch.getContentTxt;
 import static workspace.commons.service.FileContentService.getFileContentsByExtensions;
 import static workspace.commons.service.FileContentService.getMatches;
-import static workspace.commons.service.FileService.writeMd;
 import static workspace.commons.service.FileService.writeString;
 
 
@@ -28,7 +27,6 @@ public class UpdateFrontendProjects {
         updateFeatures(outputPath, frontendFileContents);
         updatePrivileges(outputPath, frontendFileContents);
         updateEnvironment(outputPath, frontendFileContents);
-        updateSetup(frontendPath, outputPath);
     }
 
     private static void updateConfigurations(Path versionPath, List<FileContent> frontendFileContents) throws IOException {
@@ -76,13 +74,6 @@ public class UpdateFrontendProjects {
 
         updateTxt(versionPath, matches, "environment");
         updateMd(versionPath, matches, "environment");
-    }
-
-    private static void updateSetup(Path frontendPath, Path versionPath) throws IOException {
-        List<FileContent> fileContents = getFileContentsByExtensions(
-                frontendPath, List.of("dockerfile"), List.of("node_modules", "json-server", "tests"));
-
-        writeMd(fileContents, Paths.get(versionPath + "\\setup.md"));
     }
 
     private static void updateTxt(Path versionPath, List<FileMatch> matches, String output) throws IOException {
