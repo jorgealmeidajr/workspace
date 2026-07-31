@@ -19,7 +19,7 @@ def main() -> None:
 
     answer = input("\nDo you want to update the laboratories? yes(y) or no(n)? ").strip().lower()
     if answer in {"y", "yes"}:
-        controller.execute()
+        controller.execute() # todo:...
 
     print("\nEnding script.")
 

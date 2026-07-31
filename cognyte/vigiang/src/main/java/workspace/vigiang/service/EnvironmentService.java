@@ -28,10 +28,10 @@ public class EnvironmentService {
     private static final String VIGIANG_DATABASES_PATH = VIGIANG_PATH_STR + "\\databases";
 
     public static List<String> getVersions() {
+        // todo: add 3.2
         return List.of(
             "2.2",
             "2.3",
-            "3.0",
             "3.1"
         );
     }
