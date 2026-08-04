@@ -17,7 +17,7 @@ public class CopyData {
         // the parameters bellow must match in file databases.json
         String SOURCE_DATABASE_NAME = "?";
         String TARGET_DATABASE_NAME = "?";
-        Integer TARGET_PROFILE_ID = 0; // this id is from database
+        int TARGET_PROFILE_ID = 0; // this id is from database
 
         try {
             DatabaseCredentialsVigiaNG sourceDb = getDatabaseCredentials(SOURCE_DATABASE_NAME);
@@ -36,9 +36,9 @@ public class CopyData {
 
     private static void copyPrivileges(VigiaNgDAO sourceDao, VigiaNgDAO targetDao) throws SQLException {
         List<String> sourcePrivileges = sourceDao.listPrivileges().stream()
-                .map(p -> p[1]).collect(Collectors.toList());
+                .map(p -> p[1]).toList();
         List<String> targetPrivileges = targetDao.listPrivileges().stream()
-                .map(p -> p[1]).collect(Collectors.toList());
+                .map(p -> p[1]).toList();
         List<String> missingPrivileges = new ArrayList<>();
 
         for (String sourcePrivilege : sourcePrivileges) {

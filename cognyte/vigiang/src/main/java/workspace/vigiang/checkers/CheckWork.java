@@ -22,8 +22,8 @@ public class CheckWork {
             String frontendPath = "$VIGIANG_ROOT/" + version + "/front-" + version;
             String backendPath = "$VIGIANG_ROOT/" + version + "/back-" + version;
 
-            String front = String.format("alias front%s='cd \"%s\"'", version, frontendPath);
-            String back = String.format("alias back%s='cd \"%s\"'", version, backendPath);
+            String front = String.format("alias front-%s='cd \"%s\"'", version, frontendPath);
+            String back = String.format("alias back-%s='cd \"%s\"'", version, backendPath);
 
             result += front + "\n";
             result += back + "\n\n";
