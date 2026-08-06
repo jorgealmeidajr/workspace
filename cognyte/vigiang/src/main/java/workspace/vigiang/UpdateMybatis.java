@@ -7,6 +7,7 @@ import workspace.commons.service.MappersService;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -88,13 +89,13 @@ public class UpdateMybatis {
     }
 
     private static void writeMappers(Path versionPath, MyBatisMappings myBatisMappings) throws IOException {
-        // todo: split in postgres and oracle
-        String resultTxt = myBatisMappings.getMappersTxt();
-        writeContentToFile(resultTxt, versionPath, "\\mappers.txt");
+        Path backPath = Paths.get(versionPath + "\\back");
 
-        // todo: split in postgres and oracle
-        String resultMd = myBatisMappings.getMappersMd();
-        writeContentToFile(resultMd, versionPath, "\\mappers.md");
+        String oracleMd = myBatisMappings.getMappersMd("oracle");
+        writeContentToFile(oracleMd, backPath, "\\mappers.oracle.md");
+
+        String postgresMd = myBatisMappings.getMappersMd("postgres");
+        writeContentToFile(postgresMd, backPath, "\\mappers.pg.md");
     }
 
     private static void writeContentToFile(String result, Path filePath, String fileName) throws IOException {

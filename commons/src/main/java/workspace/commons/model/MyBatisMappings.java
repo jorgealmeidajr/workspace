@@ -119,54 +119,7 @@ public class MyBatisMappings {
         return projectKeys;
     }
 
-    public String getMappersTxt() {
-        if (mappings.isEmpty()) return "";
-        String resultTxt = "";
-
-        for (String projectKey : getProjectsKeys()) {
-            Project project = projects.get(projectKey);
-
-            Map<String, List<XmlCallMapping>> callsByNamespace = project.getAllCalls().stream()
-                .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
-            List<String> byNamespaceKeys = new ArrayList<>(callsByNamespace.keySet());
-            Collections.sort(byNamespaceKeys);
-
-            for (String namespace : byNamespaceKeys) {
-                List<XmlCallMapping> result = callsByNamespace.get(namespace);
-                result.sort(Comparator.comparing(XmlCallMapping::getId)
-                    .thenComparing(XmlCallMapping::getDatabase));
-
-                Map<String, List<XmlCallMapping>> byId = result.stream()
-                    .collect(Collectors.groupingBy(XmlCallMapping::getId));
-
-                resultTxt += namespace + ":\n";
-
-                String currentId = null;
-                for (XmlCallMapping xmlCallMapping : result) {
-                    if (currentId == null || !currentId.equals(xmlCallMapping.getId())) {
-                        currentId = xmlCallMapping.getId();
-                        resultTxt += "  " + currentId + "():\n";
-
-                        var byIdList = byId.get(currentId);
-
-                        for (String database : databases) {
-                            var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
-                            if (call != null) {
-                                resultTxt += "    " + database + ": " + call.getFunctionCall() + "\n";
-                            } else {
-                                resultTxt += "    " + database + ": _UNDEFINED_\n";
-                            }
-                        }
-                    }
-                }
-                resultTxt += "\n";
-            }
-        }
-
-        return resultTxt.trim() + "\n";
-    }
-
-    public String getMappersMd() {
+    public String getMappersMd(String database) {
         if (mappings.isEmpty()) return "";
         String resultMd = "";
 
@@ -174,20 +127,18 @@ public class MyBatisMappings {
             Project project = projects.get(projectKey);
 
             Map<String, List<XmlCallMapping>> byNamespace = project.getAllCalls().stream()
+                .filter(call -> database.equals(call.getDatabase()))
                 .collect(Collectors.groupingBy(XmlCallMapping::getNamespace));
             List<String> byNamespaceKeys = new ArrayList<>(byNamespace.keySet());
             Collections.sort(byNamespaceKeys);
 
             var resultsByNamespace = project.getAllResultMaps().stream()
+                .filter(resultMap -> database.equals(resultMap.getDatabase()))
                 .collect(Collectors.groupingBy(XmlResultMap::getNamespace));
 
             for (String key : byNamespaceKeys) {
                 List<XmlCallMapping> callsByNamespace = byNamespace.get(key);
-                callsByNamespace.sort(Comparator.comparing(XmlCallMapping::getId)
-                    .thenComparing(XmlCallMapping::getDatabase));
-
-                Map<String, List<XmlCallMapping>> callsById = callsByNamespace.stream()
-                    .collect(Collectors.groupingBy(XmlCallMapping::getId));
+                callsByNamespace.sort(Comparator.comparing(XmlCallMapping::getId));
 
                 resultMd += "# " + key + ":\n";
                 resultMd += "```\n";
@@ -196,12 +147,7 @@ public class MyBatisMappings {
                     if (currentId == null || !currentId.equals(xmlCallMapping.getId())) {
                         currentId = xmlCallMapping.getId();
                         resultMd += currentId + "():\n";
-
-                        var byIdList = callsById.get(currentId);
-
-                        for (String database : databases) {
-                            resultMd += getCallMd(xmlCallMapping, database, byIdList);
-                        }
+                        resultMd += getCallMd(xmlCallMapping);
                     }
                 }
 
@@ -213,21 +159,14 @@ public class MyBatisMappings {
         return resultMd.trim() + "\n";
     }
 
-    static String getCallMd(XmlCallMapping xmlCallMapping, String database, List<XmlCallMapping> byIdList) {
-        var call = byIdList.stream().filter(r -> database.equals(r.getDatabase())).findFirst().orElse(null);
+    static String getCallMd(XmlCallMapping xmlCallMapping) {
         String result = "";
-
-        if (call != null) {
-            result += "  " + database + ": " + call.getFunctionCall() + "\n";
-            if (!xmlCallMapping.getFunctionParams().isEmpty()) {
-                result += "    params:\n";
-                for (String param : xmlCallMapping.getFunctionParams()) {
-                    result += "      - " + param + "\n";
-                }
-                result += "\n";
+        result += "  " + xmlCallMapping.getFunctionCall() + "\n";
+        if (!xmlCallMapping.getFunctionParams().isEmpty()) {
+            result += "    params:\n";
+            for (String param : xmlCallMapping.getFunctionParams()) {
+                result += "      - " + param + "\n";
             }
-        } else {
-            result += "  " + database + ": _UNDEFINED_\n";
             result += "\n";
         }
         return result;
@@ -244,7 +183,7 @@ public class MyBatisMappings {
             result += "result_maps:\n".toUpperCase();
 
             for (XmlResultMap xmlResultMap : resultMapsForNamespace) {
-                result += "  " + xmlResultMap.getDatabase() + ": " + xmlResultMap.getId() + "\n";
+                result += "  " + xmlResultMap.getId() + "\n";
                 for (XmlResultMap.XmlResult xmlResult : xmlResultMap.getResults()) {
                     result += "    - property: " + xmlResult.getProperty() + ", column: " + xmlResult.getColumn() + "\n";
                 }

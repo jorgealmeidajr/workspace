@@ -933,292 +933,6 @@ public class MyBatisMappingsTest {
     }
 
     @Nested
-    class GetMappersTxt {
-        @Test
-        void shouldReturnEmptyStringForEmptyMappings() {
-            List<XmlMyBatisMapping> mappings = new ArrayList<>();
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            assertEquals("", result);
-        }
-
-        @Test
-        void shouldReturnSingleCallMapping() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "call1", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: call1
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldSortNamespacesByAlphabeticalOrder() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespaceZ", "oracle",
-                    List.of(new XmlCallMapping("namespaceZ", "call1", "oracle", "SELECT * FROM Z", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespaceA", "oracle",
-                    List.of(new XmlCallMapping("namespaceA", "call1", "oracle", "SELECT * FROM A", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespaceA:
-                  call1():
-                    oracle: SELECT * FROM A
-                
-                namespaceZ:
-                  call1():
-                    oracle: SELECT * FROM Z
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldSortCallIdsByAlphabeticalOrder() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(
-                        new XmlCallMapping("namespace1", "call2", "oracle", "SELECT * FROM table2", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call1", "oracle", "SELECT * FROM table1", new ArrayList<>())
-                    ),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: SELECT * FROM table1
-                  call2():
-                    oracle: SELECT * FROM table2
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldHandleMultipleDatabases() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM ORACLE", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(new XmlCallMapping("namespace1", "call1", "postgres", "SELECT FROM POSTGRES", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: SELECT FROM ORACLE
-                    postgres: SELECT FROM POSTGRES
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldShowUndefinedForMissingDatabaseMapping() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM ORACLE", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: SELECT FROM ORACLE
-                    postgres: _UNDEFINED_
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldHandleMultipleProjectsInSortedOrder() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("projectB", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM B", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("projectA", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM A", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: SELECT FROM A
-                
-                namespace1:
-                  call1():
-                    oracle: SELECT FROM B
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldHandleMultipleCallsPerNamespace() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(
-                        new XmlCallMapping("namespace1", "call1", "oracle", "SELECT 1", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call2", "oracle", "SELECT 2", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call3", "oracle", "SELECT 3", new ArrayList<>())
-                    ),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: SELECT 1
-                  call2():
-                    oracle: SELECT 2
-                  call3():
-                    oracle: SELECT 3
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldHandleCallsWithDifferentDatabasesPerNamespace() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(
-                        new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM ORACLE1", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call2", "oracle", "SELECT FROM ORACLE2", new ArrayList<>())
-                    ),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(
-                        new XmlCallMapping("namespace1", "call1", "postgres", "SELECT FROM POSTGRES1", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call2", "postgres", "SELECT FROM POSTGRES2", new ArrayList<>())
-                    ),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    oracle: SELECT FROM ORACLE1
-                    postgres: SELECT FROM POSTGRES1
-                  call2():
-                    oracle: SELECT FROM ORACLE2
-                    postgres: SELECT FROM POSTGRES2
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldHandleComplexMultiProjectScenario() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("projectA", "namespaceX", "oracle",
-                    List.of(new XmlCallMapping("namespaceX", "methodA", "oracle", "SELECT A_ORACLE", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("projectA", "namespaceY", "postgres",
-                    List.of(new XmlCallMapping("namespaceY", "methodB", "postgres", "SELECT A_POSTGRES", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("projectB", "namespaceX", "oracle",
-                    List.of(new XmlCallMapping("namespaceX", "methodA", "oracle", "SELECT B_ORACLE", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespaceX:
-                  methodA():
-                    oracle: SELECT A_ORACLE
-                    postgres: _UNDEFINED_
-
-                namespaceY:
-                  methodB():
-                    oracle: _UNDEFINED_
-                    postgres: SELECT A_POSTGRES
-
-                namespaceX:
-                  methodA():
-                    oracle: SELECT B_ORACLE
-                    postgres: _UNDEFINED_
-                """;
-
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldSortDatabasesConsistently() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(new XmlCallMapping("namespace1", "call1", "postgres", "POSTGRES_QUERY", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "mysql",
-                    List.of(new XmlCallMapping("namespace1", "call1", "mysql", "MYSQL_QUERY", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "ORACLE_QUERY", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersTxt();
-
-            String expected = """
-                namespace1:
-                  call1():
-                    mysql: MYSQL_QUERY
-                    oracle: ORACLE_QUERY
-                    postgres: POSTGRES_QUERY
-                """;
-
-            assertEquals(expected, result);
-        }
-    }
-
-    @Nested
     class GetResultMaps {
         @Test
         void shouldReturnEmptyStringWhenResultMapsIsNull() {
@@ -1253,7 +967,7 @@ public class MyBatisMappingsTest {
             String result = MyBatisMappings.getResultMaps("namespace1", resultsByNamespace);
 
             assertTrue(result.contains("RESULT_MAPS:"));
-            assertTrue(result.contains("oracle: resultMap1"));
+            assertTrue(result.contains("resultMap1"));
             assertTrue(result.contains("property: property1, column: column1"));
         }
 
@@ -1294,8 +1008,8 @@ public class MyBatisMappingsTest {
 
             String result = MyBatisMappings.getResultMaps("namespace1", resultsByNamespace);
 
-            assertTrue(result.contains("oracle: resultMap1"));
-            assertTrue(result.contains("postgres: resultMap2"));
+            assertTrue(result.contains("resultMap1"));
+            assertTrue(result.contains("resultMap2"));
         }
 
         @Test
@@ -1331,7 +1045,7 @@ public class MyBatisMappingsTest {
             String result = MyBatisMappings.getResultMaps("namespace1", resultsByNamespace);
 
             assertTrue(result.contains("RESULT_MAPS:"));
-            assertTrue(result.contains("oracle: null"));
+            assertTrue(result.contains("null"));
         }
 
         @Test
@@ -1368,7 +1082,7 @@ public class MyBatisMappingsTest {
 
             String expected = """
                 RESULT_MAPS:
-                  oracle: userResultMap
+                  userResultMap
                     - property: userId, column: user_id
                     - property: userName, column: user_name
 
@@ -1397,7 +1111,7 @@ public class MyBatisMappingsTest {
             String result = MyBatisMappings.getResultMaps("namespace1", resultsByNamespace);
 
             assertTrue(result.contains("RESULT_MAPS:"));
-            assertTrue(result.contains("oracle: resultMap1"));
+            assertTrue(result.contains("resultMap1"));
             assertTrue(result.endsWith("\n"));
         }
     }
@@ -1405,44 +1119,30 @@ public class MyBatisMappingsTest {
     @Nested
     class GetCallMd {
         @Test
-        void shouldReturnCallWithDatabaseAndFunctionWhenCallExists() {
+        void shouldReturnFunctionCallWhenCallExists() {
             XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
-            List<XmlCallMapping> byIdList = List.of(call);
 
-            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+            String result = MyBatisMappings.getCallMd(call);
 
-            String expected = "  oracle: SELECT * FROM table\n";
+            String expected = "  SELECT * FROM table\n";
             assertEquals(expected, result);
         }
 
         @Test
-        void shouldReturnUndefinedWhenCallDoesNotExist() {
-            XmlCallMapping xmlCallMapping = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
-            List<XmlCallMapping> byIdList = new ArrayList<>();
+        void shouldNotIncludeDatabasePrefix() {
+            XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
 
-            String result = MyBatisMappings.getCallMd(xmlCallMapping, "oracle", byIdList);
+            String result = MyBatisMappings.getCallMd(call);
 
-            String expected = "  oracle: _UNDEFINED_\n\n";
-            assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldReturnUndefinedWhenDatabaseNotInList() {
-            XmlCallMapping oracleCall = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM oracle_table", new ArrayList<>());
-            List<XmlCallMapping> byIdList = List.of(oracleCall);
-
-            String result = MyBatisMappings.getCallMd(oracleCall, "postgres", byIdList);
-
-            assertTrue(result.contains("postgres: _UNDEFINED_"));
+            assertFalse(result.contains("oracle:"));
         }
 
         @Test
         void shouldIncludeParamsWhenFunctionParamsArePresent() {
             List<String> params = List.of("param1", "param2", "param3");
             XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table WHERE id = ?", params);
-            List<XmlCallMapping> byIdList = List.of(call);
 
-            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+            String result = MyBatisMappings.getCallMd(call);
 
             assertTrue(result.contains("params:"));
             assertTrue(result.contains("- param1"));
@@ -1453,9 +1153,8 @@ public class MyBatisMappingsTest {
         @Test
         void shouldNotIncludeParamsWhenFunctionParamsAreEmpty() {
             XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM table", new ArrayList<>());
-            List<XmlCallMapping> byIdList = List.of(call);
 
-            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+            String result = MyBatisMappings.getCallMd(call);
 
             assertFalse(result.contains("params:"));
         }
@@ -1464,30 +1163,15 @@ public class MyBatisMappingsTest {
         void shouldFormatParamsCorrectly() {
             List<String> params = List.of("userId", "status");
             XmlCallMapping call = new XmlCallMapping("namespace1", "id1", "oracle", "SELECT * FROM users", params);
-            List<XmlCallMapping> byIdList = List.of(call);
 
-            String result = MyBatisMappings.getCallMd(call, "oracle", byIdList);
+            String result = MyBatisMappings.getCallMd(call);
 
-            String expected = "  oracle: SELECT * FROM users\n" +
+            String expected = "  SELECT * FROM users\n" +
                             "    params:\n" +
                             "      - userId\n" +
                             "      - status\n" +
                             "\n";
             assertEquals(expected, result);
-        }
-
-        @Test
-        void shouldFindCorrectCallFromMultipleCalls() {
-            XmlCallMapping oracleCall = new XmlCallMapping("namespace1", "id1", "oracle", "CALL oracle_func()", List.of());
-            XmlCallMapping postgresCall = new XmlCallMapping("namespace1", "id1", "postgres", "CALL postgres_func()", List.of());
-            XmlCallMapping mysqlCall = new XmlCallMapping("namespace1", "id1", "mysql", "CALL mysql_func()", List.of());
-            List<XmlCallMapping> byIdList = List.of(oracleCall, postgresCall, mysqlCall);
-
-            String result = MyBatisMappings.getCallMd(oracleCall, "postgres", byIdList);
-
-            assertTrue(result.contains("postgres: CALL postgres_func()"));
-            assertFalse(result.contains("oracle_func"));
-            assertFalse(result.contains("mysql_func"));
         }
     }
 
@@ -1498,7 +1182,7 @@ public class MyBatisMappingsTest {
             List<XmlMyBatisMapping> mappings = new ArrayList<>();
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertEquals("", result);
         }
@@ -1512,12 +1196,13 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.contains("# namespace1:"));
             assertTrue(result.contains("```"));
             assertTrue(result.contains("call1():"));
-            assertTrue(result.contains("oracle: SELECT * FROM table"));
+            assertTrue(result.contains("SELECT * FROM table"));
+            assertFalse(result.contains("oracle:"));
         }
 
         @Test
@@ -1529,7 +1214,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.startsWith("# namespace1:"));
         }
@@ -1543,7 +1228,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.contains("```\n"));
             assertTrue(result.contains("\n```"));
@@ -1561,7 +1246,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             int indexA = result.indexOf("# namespaceA:");
             int indexZ = result.indexOf("# namespaceZ:");
@@ -1583,7 +1268,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             int indexCall1 = result.indexOf("call1():");
             int indexCall2 = result.indexOf("call2():");
@@ -1594,7 +1279,7 @@ public class MyBatisMappingsTest {
         }
 
         @Test
-        void shouldHandleMultipleDatabases() {
+        void shouldRenderOnlyRequestedDatabase() {
             List<XmlMyBatisMapping> mappings = List.of(
                 new XmlMyBatisMapping("project1", "namespace1", "oracle",
                     List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM ORACLE", new ArrayList<>())),
@@ -1605,27 +1290,12 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
-            assertTrue(result.contains("oracle: SELECT FROM ORACLE"));
-            assertTrue(result.contains("postgres: SELECT FROM POSTGRES"));
-        }
-
-        @Test
-        void shouldShowUndefinedForMissingDatabaseMapping() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM ORACLE", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersMd();
-
-            assertTrue(result.contains("postgres: _UNDEFINED_"));
+            assertTrue(result.contains("SELECT FROM ORACLE"));
+            assertFalse(result.contains("SELECT FROM POSTGRES"));
+            assertFalse(result.contains("oracle:"));
+            assertFalse(result.contains("postgres:"));
         }
 
         @Test
@@ -1640,7 +1310,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             int indexA = result.indexOf("SELECT FROM A");
             int indexB = result.indexOf("SELECT FROM B");
@@ -1663,7 +1333,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.contains("call1():"));
             assertTrue(result.contains("call2():"));
@@ -1671,34 +1341,6 @@ public class MyBatisMappingsTest {
             assertTrue(result.contains("SELECT 1"));
             assertTrue(result.contains("SELECT 2"));
             assertTrue(result.contains("SELECT 3"));
-        }
-
-        @Test
-        void shouldHandleCallsWithDifferentDatabasesPerNamespace() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(
-                        new XmlCallMapping("namespace1", "call1", "oracle", "SELECT FROM ORACLE1", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call2", "oracle", "SELECT FROM ORACLE2", new ArrayList<>())
-                    ),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(
-                        new XmlCallMapping("namespace1", "call1", "postgres", "SELECT FROM POSTGRES1", new ArrayList<>()),
-                        new XmlCallMapping("namespace1", "call2", "postgres", "SELECT FROM POSTGRES2", new ArrayList<>())
-                    ),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersMd();
-
-            assertTrue(result.contains("call1():"));
-            assertTrue(result.contains("call2():"));
-            assertTrue(result.contains("oracle: SELECT FROM ORACLE1"));
-            assertTrue(result.contains("oracle: SELECT FROM ORACLE2"));
-            assertTrue(result.contains("postgres: SELECT FROM POSTGRES1"));
-            assertTrue(result.contains("postgres: SELECT FROM POSTGRES2"));
         }
 
         @Test
@@ -1716,47 +1358,19 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.contains("# namespaceX:"));
-            assertTrue(result.contains("# namespaceY:"));
+            assertFalse(result.contains("# namespaceY:"));
             assertTrue(result.contains("methodA():"));
-            assertTrue(result.contains("methodB():"));
+            assertFalse(result.contains("methodB():"));
             assertTrue(result.contains("SELECT A_ORACLE"));
-            assertTrue(result.contains("SELECT A_POSTGRES"));
+            assertFalse(result.contains("SELECT A_POSTGRES"));
             assertTrue(result.contains("SELECT B_ORACLE"));
         }
 
         @Test
-        void shouldSortDatabasesConsistently() {
-            List<XmlMyBatisMapping> mappings = List.of(
-                new XmlMyBatisMapping("project1", "namespace1", "postgres",
-                    List.of(new XmlCallMapping("namespace1", "call1", "postgres", "POSTGRES_QUERY", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "mysql",
-                    List.of(new XmlCallMapping("namespace1", "call1", "mysql", "MYSQL_QUERY", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>()),
-                new XmlMyBatisMapping("project1", "namespace1", "oracle",
-                    List.of(new XmlCallMapping("namespace1", "call1", "oracle", "ORACLE_QUERY", new ArrayList<>())),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
-            );
-            MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
-
-            String result = myBatisMappings.getMappersMd();
-
-            int indexMysql = result.indexOf("mysql: MYSQL_QUERY");
-            int indexOracle = result.indexOf("oracle: ORACLE_QUERY");
-            int indexPostgres = result.indexOf("postgres: POSTGRES_QUERY");
-
-            assertTrue(indexMysql > -1);
-            assertTrue(indexOracle > -1);
-            assertTrue(indexPostgres > -1);
-            assertTrue(indexMysql < indexOracle, "mysql should appear before oracle");
-            assertTrue(indexOracle < indexPostgres, "oracle should appear before postgres");
-        }
-
-        @Test
-        void shouldIncludeIndentationForDatabaseCalls() {
+        void shouldIncludeIndentationForCalls() {
             List<XmlMyBatisMapping> mappings = List.of(
                 new XmlMyBatisMapping("project1", "namespace1", "oracle",
                     List.of(new XmlCallMapping("namespace1", "call1", "oracle", "SELECT * FROM table", new ArrayList<>())),
@@ -1764,9 +1378,9 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
-            assertTrue(result.contains("  oracle:"), "Database calls should be indented");
+            assertTrue(result.contains("  SELECT * FROM table"), "Calls should be indented");
         }
 
         @Test
@@ -1778,7 +1392,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.endsWith("\n"));
         }
@@ -1793,7 +1407,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.contains("params:"));
             assertTrue(result.contains("- param1"));
@@ -1809,7 +1423,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertFalse(result.contains("params:"));
         }
@@ -1828,7 +1442,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             assertTrue(result.contains("RESULT_MAPS:") || result.contains("result_maps:"));
             assertTrue(result.contains("resultMapId"));
@@ -1845,7 +1459,7 @@ public class MyBatisMappingsTest {
             );
             MyBatisMappings myBatisMappings = new MyBatisMappings(mappings);
 
-            String result = myBatisMappings.getMappersMd();
+            String result = myBatisMappings.getMappersMd("oracle");
 
             int openingCount = 0;
             int lastIndex = 0;
