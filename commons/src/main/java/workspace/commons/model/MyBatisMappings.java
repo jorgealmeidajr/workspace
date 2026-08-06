@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 public class MyBatisMappings {
 
     private final Map<String, Project> projects;
-    private final List<String> databases;
     private final List<XmlMyBatisMapping> mappings;
 
     record Project (String name, List<XmlMyBatisMapping> mappings) {
@@ -26,12 +25,6 @@ public class MyBatisMappings {
     public MyBatisMappings(List<XmlMyBatisMapping> mappings) {
         validateUniqueMappings(mappings);
         this.mappings = mappings;
-
-        this.databases = mappings.stream()
-            .map(XmlMyBatisMapping::database)
-            .distinct()
-            .sorted()
-            .toList();
 
         this.projects = new HashMap<>();
 
@@ -103,7 +96,7 @@ public class MyBatisMappings {
 
     static void validateCalls(List<XmlCallMapping> allCalls) {
         for (XmlCallMapping xmlCallMapping : allCalls) {
-            if ("".equals(xmlCallMapping.getFunctionCall()) || "".equals(xmlCallMapping.getId().trim())) {
+            if ("".equals(xmlCallMapping.getFunctionCall()) || xmlCallMapping.getId().trim().isEmpty()) {
                 throw new IllegalArgumentException(
                     "Function call or ID cannot be empty: namespace=" + xmlCallMapping.getNamespace() +
                     ", id=" + xmlCallMapping.getId() +
