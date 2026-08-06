@@ -60,11 +60,29 @@ public class CheckContainers {
     }
 
     private static void updateFrontendScriptFiles(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
-        updateScriptFile(environmentPath, laboratoryVigiaNg, "webviewer_docker_run.sh");
-        updateScriptFile(environmentPath, laboratoryVigiaNg, "workflow_docker_run.sh");
+        updateScriptFile(environmentPath, laboratoryVigiaNg, List.of("webviewer_docker_run.sh", "vigia_ng_webviewer_docker_run.sh"));
+        updateScriptFile(environmentPath, laboratoryVigiaNg, List.of("workflow_docker_run.sh", "vigia_ng_workflow_docker_run.sh"));
     }
 
-    private static void updateScriptFile(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg, String script) throws Exception {
+    private static void updateScriptFile(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg, List<String> scripts) throws Exception {
+        boolean anyFound = false;
+
+        for (String script : scripts) {
+            String result = readScriptFile(laboratoryVigiaNg, script);
+
+            if (!result.isEmpty()) {
+                Path outputPath = Paths.get(environmentPath + "\\" + script);
+                writeString(outputPath, result);
+                anyFound = true;
+            }
+        }
+
+        if (!anyFound) {
+            System.out.println("WARNING: none of [" + String.join(", ", scripts) + "] were found on " + laboratoryVigiaNg.getName());
+        }
+    }
+
+    private static String readScriptFile(LaboratoryVigiaNg laboratoryVigiaNg, String script) throws Exception {
         var command = "cat /opt/vigiang/scripts/" + script;
         String sshResponse = SshService.execute(
                 laboratoryVigiaNg.getSshUsername(),
@@ -73,11 +91,7 @@ public class CheckContainers {
                 laboratoryVigiaNg.getSshPort(),
                 command);
 
-        Path outputPath = Paths.get(environmentPath + "\\" + script);
-
-        String result = sshResponse.trim();
-
-        writeString(outputPath, result);
+        return sshResponse.trim();
     }
 
     private static String listContainers(String username, String password, String host, int port) throws Exception {
