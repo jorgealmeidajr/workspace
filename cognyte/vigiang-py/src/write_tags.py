@@ -1,3 +1,4 @@
+import argparse
 import urllib3
 from pathlib import Path
 from dotenv import load_dotenv
@@ -43,11 +44,22 @@ def write_tags_md(
 
 
 
-def main() -> None:
+def main(initial_version: str | None = None) -> None:
     print("Starting to write the TAGS...")
 
     tasks_folder = Path(get_vigia_ng_path()) / "tasks"
-    branches = get_current_branches()
+
+    if initial_version is None:
+        branches = get_current_branches()
+    else:
+        branch = f"version-{initial_version}.0"
+        valid_branches = get_current_branches()
+        if branch not in valid_branches:
+            valid_versions = [b.replace("version-", "").rsplit(".", 1)[0] for b in valid_branches]
+            raise ValueError(
+                f"Invalid version '{initial_version}'. Valid versions are: {', '.join(valid_versions)}."
+            )
+        branches = [branch]
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -79,6 +91,14 @@ def main() -> None:
     print("\nEnding script.")
 
 
+# usage example: python src/write_tags.py 2.3
 if __name__ == "__main__":
-    main()
-
+    parser = argparse.ArgumentParser(description="Write tags markdown files per branch.")
+    parser.add_argument(
+        "version",
+        nargs="?",
+        default=None,
+        help="Optional initial version (e.g. '2.3'). If omitted, all current branches are processed.",
+    )
+    args = parser.parse_args()
+    main(args.version)

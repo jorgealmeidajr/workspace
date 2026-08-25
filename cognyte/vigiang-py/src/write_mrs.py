@@ -112,7 +112,7 @@ def write_mrs(branch: str, project_names: list[str], gl: Gitlab, md_path: Path, 
     write_branch_md(project_mrs, md_path)
 
 
-# exemple: python src/write_mrs.py 2.3
+# usage example: python src/write_mrs.py 2.3
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Write merged requests markdown files per branch.")
     parser.add_argument(
