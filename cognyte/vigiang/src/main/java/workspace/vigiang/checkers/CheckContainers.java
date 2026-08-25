@@ -1,5 +1,7 @@
 package workspace.vigiang.checkers;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.service.SshService;
 import workspace.vigiang.model.LaboratoryRef;
@@ -58,7 +60,7 @@ public class CheckContainers {
             List<String[]> frontendContainers = containers.stream()
                     .filter(row -> frontendTags.stream().anyMatch(row[0]::contains))
                     .toList();
-            
+
             checkFrontendVersions(laboratory, frontendContainers);
 
             if (frontendContainers.isEmpty()) continue;
@@ -80,8 +82,14 @@ public class CheckContainers {
                 .toList();
 
         Path outputPath = Paths.get(vigiaNgPath + "\\version_laboratories.json");
+
+        DefaultIndenter indenter = new DefaultIndenter("  ", "\n");
+        DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+                .withObjectIndenter(indenter)
+                .withArrayIndenter(indenter);
+
         String json = new ObjectMapper()
-                .writerWithDefaultPrettyPrinter()
+                .writer(prettyPrinter)
                 .writeValueAsString(versionLaboratories);
         writeString(outputPath, json);
     }
