@@ -1,5 +1,6 @@
 import os
 import re
+import argparse
 import urllib3
 import gitlab
 from pathlib import Path
@@ -200,11 +201,23 @@ def collect_jiras(branch: str, project_names: list[str], gl: Gitlab, label: str)
     return project_data
 
 
-def main() -> None:
+# usage example: python src/write_jiras.py 2.3
+def main(initial_version: str | None = None) -> None:
     print("Starting to write the JIRAS...")
 
     tasks_folder = Path(get_vigia_ng_path()) / "tasks"
-    branches = get_current_branches()
+
+    if initial_version is None:
+        branches = get_current_branches()
+    else:
+        branch = f"version-{initial_version}.0"
+        valid_branches = get_current_branches()
+        if branch not in valid_branches:
+            valid_versions = [b.replace("version-", "").rsplit(".", 1)[0] for b in valid_branches]
+            raise ValueError(
+                f"Invalid version '{initial_version}'. Valid versions are: {', '.join(valid_versions)}."
+            )
+        branches = [branch]
 
     load_dotenv()
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -231,5 +244,13 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Write Jira references markdown files per branch.")
+    parser.add_argument(
+        "version",
+        nargs="?",
+        default=None,
+        help="Optional initial version (e.g. '2.3'). If omitted, all current branches are processed.",
+    )
+    args = parser.parse_args()
+    main(args.version)
 
