@@ -35,7 +35,9 @@ public class ContainersService {
                 "system-service",
                 "tracking-service",
                 "voucher-service",
-                "warrant-service"
+                "warrant-service",
+                "websocket-service",
+                "wms-service"
         );
 
         var tagGroups = getTagGroups(data, frontendTags, cloudControlTags, cloudVigiangTags);
