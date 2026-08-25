@@ -7,8 +7,12 @@ import java.util.List;
 
 public class ContainersService {
 
+    public static List<String> getFrontendTags() {
+        return List.of("webviewer", "workflow");
+    }
+
     public static String getContainersContent(List<String[]> data) {
-        List<String> frontendTags = List.of("webviewer", "workflow");
+        List<String> frontendTags = getFrontendTags();
 
         List<String> cloudControlTags = List.of(
                 "auth-service",

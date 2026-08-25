@@ -1,7 +1,10 @@
 package workspace.vigiang.checkers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.service.SshService;
+import workspace.vigiang.model.LaboratoryRef;
 import workspace.vigiang.model.LaboratoryVigiaNg;
+import workspace.vigiang.model.VersionLaboratories;
 import workspace.vigiang.service.ContainersService;
 import workspace.vigiang.service.EnvironmentService;
 
@@ -10,7 +13,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static workspace.commons.service.FileService.writeString;
 
@@ -29,10 +34,77 @@ public class CheckContainers {
 
                 System.out.println();
             }
+
+            updateVersionLaboratoriesFile(EnvironmentService.getVigiaNgPath());
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("\n## END checking all containers.");
+    }
+
+    private static void updateVersionLaboratoriesFile(Path vigiaNgPath) throws Exception {
+        List<String> frontendTags = ContainersService.getFrontendTags();
+
+        Map<String, List<LaboratoryRef>> versionToLaboratories = new LinkedHashMap<>();
+
+        List<LaboratoryVigiaNg> laboratories = EnvironmentService.getLaboratoriesVigiaNg();
+        for (LaboratoryVigiaNg laboratory : laboratories) {
+            List<String[]> containers = listDockerContainers(
+                laboratory.getSshUsername(),
+                laboratory.getSshPassword(),
+                laboratory.getSshHost(),
+                laboratory.getSshPort());
+
+            List<String[]> frontendContainers = containers.stream()
+                    .filter(row -> frontendTags.stream().anyMatch(row[0]::contains))
+                    .toList();
+            
+            checkFrontendVersions(laboratory, frontendContainers);
+
+            if (frontendContainers.isEmpty()) continue;
+
+            String version = getMajorMinorVersion(frontendContainers.get(0)[1]);
+            versionToLaboratories
+                    .computeIfAbsent(version, k -> new ArrayList<>())
+                    .add(new LaboratoryRef(laboratory.getName(), laboratory.getCarrier(), laboratory.getSshHost()));
+        }
+
+        List<VersionLaboratories> versionLaboratories = versionToLaboratories.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    List<LaboratoryRef> sortedLaboratories = entry.getValue().stream()
+                            .sorted(Comparator.comparing(LaboratoryRef::getName))
+                            .toList();
+                    return new VersionLaboratories(entry.getKey(), sortedLaboratories);
+                })
+                .toList();
+
+        Path outputPath = Paths.get(vigiaNgPath + "\\version_laboratories.json");
+        String json = new ObjectMapper()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(versionLaboratories);
+        writeString(outputPath, json);
+    }
+
+    private static void checkFrontendVersions(LaboratoryVigiaNg laboratory, List<String[]> frontendContainers) {
+        // Only compare when there is more than one front-end container
+        if (frontendContainers.size() <= 1) return;
+
+        List<String> majorMinorVersions = frontendContainers.stream()
+                .map(row -> getMajorMinorVersion(row[1]))
+                .distinct()
+                .toList();
+
+        if (majorMinorVersions.size() > 1) {
+            System.out.println("WARNING: front-end container versions do not match on "
+                + laboratory.getName() + " (" + String.join(", ", majorMinorVersions) + ")");
+        }
+    }
+
+    private static String getMajorMinorVersion(String version) {
+        String[] parts = version.split("\\.");
+        if (parts.length < 2) return version;
+        return parts[0] + "." + parts[1];
     }
 
     private static void updateDockerComposeFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
