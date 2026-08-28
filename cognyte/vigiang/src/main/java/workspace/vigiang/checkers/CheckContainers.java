@@ -49,6 +49,10 @@ public class CheckContainers {
 
         Map<String, List<LaboratoryRef>> versionToLaboratories = new LinkedHashMap<>();
 
+        List<String> versions = new ArrayList<>(EnvironmentService.getVersions());
+        versions.add("3.2"); // todo: remove this when 3.2 is officially released
+        versions.sort(Comparator.naturalOrder());
+
         List<LaboratoryVigiaNg> laboratories = EnvironmentService.getLaboratoriesVigiaNg();
         for (LaboratoryVigiaNg laboratory : laboratories) {
             List<String[]> containers = listDockerContainers(
@@ -66,6 +70,11 @@ public class CheckContainers {
             if (frontendContainers.isEmpty()) continue;
 
             String version = getMajorMinorVersion(frontendContainers.get(0)[1]);
+
+            if (!versions.contains(version)) {
+                continue;
+            }
+
             versionToLaboratories
                     .computeIfAbsent(version, k -> new ArrayList<>())
                     .add(new LaboratoryRef(laboratory.getName(), laboratory.getCarrier(), laboratory.getSshHost()));
