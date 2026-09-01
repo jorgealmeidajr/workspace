@@ -17,12 +17,13 @@ from shared import connect_gitlab, get_project, write_content, get_merged_reques
 # false positives from fragments like "77_fix".
 JIRA_PREFIXES = ("NISR", "VRP")
 
-# Matches both hyphen and underscore variants, case-insensitively, e.g.
-# "VRP-2242", "vrp-2242" and "vrp_2242_unifique" (trailing "_unifique" ignored).
-# A lookbehind (instead of \b) allows a leading underscore, as in branch names
-# like "77_fix_vrp_2242_unifique", while still rejecting letter/digit prefixes.
+# Matches hyphen, underscore and space variants, case-insensitively, e.g.
+# "VRP-2242", "vrp-2242", "vrp_2242_unifique" (trailing "_unifique" ignored) and
+# "NISR 15" / "NISR  15". A lookbehind (instead of \b) allows a leading
+# underscore, as in branch names like "77_fix_vrp_2242_unifique", while still
+# rejecting letter/digit prefixes.
 JIRA_KEY_PATTERN = re.compile(
-    rf"(?<![A-Za-z0-9])(?:{'|'.join(JIRA_PREFIXES)})[-_]\d+",
+    rf"(?<![A-Za-z0-9])(?:{'|'.join(JIRA_PREFIXES)})[-_ ]+\d+",
     re.IGNORECASE,
 )
 
@@ -70,14 +71,14 @@ def get_jira_issue(client: JIRA, key: str) -> dict | None:
 def extract_jira_keys(text: str) -> list[str]:
     """Return the unique Jira keys found in a piece of text (order preserved).
 
-    Matches are normalized to canonical uppercase-hyphen form (e.g. ``vrp_2242``
-    and ``vrp-2242`` both become ``VRP-2242``).
+    Matches are normalized to canonical uppercase-hyphen form (e.g. ``vrp_2242``,
+    ``vrp-2242`` and ``NISR  15`` become ``VRP-2242`` / ``NISR-15``).
     """
     if not text:
         return []
     keys: list[str] = []
     for match in JIRA_KEY_PATTERN.findall(text):
-        key = match.upper().replace("_", "-")
+        key = re.sub(r"[-_ ]+", "-", match.upper())
         if key not in keys:
             keys.append(key)
     return keys

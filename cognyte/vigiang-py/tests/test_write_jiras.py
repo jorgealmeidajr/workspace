@@ -16,6 +16,12 @@ from write_jiras import extract_jira_keys
         ("vrp-2242 lower", ["VRP-2242"]),
         # NISR prefix, both underscore and hyphen, deduped and ordered.
         ("NISR_15 and nisr-9", ["NISR-15", "NISR-9"]),
+        # Single-space separator, normalized to hyphen form.
+        ("NISR 15", ["NISR-15"]),
+        # Multiple spaces collapse to a single hyphen.
+        ("NISR  15", ["NISR-15"]),
+        # Lowercase with a space is normalized/uppercased.
+        ("nisr 15", ["NISR-15"]),
         # Numeric-only fragments must not match.
         ("77_fix should not match", []),
         ("fix_2242 should not match", []),
