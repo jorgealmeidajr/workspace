@@ -75,7 +75,7 @@ def main(initial_version: str | None = None) -> None:
         version_path.mkdir(parents=True, exist_ok=True)
 
         print("## Processing front projects...")
-        project_names = get_front_project_names()
+        project_names = get_front_project_names(branch)
         md_path = version_path / f"{version}.tags.front.md"
 
         projects_data = get_projects_data(branch, gl, project_names, version)

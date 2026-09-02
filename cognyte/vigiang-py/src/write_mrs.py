@@ -84,7 +84,7 @@ def main(initial_version: str | None = None) -> None:
         version_path = tasks_folder / version
         version_path.mkdir(parents=True, exist_ok=True)
 
-        project_names = get_front_project_names()
+        project_names = get_front_project_names(branch)
         md_path = version_path / f"{version}.mrs.front.md"
         write_mrs(branch, project_names, gl, md_path, "FRONT")
 

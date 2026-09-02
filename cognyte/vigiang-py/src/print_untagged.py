@@ -37,7 +37,7 @@ def main() -> None:
         version = ".".join(branch.replace("version-", "").split(".")[:2])
 
         print("## Processing front projects...")
-        project_names = get_front_project_names()
+        project_names = get_front_project_names(branch)
         projects_data = get_projects_data(branch, gl, project_names, version)
         print_untagged_new_commits(projects_data)
 

@@ -267,7 +267,7 @@ def main(initial_version: str | None = None) -> None:
         version_path.mkdir(parents=True, exist_ok=True)
 
         project_data: dict = {}
-        project_data.update(collect_jiras(branch, get_front_project_names(), gl, "FRONT"))
+        project_data.update(collect_jiras(branch, get_front_project_names(branch), gl, "FRONT"))
         project_data.update(collect_jiras(branch, get_back_project_names(branch), gl, "BACK"))
 
         md_path = version_path / f"{version}.jiras.md"

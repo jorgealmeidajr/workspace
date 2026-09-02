@@ -6,16 +6,24 @@ SSH_TIMEOUT_SECONDS = 10
 
 def get_project_names(branch: str) -> list[str]:
     projects = []
-    projects += get_front_project_names()
+    projects += get_front_project_names(branch)
     projects += get_back_project_names(branch)
     return projects
 
 
-def get_front_project_names() -> list[str]:
-    return sorted([
+def get_front_project_names(branch: str) -> list[str]:
+    shared = [
         "vigia_ng_webviewer",
-        "vigia_ng_workflow"
-    ])
+        "vigia_ng_workflow",
+    ]
+
+    # 'vigia-components' was introduced in version 3.1.
+    if branch.startswith("version-3."):
+        minor = int(branch.replace("version-", "").split(".")[1])
+        if minor >= 1:
+            return sorted(shared + ["vigia-components"])
+
+    return sorted(shared)
 
 
 def get_back_project_names(branch: str) -> list[str]:
