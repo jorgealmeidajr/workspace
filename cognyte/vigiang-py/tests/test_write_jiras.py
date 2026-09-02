@@ -22,6 +22,16 @@ from write_jiras import extract_jira_keys
         ("NISR  15", ["NISR-15"]),
         # Lowercase with a space is normalized/uppercased.
         ("nisr 15", ["NISR-15"]),
+        # Shared prefix: numbers linked by "and" each inherit the prefix.
+        ("bringing vrp 1283 and 1285 fix to version 2.3.0", ["VRP-1283", "VRP-1285"]),
+        # Shared prefix: numbers linked by a space; trailing "to 3 1 0" ignored.
+        ("Nisr 8577 8593 to 3 1 0", ["NISR-8577", "NISR-8593"]),
+        # Continuation breaks at a non-number word.
+        ("vrp 1283 and fix", ["VRP-1283"]),
+        # Continuation applies to hyphen form too, case-insensitive "AND".
+        ("vrp-1283 AND 1285", ["VRP-1283", "VRP-1285"]),
+        # Non-4-digit continuations are not chained.
+        ("vrp 1283 15", ["VRP-1283"]),
         # Numeric-only fragments must not match.
         ("77_fix should not match", []),
         ("fix_2242 should not match", []),

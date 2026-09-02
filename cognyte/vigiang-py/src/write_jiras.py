@@ -27,6 +27,13 @@ JIRA_KEY_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# After an initial key, additional numbers may share its prefix when they are
+# bare 4-digit integers linked only by spaces or the word "and", e.g.
+# "vrp 1283 and 1285" -> VRP-1283, VRP-1285 and "Nisr 8577 8593" -> NISR-8577,
+# NISR-8593. The chain stops at any other token (so "8593 to 3 1 0" ignores the
+# version fragment) and a dangling "and" yields nothing extra.
+JIRA_CONTINUATION_PATTERN = re.compile(r"\s+(?:and\s+)?(\d{4})\b", re.IGNORECASE)
+
 GITLAB_ISSUE_PATTERN = re.compile(r"(?:Closes|Related to)\s+#(\d+)", re.IGNORECASE)
 
 
@@ -77,10 +84,19 @@ def extract_jira_keys(text: str) -> list[str]:
     if not text:
         return []
     keys: list[str] = []
-    for match in JIRA_KEY_PATTERN.findall(text):
-        key = re.sub(r"[-_ ]+", "-", match.upper())
+    for match in JIRA_KEY_PATTERN.finditer(text):
+        key = re.sub(r"[-_ ]+", "-", match.group().upper())
         if key not in keys:
             keys.append(key)
+
+        # Expand any trailing 4-digit numbers that share this key's prefix.
+        prefix = key.rsplit("-", 1)[0]
+        pos = match.end()
+        while (cont := JIRA_CONTINUATION_PATTERN.match(text, pos)) is not None:
+            cont_key = f"{prefix}-{cont.group(1)}"
+            if cont_key not in keys:
+                keys.append(cont_key)
+            pos = cont.end()
     return keys
 
 
