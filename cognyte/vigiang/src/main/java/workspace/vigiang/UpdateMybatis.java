@@ -6,6 +6,7 @@ import workspace.commons.model.XmlMyBatisMapping;
 import workspace.commons.service.MappersService;
 import workspace.vigiang.service.EnvironmentService;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,6 +46,7 @@ public class UpdateMybatis {
     private static void updateMybatis(Path backendPath, Path versionPath) throws IOException {
         var fileContents = getFileContentsByExtensions(backendPath, List.of("xml"), List.of("commons", "target")).stream()
                 .filter(f -> f.getRelativeDir().contains("\\repository\\"))
+                .filter(f -> !f.getFullName().startsWith("services" + File.separator))
                 .collect(Collectors.toList());
 
         updateMappers(versionPath, fileContents);

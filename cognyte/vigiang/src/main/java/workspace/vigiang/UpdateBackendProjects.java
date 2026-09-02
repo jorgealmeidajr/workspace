@@ -3,6 +3,7 @@ package workspace.vigiang;
 import workspace.commons.model.FileContent;
 import workspace.commons.model.FileMatch;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,6 +23,10 @@ public class UpdateBackendProjects {
     public static void run(Path backendPath, Path versionPath) throws IOException {
         List<FileContent> backendFileContents = getFileContentsByExtensions(
                 backendPath, List.of("java", "yaml"), List.of("commons", "target"));
+
+        backendFileContents = backendFileContents.stream()
+                .filter(fc -> !fc.getFullName().startsWith("services" + File.separator))
+                .collect(Collectors.toList());
 
         updateConfigurations(versionPath, backendFileContents);
         updateFeatures(versionPath, backendFileContents);
