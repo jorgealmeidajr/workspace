@@ -189,7 +189,7 @@ public class CheckDatabases {
             Path logoPath = Paths.get(logosPath + "\\" + logoName + ".svg");
             Files.writeString(logoPath, logo, StandardCharsets.UTF_8);
         } else {
-            System.out.println("Logo is not in SVG format=" + logo);
+            System.out.println("❌ Logo is not in SVG format.");
         }
     }
 
