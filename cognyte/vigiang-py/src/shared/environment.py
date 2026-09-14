@@ -16,11 +16,3 @@ def get_laboratories_vigia_ng():
         data = json.load(f)
     return data
 
-
-def get_branch_laboratories_vigia_ng():
-    input_path = Path(get_vigia_ng_path()) / "branch_laboratories.json"
-    with open(input_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    return data
-
-

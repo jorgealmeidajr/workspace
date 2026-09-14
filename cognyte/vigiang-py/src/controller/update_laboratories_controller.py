@@ -2,7 +2,6 @@ import gitlab
 
 from shared.environment import (
     get_laboratories_vigia_ng,
-    get_branch_laboratories_vigia_ng,
 )
 from shared import (
     connect_gitlab,
@@ -42,7 +41,17 @@ class UpdateLaboratoriesController:
     def load_data(self) -> None:
         active_laboratories = self._get_active_laboratories()
 
-        branch_laboratory_map = get_branch_laboratories_vigia_ng()
+        branch_laboratory_map = [
+            {
+                "branch": "version-3.1.0",
+                "laboratories": ["ENTEL"],
+            },
+            {
+                "branch": "version-3.2.0",
+                "laboratories": ["WMS1", "WMS2"],
+            },
+        ]
+
         branch_laboratory_names = validate_laboratories_from_branch(
             self.source_branch, active_laboratories, branch_laboratory_map
         )
