@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import static workspace.vigiang.service.EnvironmentService.validateProjectDirectories;
 
 
-public class UpdateProjectsByVersion {
+public class UpdateProjectsByVersion { // todo: 3.1, 3.2
 
     public static void main(String[] args) {
         var WORK_DIR = EnvironmentService.getWorkVigiaDir();

@@ -4,8 +4,6 @@ urllib3
 python-gitlab
 python-dotenv
 gitpython
-paramiko
-PyYAML
 requests
 jira
 pytest

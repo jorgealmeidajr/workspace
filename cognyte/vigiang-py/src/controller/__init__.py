@@ -1,6 +1,2 @@
-from .update_laboratories_controller import UpdateLaboratoriesController
-
-__all__ = [
-    "UpdateLaboratoriesController",
-]
+__all__: list[str] = []
 
