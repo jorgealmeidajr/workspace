@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ProjectVersion {
+public class DockerContainer {
     private final String name;
     private final String version;
 
@@ -13,8 +13,5 @@ public class ProjectVersion {
     public String toString() {
         return name + ":" + version;
     }
-
-    public String[] toArray() {
-        return new String[] { name , version };
-    }
 }
+

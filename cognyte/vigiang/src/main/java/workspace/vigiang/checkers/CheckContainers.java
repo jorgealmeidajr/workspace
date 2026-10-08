@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.service.SshService;
+import workspace.vigiang.model.DockerContainer;
 import workspace.vigiang.model.LaboratoryRef;
 import workspace.vigiang.model.LaboratoryVigiaNg;
 import workspace.vigiang.model.VersionLaboratories;
@@ -55,21 +56,21 @@ public class CheckContainers {
 
         List<LaboratoryVigiaNg> laboratories = EnvironmentService.getLaboratoriesVigiaNg();
         for (LaboratoryVigiaNg laboratory : laboratories) {
-            List<String[]> containers = listDockerContainers(
+            List<DockerContainer> containers = listDockerContainers(
                 laboratory.getSshUsername(),
                 laboratory.getSshPassword(),
                 laboratory.getSshHost(),
                 laboratory.getSshPort());
 
-            List<String[]> frontendContainers = containers.stream()
-                    .filter(row -> frontendTags.stream().anyMatch(row[0]::contains))
+            List<DockerContainer> frontendContainers = containers.stream()
+                    .filter(container -> frontendTags.stream().anyMatch(container.getName()::contains))
                     .toList();
 
             checkFrontendVersions(laboratory, frontendContainers);
 
             if (frontendContainers.isEmpty()) continue;
 
-            String version = getMajorMinorVersion(frontendContainers.get(0)[1]);
+            String version = getMajorMinorVersion(frontendContainers.get(0).getVersion());
 
             if (!versions.contains(version)) {
                 continue;
@@ -103,12 +104,12 @@ public class CheckContainers {
         writeString(outputPath, json);
     }
 
-    private static void checkFrontendVersions(LaboratoryVigiaNg laboratory, List<String[]> frontendContainers) {
+    private static void checkFrontendVersions(LaboratoryVigiaNg laboratory, List<DockerContainer> frontendContainers) {
         // Only compare when there is more than one front-end container
         if (frontendContainers.size() <= 1) return;
 
         List<String> majorMinorVersions = frontendContainers.stream()
-                .map(row -> getMajorMinorVersion(row[1]))
+                .map(container -> getMajorMinorVersion(container.getVersion()))
                 .distinct()
                 .toList();
 
@@ -148,6 +149,20 @@ public class CheckContainers {
         writeString(outputPath, result);
     }
 
+    private static void updateContainersJsonFile(Path laboratoryPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
+        Path outputPath = Paths.get(laboratoryPath + "\\containers.json");
+
+        List<DockerContainer> containers = listDockerContainers(
+                laboratoryVigiaNg.getSshUsername(),
+                laboratoryVigiaNg.getSshPassword(),
+                laboratoryVigiaNg.getSshHost(),
+                laboratoryVigiaNg.getSshPort());
+
+        String result = ""; // todo: implement JSON serialization for containers
+
+//        writeString(outputPath, result);
+    }
+
     private static void updateFrontendScriptFiles(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
         updateScriptFile(environmentPath, laboratoryVigiaNg, List.of("webviewer_docker_run.sh", "vigia_ng_webviewer_docker_run.sh"));
         updateScriptFile(environmentPath, laboratoryVigiaNg, List.of("workflow_docker_run.sh", "vigia_ng_workflow_docker_run.sh"));
@@ -184,18 +199,18 @@ public class CheckContainers {
     }
 
     private static String listContainers(String username, String password, String host, int port) throws Exception {
-        List<String[]> data = listDockerContainers(username, password, host, port);
+        List<DockerContainer> data = listDockerContainers(username, password, host, port);
         return ContainersService.getContainersContent(data);
     }
 
-    private static List<String[]> listDockerContainers(String username, String password, String host, int port) throws Exception {
+    private static List<DockerContainer> listDockerContainers(String username, String password, String host, int port) throws Exception {
         var command = "docker ps -a --format 'table {{.Names}}\\t{{.Image}}'";
         String sshResponse = SshService.execute(username, password, host, port, command);
         List<String> initialLines = new ArrayList<>(Arrays.asList(sshResponse.split("\\R")));
         initialLines.remove(0);
         initialLines.sort(Comparator.naturalOrder());
 
-        List<String[]> data = new ArrayList<>();
+        List<DockerContainer> data = new ArrayList<>();
         for (String line : initialLines) {
             String[] firstSplit = line.split(" ");
             String project = firstSplit[0];
@@ -205,8 +220,7 @@ public class CheckContainers {
             String[] secondSplit = lastString.split(":");
             String version = secondSplit[secondSplit.length - 1];
 
-            String[] row = new String[] { project, version };
-            data.add(row);
+            data.add(new DockerContainer(project, version));
         }
 
         return data;

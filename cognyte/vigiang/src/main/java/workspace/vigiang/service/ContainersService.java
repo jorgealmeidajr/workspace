@@ -1,5 +1,7 @@
 package workspace.vigiang.service;
 
+import workspace.vigiang.model.DockerContainer;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,7 +13,7 @@ public class ContainersService {
         return List.of("webviewer", "workflow");
     }
 
-    public static String getContainersContent(List<String[]> data) {
+    public static String getContainersContent(List<DockerContainer> data) {
         List<String> frontendTags = getFrontendTags();
 
         List<String> cloudControlTags = List.of(
@@ -57,7 +59,7 @@ public class ContainersService {
         return content;
     }
 
-    private static HashMap<String, List<String>> getTagGroups(List<String[]> data, List<String> frontendTags, List<String> cloudControlTags, List<String> cloudVigiangTags) {
+    private static HashMap<String, List<String>> getTagGroups(List<DockerContainer> data, List<String> frontendTags, List<String> cloudControlTags, List<String> cloudVigiangTags) {
         var tagGroups = new HashMap<String, List<String>>();
         tagGroups.put("frontend", new ArrayList<>());
         tagGroups.put("cloud-control", new ArrayList<>());
@@ -70,11 +72,11 @@ public class ContainersService {
                 "mailhog", "redis", "boring_bartik"
         );
 
-        for (String[] row : data) {
-            String projectInitial = row[0];
+        for (DockerContainer container : data) {
+            String projectInitial = container.getName();
             if (projectsToIgnore.stream().anyMatch(projectInitial::contains)) continue;
 
-            String project = row[0] + ":" + row[1];
+            String project = container.toString();
 
             if (frontendTags.stream().anyMatch(projectInitial::contains)) {
                 tagGroups.get("frontend").add(project);
