@@ -32,6 +32,7 @@ public class CheckContainers {
                 Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratoryVigiaNg);
 
                 updateContainersFile(laboratoryPath, laboratoryVigiaNg);
+                updateContainersJsonFile(laboratoryPath, laboratoryVigiaNg);
                 updateDockerComposeFile(laboratoryPath, laboratoryVigiaNg);
                 updateFrontendScriptFiles(laboratoryPath, laboratoryVigiaNg);
 
@@ -158,9 +159,9 @@ public class CheckContainers {
                 laboratoryVigiaNg.getSshHost(),
                 laboratoryVigiaNg.getSshPort());
 
-        String result = ""; // todo: implement JSON serialization for containers
+        String result = ContainersService.getContainersJsonContent(containers);
 
-//        writeString(outputPath, result);
+        writeString(outputPath, result);
     }
 
     private static void updateFrontendScriptFiles(Path environmentPath, LaboratoryVigiaNg laboratoryVigiaNg) throws Exception {
