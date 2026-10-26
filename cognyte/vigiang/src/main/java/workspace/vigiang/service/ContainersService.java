@@ -54,7 +54,8 @@ public class ContainersService {
     );
 
     private static final List<String> SERVICES_PROJECTS = List.of(
-            "claro-block-service"
+            "claro-block-service",
+            "vigiang_sync"
     );
 
     private static final List<String> FRONT_PROJECTS = List.of(

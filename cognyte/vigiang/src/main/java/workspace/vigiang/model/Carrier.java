@@ -7,6 +7,7 @@ public enum Carrier {
     LIGGA,
     MOVISTAR,
     OI,
+    ONEGLOBAL,
     SKY,
     SURF,
     TIM,
