@@ -24,7 +24,7 @@ public class CheckDatabases {
     public static void main(String[] args) {
         System.out.println("## START checking all environment databases\n");
         try {
-            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getDatabasesVigiaNg()) {
+            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getDatabasesVigiaNgActive()) {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
                 System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 

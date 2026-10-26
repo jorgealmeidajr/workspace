@@ -21,7 +21,7 @@ public class CheckEmailTemplates {
     public static void main(String[] args) {
         System.out.println("## START checking all email templates\n");
         try {
-            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getDatabasesVigiaNg()) {
+            for (DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG : EnvironmentService.getDatabasesVigiaNgActive()) {
                 VigiaNgDAO dao = EnvironmentService.getVigiaNgDAO(databaseCredentialsVigiaNG);
                 System.out.println(databaseCredentialsVigiaNG.getName() + ":");
 

@@ -37,19 +37,27 @@ public class EnvironmentService {
         );
     }
 
-    public static List<DatabaseCredentialsVigiaNG> getDatabasesVigiaNg() throws IOException {
+    public static List<DatabaseCredentialsVigiaNG> getDatabasesVigiaNgActive() throws IOException {
         Path inputPath = Paths.get(getVigiaNgPath() + "\\databases.json");
         try (InputStream read = Files.newInputStream(inputPath)) {
-            return getDatabaseCredentials(read);
+            return getDatabaseCredentials(read).stream()
+                    .filter(DatabaseCredentialsVigiaNG::isActive)
+                    .collect(Collectors.toList());
         }
     }
 
     private static List<DatabaseCredentialsVigiaNG> getDatabaseCredentials(InputStream read) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        List<DatabaseCredentialsVigiaNG> databaseCredentialVigiaNGS = mapper.readValue(read, new TypeReference<>(){});
-        return databaseCredentialVigiaNGS.stream()
-                .filter(DatabaseCredentialsVigiaNG::isActive)
-                .collect(Collectors.toList());
+        return mapper.readValue(read, new TypeReference<>(){});
+    }
+
+    public static List<DatabaseCredentialsVigiaNG> getDatabasesVigiaNgInactive() throws IOException {
+        Path inputPath = Paths.get(getVigiaNgPath() + "\\databases.json");
+        try (InputStream read = Files.newInputStream(inputPath)) {
+            return getDatabaseCredentials(read).stream()
+                    .filter(credentials -> !credentials.isActive())
+                    .collect(Collectors.toList());
+        }
     }
 
     public static List<LaboratoryVigiaNg> getLaboratoriesVigiaNgActive() throws IOException {
@@ -164,7 +172,7 @@ public class EnvironmentService {
     }
 
     public static DatabaseCredentialsVigiaNG getDatabaseCredentials(String databaseName) throws IOException {
-        return getDatabasesVigiaNg().stream()
+        return getDatabasesVigiaNgActive().stream()
                 .filter((credentials) -> credentials.getName().equals(databaseName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
