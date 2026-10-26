@@ -3,6 +3,7 @@ package workspace.vigiang.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import workspace.commons.model.Database;
+import workspace.commons.model.Laboratory;
 import workspace.vigiang.dao.OracleVigiaNgDAO;
 import workspace.vigiang.dao.PostgresVigiaNgDAO;
 import workspace.vigiang.dao.VigiaNgDAO;
@@ -51,9 +52,18 @@ public class EnvironmentService {
                 .collect(Collectors.toList());
     }
 
-    public static List<LaboratoryVigiaNg> getLaboratoriesVigiaNg() throws IOException {
+    public static List<LaboratoryVigiaNg> getLaboratoriesVigiaNgActive() throws IOException {
         Path inputPath = Paths.get(getVigiaNgPath() + "\\laboratories.json");
-        return getLaboratories(inputPath, LaboratoryVigiaNg.class);
+        return getLaboratories(inputPath, LaboratoryVigiaNg.class).stream()
+                .filter(Laboratory::isActive)
+                .collect(Collectors.toList());
+    }
+
+    public static List<LaboratoryVigiaNg> getLaboratoriesVigiaNgInactive() throws IOException {
+        Path inputPath = Paths.get(getVigiaNgPath() + "\\laboratories.json");
+        return getLaboratories(inputPath, LaboratoryVigiaNg.class).stream()
+                .filter(laboratory -> !laboratory.isActive())
+                .collect(Collectors.toList());
     }
 
     public static VigiaNgDAO getVigiaNgDAO(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) {

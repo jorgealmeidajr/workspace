@@ -36,9 +36,7 @@ public class EnvironmentService {
 
             validateLaboratories(laboratories);
 
-            return laboratories.stream()
-                    .filter(Laboratory::isActive)
-                    .collect(Collectors.toList());
+            return laboratories;
         }
     }
 

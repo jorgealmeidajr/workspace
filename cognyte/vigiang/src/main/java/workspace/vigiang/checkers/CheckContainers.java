@@ -27,7 +27,7 @@ public class CheckContainers {
     public static void main(String[] args) {
         System.out.println("## START checking all containers\n");
         try {
-            for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+            for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNgActive()) {
                 System.out.println(laboratoryVigiaNg.getName() + ":");
                 Path laboratoryPath = EnvironmentService.getLaboratoryPath(laboratoryVigiaNg);
 
@@ -55,7 +55,7 @@ public class CheckContainers {
         versions.add("3.2"); // todo: remove this when 3.2 is officially released
         versions.sort(Comparator.naturalOrder());
 
-        List<LaboratoryVigiaNg> laboratories = EnvironmentService.getLaboratoriesVigiaNg();
+        List<LaboratoryVigiaNg> laboratories = EnvironmentService.getLaboratoriesVigiaNgActive();
         for (LaboratoryVigiaNg laboratory : laboratories) {
             List<DockerContainer> containers = listDockerContainers(
                 laboratory.getSshUsername(),

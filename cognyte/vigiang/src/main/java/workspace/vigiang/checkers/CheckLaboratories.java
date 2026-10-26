@@ -31,7 +31,7 @@ public class CheckLaboratories {
     private static void updateMd(Path laboratoriesPath) throws IOException {
         String result = "# DEPLOY_HOSTS:\n";
         result += "```\n";
-        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNgActive()) {
             result += laboratoryVigiaNg.getSshHost() + " " + laboratoryVigiaNg.getName() + "\n";
         }
         result += "```\n\n";
@@ -39,7 +39,7 @@ public class CheckLaboratories {
         result += "# vite deploy string:\n";
         result += "```\n";
         String oneline = "";
-        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNgActive()) {
             oneline += laboratoryVigiaNg.getSshHost() + "-" + laboratoryVigiaNg.getAlias() + " ";
         }
         result += oneline.trim() + "\n";
@@ -53,7 +53,7 @@ public class CheckLaboratories {
     private static void updateBashrc() throws IOException {
         List<String> aliasList = new ArrayList<>();
 
-        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNg()) {
+        for (LaboratoryVigiaNg laboratoryVigiaNg : EnvironmentService.getLaboratoriesVigiaNgActive()) {
             String alias = getSshAliasFormat(laboratoryVigiaNg);
             aliasList.add(alias);
         }
