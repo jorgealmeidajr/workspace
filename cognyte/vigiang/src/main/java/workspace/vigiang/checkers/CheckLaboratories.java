@@ -1,6 +1,7 @@
 package workspace.vigiang.checkers;
 
 import workspace.vigiang.model.LaboratoryVigiaNg;
+import workspace.vigiang.service.ConfigService;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class CheckLaboratories {
             replaceRegion(bashrcPath, "# vigiang_labs begin", "# vigiang_labs end", aliasList);
             String content = Files.readString(bashrcPath, StandardCharsets.UTF_8);
 
-            Path userBashrcPath = Paths.get("C:\\Users\\jjunior\\.bashrc");
+            Path userBashrcPath = Paths.get(ConfigService.getUserBashrcPath());
             if (Files.exists(userBashrcPath)) {
                 Files.writeString(userBashrcPath, content, StandardCharsets.UTF_8);
                 System.out.println("updating file: " + userBashrcPath);

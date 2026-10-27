@@ -1,5 +1,6 @@
 package workspace.vigiang.checkers;
 
+import workspace.vigiang.service.ConfigService;
 import workspace.vigiang.service.EnvironmentService;
 
 import java.io.IOException;
@@ -14,7 +15,6 @@ import static workspace.commons.service.FileService.replaceRegion;
 
 public class CheckWork {
 
-    public static final String USER_BASHRC = "C:\\Users\\jjunior\\.bashrc";
 
     public static void main(String[] args) {
         String result = "";
@@ -42,7 +42,7 @@ public class CheckWork {
         replaceRegion(bashrcPath, "# vigiang_work begin", "# vigiang_work end", lines);
         String content = Files.readString(bashrcPath, StandardCharsets.UTF_8);
 
-        Path userBashrcPath = Paths.get(USER_BASHRC);
+        Path userBashrcPath = Paths.get(ConfigService.getUserBashrcPath());
         if (Files.exists(userBashrcPath)) {
             Files.writeString(userBashrcPath, content, StandardCharsets.UTF_8);
             System.out.println("updating file: " + userBashrcPath);

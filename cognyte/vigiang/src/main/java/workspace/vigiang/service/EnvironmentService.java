@@ -22,11 +22,25 @@ import static workspace.commons.service.EnvironmentService.getLaboratories;
 
 public class EnvironmentService {
 
-    private static final String WORK_PATH_STR = "C:\\work";
-    private static final String COGNYTE_PATH_STR = WORK_PATH_STR + "\\COGNYTE";
-    private static final String VIGIANG_PATH_STR = COGNYTE_PATH_STR + "\\VIGIANG";
-    private static final String VIGIANG_LABORATORIES_PATH = VIGIANG_PATH_STR + "\\laboratories";
-    private static final String VIGIANG_DATABASES_PATH = VIGIANG_PATH_STR + "\\databases";
+    private static String getWorkPathStr() {
+        return ConfigService.getWorkPath();
+    }
+
+    private static String getCognytePathStr() {
+        return getWorkPathStr() + "\\COGNYTE";
+    }
+
+    private static String getVigiaNgPathStr() {
+        return getCognytePathStr() + "\\VIGIANG";
+    }
+
+    private static String getVigiaNgLaboratoriesPathStr() {
+        return getVigiaNgPathStr() + "\\laboratories";
+    }
+
+    private static String getVigiaNgDatabasesPathStr() {
+        return getVigiaNgPathStr() + "\\databases";
+    }
 
     public static List<String> getVersions() {
         // todo: add 3.2
@@ -81,7 +95,7 @@ public class EnvironmentService {
     }
 
     public static Path getCognytePath() {
-        Path vigiangPath = Paths.get(COGNYTE_PATH_STR);
+        Path vigiangPath = Paths.get(getCognytePathStr());
         if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
             throw new IllegalArgumentException("o diretorio do cognyte nao existe ou nao eh um diretorio");
         }
@@ -89,7 +103,7 @@ public class EnvironmentService {
     }
 
     public static Path getVigiaNgPath() {
-        Path vigiangPath = Paths.get(VIGIANG_PATH_STR);
+        Path vigiangPath = Paths.get(getVigiaNgPathStr());
         if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
             throw new IllegalArgumentException("o diretorio do vigiang nao existe ou nao eh um diretorio");
         }
@@ -97,7 +111,7 @@ public class EnvironmentService {
     }
 
     public static Path getVigiaNgLaboratoriesPath() {
-        Path vigiangPath = Paths.get(VIGIANG_LABORATORIES_PATH);
+        Path vigiangPath = Paths.get(getVigiaNgLaboratoriesPathStr());
         if (!Files.exists(vigiangPath) || !Files.isDirectory(vigiangPath)) {
             throw new IllegalArgumentException("o diretorio do vigiang laboratories nao existe ou nao eh um diretorio");
         }
@@ -121,7 +135,7 @@ public class EnvironmentService {
     }
 
     public static Path getDatabaseDataPath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
-        Path environmentPath = Paths.get(VIGIANG_DATABASES_PATH);
+        Path environmentPath = Paths.get(getVigiaNgDatabasesPathStr());
         String database = databaseCredentialsVigiaNG.getDatabase().toString();
 
         Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + databaseCredentialsVigiaNG.getName() + "\\data");
@@ -141,7 +155,7 @@ public class EnvironmentService {
     }
 
     public static Path getDatabasePath(DatabaseCredentialsVigiaNG databaseCredentialsVigiaNG) throws IOException {
-        Path environmentPath = Paths.get(VIGIANG_DATABASES_PATH);
+        Path environmentPath = Paths.get(getVigiaNgDatabasesPathStr());
         String database = databaseCredentialsVigiaNG.getDatabase().toString();
 
         Path databaseDataPath = Paths.get(environmentPath + "\\" + database + "\\" + databaseCredentialsVigiaNG.getName());
@@ -196,7 +210,7 @@ public class EnvironmentService {
     }
 
     public static String getWorkVigiaDir() {
-        return WORK_PATH_STR + "\\vigiang";
+        return getWorkPathStr() + "\\vigiang";
     }
 
 }
