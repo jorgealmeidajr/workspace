@@ -17,6 +17,15 @@ Facts that shape the design:
 - **The "actions" are `main()` methods.** These are `UpdateLaboratories`, `UpdateDatabases`, `UpdateSchemas`, `UpdateMybatis`, `UpdateProjectsByVersion`, `UpdateBackendProjects`, `UpdateFrontendProjects` and `checkers/Check*`.
 - **The models hold secrets.** `DatabaseCredentials` contains `password`, and `Laboratory` contains `sshPassword`. Never serialize these models directly; map them to DTOs.
 
+### Product decisions
+
+- **Internal dev tool.** The app is only for developers on the team. There is **no login, no user management and no authorization**:
+  - Do not add `spring-boot-starter-security`, JWT/OAuth or session handling to the backend.
+  - The frontend has no login page, auth context, route guards or token handling.
+  - Every endpoint is open to anyone who can reach the server.
+  - DTOs still leave out passwords. This costs nothing and keeps secrets out of browser dev tools and logs.
+- **Dark layout only.** The UI always uses a dark theme. There is no light mode and no theme toggle (see "Dark theme" in section 4).
+
 ## 2. Toolchain constraints
 
 ### Node 20.18.0 (fixed)
@@ -95,7 +104,7 @@ workspace/
         └── src/
             ├── main.tsx                            # antd ConfigProvider/App, QueryClientProvider, RouterProvider
             ├── App.tsx                             # antd Layout: Sider + Menu, Content with <Outlet/>
-            ├── theme.ts                            # antd ThemeConfig (tokens, dark/light algorithm)
+            ├── theme.ts                            # antd ThemeConfig: darkAlgorithm + tokens (dark only)
             ├── api/
             │   ├── client.ts                       # fetch wrapper, error → ProblemDetail
             │   └── vigiang.ts                      # typed endpoint functions
@@ -189,6 +198,46 @@ Conventions:
 - Import icons one at a time (`import { ReloadOutlined } from '@ant-design/icons'`).
 - Type table columns as `TableProps<LaboratoryDto>['columns']`, using types from `src/types/`.
 - React Query owns the server data; antd components only render it. Don't store fetched data in component state.
+
+### Dark theme
+
+The whole app is dark. It uses antd's `theme.darkAlgorithm`, configured once in `theme.ts`, and does not offer a light mode.
+
+`frontend/src/theme.ts`:
+
+```ts
+import { theme, type ThemeConfig } from 'antd';
+
+export const appTheme: ThemeConfig = {
+  algorithm: theme.darkAlgorithm,
+  token: {
+    colorPrimary: '#1677ff',
+    colorBgBase: '#141414',
+    borderRadius: 6,
+  },
+  components: {
+    Layout: { siderBg: '#1f1f1f', headerBg: '#1f1f1f', bodyBg: '#141414' },
+    Menu: { darkItemBg: '#1f1f1f' },
+  },
+};
+```
+
+`frontend/index.html` sets the background before React loads, so the page doesn't flash white:
+
+```html
+<html lang="en" style="color-scheme: dark">
+  <head>
+    <meta name="color-scheme" content="dark" />
+    <style>html, body, #root { margin: 0; min-height: 100%; background: #141414; }</style>
+  </head>
+  ...
+```
+
+Rules:
+- `main.tsx` passes `appTheme` to `<ConfigProvider theme={appTheme}>`. Don't wrap any subtree in a second `ConfigProvider` that switches back to the default algorithm.
+- `App.tsx` uses `<Layout.Sider theme="dark">` and `<Menu theme="dark" mode="inline">`.
+- Don't hard-code light colors (`#fff`, `white`, `#000` text) in components. Read colors from `theme.useToken()` when a custom style needs one.
+- `Tag` and `Badge` colors for carrier and status use antd preset colors (`green`, `red`, `blue`, …). These stay readable on a dark background.
 
 ### `backend/pom.xml` (excerpt)
 
@@ -315,6 +364,7 @@ Container listing currently lives in a **private** method, `CheckContainers.list
 - [ ] (Optional) Add a root aggregator `pom.xml` with modules `commons`, `cognyte/vigiang` and `vigiang-tools-app/backend`, so one `mvn install` builds everything in order.
 - [ ] Add `vigiang-tools-app/README.md` with run instructions.
 - [ ] Add `.gitignore` entries: `node_modules/`, `dist/`, `target/`.
+- [ ] Don't add Spring Security or any auth library (internal dev tool, see section 1).
 
 ### Phase 2: `vigiang` refactor for containers
 - [ ] Move `listDockerContainers` from `CheckContainers` into `ContainersService` (public, takes a `LaboratoryVigiaNg`), and update `CheckContainers` to call it.
@@ -326,7 +376,7 @@ Container listing currently lives in a **private** method, `CheckContainers.list
 - [ ] Add DTOs as Java `record`s with a `from(...)` mapper and **no secrets**: `LaboratoryDto`, `DatabaseDto`, `ContainerDto`.
 - [ ] Add the four controllers (versions, laboratories, databases, containers) plus `@WebMvcTest` tests.
 - [ ] Add `ApiExceptionHandler`, mapping errors to `ProblemDetail`: invalid `status` → 400, unknown laboratory → 404, SSH failure → 502, `IOException` → 500.
-- [ ] Frontend: add the antd `ConfigProvider`/`App` providers and theme, the `Layout`/`Sider`/`Menu` shell, the router, the React Query hooks and the four pages built on antd `Table`.
+- [ ] Frontend: add the antd `ConfigProvider`/`App` providers with the dark `appTheme`, the dark `index.html` background, the dark `Layout`/`Sider`/`Menu` shell, the router, the React Query hooks and the four pages built on antd `Table`.
 - [ ] Containers page: a laboratory `Select` that sets the `?laboratory=` URL param, then a containers `Table`. Use `enabled: !!laboratory` in React Query and don't refetch on window focus, since every call is an SSH call.
 
 ### Phase 4: Packaging
@@ -348,11 +398,13 @@ npm run dev        # http://localhost:5173, /api proxied to :8080
 
 ## 8. Risks and open questions
 
-- **Secrets:** credentials come from local config files read by `EnvironmentService`. The API must never return passwords. Bind the server to `localhost` (`server.address=127.0.0.1`) unless auth is added.
+- **No auth (by design):** this is an internal dev tool, so anyone who can reach the server can use it. By default the server binds to `localhost` (`server.address=127.0.0.1`). To share it with the team, set `server.address=0.0.0.0`, but only on the internal dev network. Never expose it publicly.
+- **Secrets:** credentials come from local config files read by `EnvironmentService`. The API still never returns passwords.
 - **SSH on request:** `/api/containers` opens an SSH session for each call. Set an SSH timeout, and consider a short server-side cache (for example, 30 s per lab) if the page is refreshed often.
 - **Out of scope for v1:** running the `Update*` tools and the `checkers/Check*` tools from the UI (jobs, logs, confirmations). Revisit after v1, once those `main()` methods are refactored into callable services.
 - **Static and global state:** the static services can't be mocked easily. The facade isolates them for now; turning them into real beans can come later.
 - **Jackson version drift** between `commons` (2.17.3) and the Spring Boot BOM.
 - **Node upgrades:** moving to Node ≥ 20.19 / 22 later allows Vite 7 and `@vitejs/plugin-react` 5. Update `engines`, `.nvmrc` and the plugin's `nodeVersion` together.
-- **Open:** is authentication needed (single local user vs. shared server)?
+- **Decided:** no authentication. The app is for internal dev use only.
+- **Decided:** dark theme only, with no light mode or toggle.
 - **Open:** should the root aggregator `pom.xml` be introduced, or should the modules stay independent?
