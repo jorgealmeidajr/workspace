@@ -23,15 +23,13 @@ import static workspace.vigiang.service.EnvironmentService.validateProjectDirect
 public class UpdateMybatis {
 
     public static void main(String[] args) {
-        var WORK_DIR = EnvironmentService.getWorkVigiaDir();
-
         for (String version : EnvironmentService.getVersions()) {
-            validateProjectDirectories(WORK_DIR, version);
+            validateProjectDirectories(version);
             String versionTitle = "VERSION: " + version;
             System.out.println(versionTitle);
 
-            Path backendPath = Paths.get(WORK_DIR + "\\" + version + "\\back-" + version);
-            Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
+            Path backendPath = EnvironmentService.getBackendPath(version);
+            Path versionPath = EnvironmentService.getVersionPath(version);
 
             try {
                 updateMybatis(backendPath, versionPath);

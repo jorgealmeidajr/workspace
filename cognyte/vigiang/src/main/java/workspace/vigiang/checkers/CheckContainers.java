@@ -52,7 +52,6 @@ public class CheckContainers {
         Map<String, List<LaboratoryRef>> versionToLaboratories = new LinkedHashMap<>();
 
         List<String> versions = new ArrayList<>(EnvironmentService.getVersions());
-        versions.add("3.2"); // todo: remove this when 3.2 is officially released
         versions.sort(Comparator.naturalOrder());
 
         List<LaboratoryVigiaNg> laboratories = EnvironmentService.getLaboratoriesVigiaNgActive();

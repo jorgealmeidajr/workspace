@@ -12,6 +12,7 @@ import workspace.vigiang.model.LaboratoryVigiaNg;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,13 +43,28 @@ public class EnvironmentService {
         return getVigiaNgPathStr() + "\\databases";
     }
 
+    /**
+     * Versions that still use the old working folder layout:
+     * '{WORK_PATH}\vigiang\{version}\back-{version}' and '...\front-{version}'.
+     *
+     * <p>Newer versions use '{WORK_PATH}\vigiang2\{version}\back' and '...\front'.
+     */
+    private static final List<String> LEGACY_VERSIONS = List.of(
+        "2.2",
+        "2.3"
+    );
+
     public static List<String> getVersions() {
-        // todo: add 3.2
         return List.of(
             "2.2",
             "2.3",
-            "3.1"
+            "3.1",
+            "3.2"
         );
+    }
+
+    public static boolean isLegacyVersion(String version) {
+        return LEGACY_VERSIONS.contains(version);
     }
 
     public static List<DatabaseCredentialsVigiaNG> getDatabasesVigiaNgActive() throws IOException {
@@ -192,25 +208,57 @@ public class EnvironmentService {
                 .orElseThrow(() -> new IllegalArgumentException("Database credentials not found by name=" + databaseName));
     }
 
-    public static void validateProjectDirectories(String workDir, String version) {
-        Path backendPath = Paths.get(workDir + "\\" + version + "\\back-" + version);
+    public static void validateProjectDirectories(String version) {
+        Path backendPath = getBackendPath(version);
         if (!Files.exists(backendPath) || !Files.isDirectory(backendPath)) {
-            throw new IllegalArgumentException("o diretorio backendPath nao existe ou nao eh um diretorio");
+            throw new IllegalArgumentException("o diretorio backendPath nao existe ou nao eh um diretorio: " + backendPath);
         }
 
-        Path frontendPath = Paths.get(workDir + "\\" + version + "\\front-" + version);
+        Path frontendPath = getFrontendPath(version);
         if (!Files.exists(frontendPath) || !Files.isDirectory(frontendPath)) {
-            throw new IllegalArgumentException("o diretorio frontendPath nao existe ou nao eh um diretorio");
+            throw new IllegalArgumentException("o diretorio frontendPath nao existe ou nao eh um diretorio: " + frontendPath);
         }
 
-        Path versionPath = Paths.get(EnvironmentService.getVigiaNgPath() + "\\versions\\" + version);
-        if (!Files.exists(versionPath) || !Files.isDirectory(versionPath)) {
-            throw new IllegalArgumentException("o diretorio versionPath nao existe ou nao eh um diretorio");
-        }
+        getVersionPath(version);
     }
 
-    public static String getWorkVigiaDir() {
-        return getWorkPathStr() + "\\vigiang";
+    /**
+     * Root of the working folder that holds the projects of the given version.
+     * Legacy versions live in '{WORK_PATH}\vigiang', newer ones in '{WORK_PATH}\vigiang2'.
+     */
+    public static String getWorkVigiaDir(String version) {
+        if (isLegacyVersion(version)) {
+            return getWorkPathStr() + "\\vigiang";
+        }
+        return getWorkPathStr() + "\\vigiang2";
+    }
+
+    public static Path getBackendPath(String version) {
+        return getProjectPath(version, "back");
+    }
+
+    public static Path getFrontendPath(String version) {
+        return getProjectPath(version, "front");
+    }
+
+    private static Path getProjectPath(String version, String project) {
+        String projectDir = isLegacyVersion(version) ? project + "-" + version : project;
+        return Paths.get(getWorkVigiaDir(version) + "\\" + version + "\\" + projectDir);
+    }
+
+    public static Path getVersionPath(String version) {
+        Path versionPath = Paths.get(getVigiaNgPath() + "\\versions\\" + version);
+        if (!Files.exists(versionPath)) {
+            try {
+                Files.createDirectories(versionPath);
+            } catch (IOException e) {
+                throw new UncheckedIOException("nao foi possivel criar o diretorio versionPath: " + versionPath, e);
+            }
+        }
+        if (!Files.isDirectory(versionPath)) {
+            throw new IllegalArgumentException("o versionPath nao eh um diretorio: " + versionPath);
+        }
+        return versionPath;
     }
 
 }

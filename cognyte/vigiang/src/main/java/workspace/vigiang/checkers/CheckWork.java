@@ -19,6 +19,12 @@ public class CheckWork {
     public static void main(String[] args) {
         String result = "";
         for (String version : EnvironmentService.getVersions()) {
+            // todo: generate these aliases when '$VIGIANG2_ROOT' is defined in the '.bashrc'
+            if (!EnvironmentService.isLegacyVersion(version)) {
+                System.out.println("skipping aliases of the version " + version + ": '$VIGIANG2_ROOT' is not defined yet");
+                continue;
+            }
+
             String frontendPath = "$VIGIANG_ROOT/" + version + "/front-" + version;
             String backendPath = "$VIGIANG_ROOT/" + version + "/back-" + version;
 
