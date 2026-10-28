@@ -15,18 +15,13 @@ import static workspace.commons.service.FileService.replaceRegion;
 
 public class CheckWork {
 
-
     public static void main(String[] args) {
         String result = "";
         for (String version : EnvironmentService.getVersions()) {
-            // todo: generate these aliases when '$VIGIANG2_ROOT' is defined in the '.bashrc'
-            if (!EnvironmentService.isLegacyVersion(version)) {
-                System.out.println("skipping aliases of the version " + version + ": '$VIGIANG2_ROOT' is not defined yet");
-                continue;
-            }
+            String root = EnvironmentService.getWorkVigiaRootVariable(version);
 
-            String frontendPath = "$VIGIANG_ROOT/" + version + "/front-" + version;
-            String backendPath = "$VIGIANG_ROOT/" + version + "/back-" + version;
+            String frontendPath = root + "/" + version + "/" + EnvironmentService.getProjectDirName(version, "front");
+            String backendPath = root + "/" + version + "/" + EnvironmentService.getProjectDirName(version, "back");
 
             String front = String.format("alias front-%s='cd \"%s\"'", version, frontendPath);
             String back = String.format("alias back-%s='cd \"%s\"'", version, backendPath);

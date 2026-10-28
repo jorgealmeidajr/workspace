@@ -233,6 +233,17 @@ public class EnvironmentService {
         return getWorkPathStr() + "\\vigiang2";
     }
 
+    /**
+     * Name of the shell variable that points to the root of the working folder of the given version.
+     * Legacy versions use '$VIGIANG_ROOT', newer ones use '$VIGIANG2_ROOT'.
+     */
+    public static String getWorkVigiaRootVariable(String version) {
+        if (isLegacyVersion(version)) {
+            return "$VIGIANG_ROOT";
+        }
+        return "$VIGIANG2_ROOT";
+    }
+
     public static Path getBackendPath(String version) {
         return getProjectPath(version, "back");
     }
@@ -242,8 +253,15 @@ public class EnvironmentService {
     }
 
     private static Path getProjectPath(String version, String project) {
-        String projectDir = isLegacyVersion(version) ? project + "-" + version : project;
-        return Paths.get(getWorkVigiaDir(version) + "\\" + version + "\\" + projectDir);
+        return Paths.get(getWorkVigiaDir(version) + "\\" + version + "\\" + getProjectDirName(version, project));
+    }
+
+    /**
+     * Folder name of a project inside the version folder.
+     * Legacy versions suffix it with the version, example 'front-2.3'; newer ones use just 'front'.
+     */
+    public static String getProjectDirName(String version, String project) {
+        return isLegacyVersion(version) ? project + "-" + version : project;
     }
 
     public static Path getVersionPath(String version) {
