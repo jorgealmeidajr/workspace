@@ -26,8 +26,12 @@ public class CheckWork {
             String front = String.format("alias front-%s='cd \"%s\"'", version, frontendPath);
             String back = String.format("alias back-%s='cd \"%s\"'", version, backendPath);
 
-            result += front + "\n";
-            result += back + "\n\n";
+            boolean frontExists = Files.exists(EnvironmentService.getFrontendPath(version));
+            boolean backExists = Files.exists(EnvironmentService.getBackendPath(version));
+
+            if (frontExists) result += front + "\n";
+            if (backExists) result += back + "\n";
+            if (frontExists || backExists) result += "\n";
         }
 
         try {

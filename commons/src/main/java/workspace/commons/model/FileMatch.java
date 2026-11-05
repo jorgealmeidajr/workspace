@@ -47,7 +47,7 @@ public class FileMatch {
 
         String result = "";
         for (String dir : dirs) {
-            result += dir + ":\n";
+            result += dir + ":\n"; // todo: ...
 
             List<FileMatch> sortedUnique = grouped.get(dir).stream()
                     .collect(Collectors.collectingAndThen(
